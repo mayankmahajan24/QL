@@ -28,7 +28,7 @@ All non-primitive data types are passed by a reference in memory. They can each 
 
 
 #### 2.2.1 Arrays (`array`)
-Arrays represent multiple instances of one of the primitive data types represente as contiguous memory. The square bracket notation is used to create an array and then get direct access to elements. Each array must contain only a single type of primitives; for example, we can have either an array of `int`, an array of `float`, an array of `bool`, and an array of `string`, but no combinations of these types. The size of the array is fixed at the time of its creation e.g. `array(10)`.
+Arrays represent multiple instances of one of the primitive data types represente as contiguous memory. The square bracket notation is used to create an array and then get direct access to elements. Each array must The size of the array is fixed at the time of its creation e.g. `[1,2,3]`, `["my", "name"]`, `[true, false, false, true]`
 
 #### 2.2.2 JSON (`json`)
 Since the language must search and return results from JSON files, it supports Jsons as a non-primitive type. A `json` object can be created through multiple mechanisms. The first is directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. This will check `file1.json` to ensure it is a valid JSON, and if so, will store the JSON in the variable `a`. The second way to obtain a JSON object is by using a subset of a current JSON. For example, say the following variable is already set:
@@ -56,37 +56,15 @@ links = {
 
 ## 3.0 Lexical Conventions
 ### 3.1 Identifiers
-Identifiers are combinations of letters and numbers. They must start with a lowercase letter, and can be any combination of lowercase letters, uppercase letters, and numbers. Lowercase letters and uppercase letters are seen as being distinct. We also reject dashes in identifiers. Identifiers can refer to three things in our language: variables, functions, and function arguments.
 ### 3.2 Keywords
-The following words are defined as keywords and are reserved for the use of the language; thus, they cannot be used as identifiers to name either a variable, a function, or a function argument:
-
-```
-int, float, bool, string, json, array, where, in, as, for, while, return, function, true, false, if, elseif, else, void, not
-```
 ### 3.3 Comments
-We reserve the symbol `#~~` to introduce a comment and the symbol `~~#` to close a comment. Comments cannot be nested, and they do not occur within string literals. A comment looks as follows:
-
-```
-#~~ This is a comment. ~~#
-```
-
 ### 3.4 Literals
-Our language supports several different types of literals.
-#### 3.4.1 `int` literals
-A string of numeric digits of arbitrary size that does not contain a decimal point with an optional ‘-’ to indicate a negative number.
-#### 3.4.2 `float` literals
-A string of numeric digits of arbitrary size, followed by a single ‘.’ digit character, followed by another string of numeric digits of arbitrary size. It can also contain an optional ‘-’ to indicate a negative number.
-#### 3.4.3 `boolean` literals
-Booleans can take on one of two values: `true` or `false`. `true` evaluates to an integer value of 1 and `false` evaluates to an integer value of  0. Thus, something like `true == 1` would evaluate to `true`, and something like `if(1)` would be valid.
-#### 3.4.4 `string` literals
-A sequence of ASCII characters surrounded by double quotation marks on both sides.
 
 ## 4.0 Syntax
-### 4.1 Program Structure
-A QL program consists of a series of statements. There is no concept of a `main` method in our language. The commands are run in order. We can also define functions, which must be defined earlier in the program than they are used. QL is not an object-oriented, so there is no concept of a class or an object. Similar to languages like Python or AWK, the execution of a QL script will simply run the expressions present in our file.
+### 4.1 Expressions
 ### 4.2 Punctuation
 ### 4.3 Operators
-[] : attribute access
+#### 4.3.1 `[]` : attribute access
 
 This can be used in two different ways:
 
@@ -150,73 +128,72 @@ file1.json:
 }]
 ```
 		
-		% : mod
-			`int` % `int`: returns int (remainder of ($1 divided by $3))
+#### 4.3.2 `%` : mod
+
+- `int` % `int`: returns an int (the remainder of ($1 divided by $3))
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-		[ASTERISK] : multiplication
-			`int` * `int`: returns int ($1 multiplied by $3)
+#### 4.3.3 `*` : multiplication
+- `int` * `int`: returns int ($1 multiplied by $3)
 
-`double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1                                                                                                                                              multiplied by $3)
-
-For all other combinations of types, we throw an error (incompatible data types).
-		/ : division
-			`int` / `int`: returns int (floor($1 divided by $3))
-
-`double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1  divided by $3)
+- `double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1 multiplied by $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-		[PLUS] : addition
-			`int` / `int`: returns int ($1 added to $3)
+#### 4.3.4 `/` : division
+- `int` / `int`: returns an int (the floor of ($1 divided by $3))
 
-`double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1  added to $3)
+- `double` / `int`, `int` / `double`,  `double` / `double`: returns a double ($1 divided by $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
+#### 4.3.5 `+` : addition
+- `int` / `int`: returns int ($1 added to $3)
 
-		[MINUS] : subtraction
-			`int` / `int`: returns int ($1 minus $3)
+- `double` + `int`, `int` + `double`,  `double` + `double`: returns double ($1 added to $3)
 
-`double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1  minus $3)
+For all other combinations of types, we throw an error (incompatible data types).
+
+#### 4.3.6 `-` : subtraction
+- `int` - `int`: returns int ($1 minus $3)
+
+- `double` - `int`, `int` - `double`,  `double` - `double`: returns double ($1  minus $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 		
-		= : assignment
-			`anytype` = `anytype`: sets value of $1 to $3.
+#### 4.3.7 `=` : assignment
+- `anytype` = `anytype`: sets value of $1 to $3.
 
-If the type of $1 is different from the type of $3, we throw an error (no casting).
+If the type of $1 is different from the type of $3, we throw an error.
 
-		not : negation
-not `bool` = returns a bool (if bool was true, return false; if bool was false, return true)
+#### 4.3.8 `!` : negation
+
+- !`expr` = evaluates `expr` as a boolean (throws error if this is not possible); returns the opposite of `expr` (if `expr` was true, return false; if `expr` was false, return true)
 
 If this operator is used on anything other than a bool, we throw an error.
 
-		== : equivalence,
-		!= : non-equivalence,
-		> : greater than, 
-		< : less than, 
-		>= : greater than or equal to,
-		<= : less than or equal to
+#### 4.3.9 Equivalency operators
+- == : equivalence,
+- != : non-equivalence,
+- \> : greater than, 
+- < : less than, 
+- \>= : greater than or equal to,
+- <= : less than or equal to
 
 `anytype` OP `anytype`: returns a bool (true if $1 OP $3 e.g. `3 == 3` returns true)
 
-			if $1 and $3 are strings, we do a lexical comparison
+- if $1 and $3 are strings, we do a lexical comparison
 
-			if $1 and $3 are both ints, or both floats, we see if they are equal
+- if $1 and $3 are both ints, or both floats, we see if they are equal
 
-if the types are anything else, throws an error (no casting)
+If the types are anything other than these specified combinations, we throw an error.
 
-		& :
-`bool1` & `bool2`: returns true if they both are true, otherwise returns false
+#### 4.3.10 Logical operators
 
-`expr1` & `expr2`: evaluates expr1 and expr2 as booleans (throws error if this is not possible), and returns true if they both evaluate to true; otherwise, returns false.
+- `expr1` & `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if they both evaluate to true; otherwise, returns false.
 
-		| :
-`bool1` | `bool2`: returns true if either bool1 or bool2 is true, otherwise returns false
-
-`expr1` | `expr2`: evaluates expr1 and expr2 as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
+- `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
 
 
 ### 4.4 Declarations
@@ -342,6 +319,3 @@ function sort(array arr) : array {
 ```
 
 The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array [1,4,3,5,2] passed into the sort() method would return [1,2,3,4,5]. The array [“c”,”e”,”a”,”c”,”f”] would return [“a”,”c”,”d”,”e”,”f”].
-=======
-## 5.0 Standard Library Functions
->>>>>>> c5e97789ea88d74d94cfbd796a23b0c6c7b0396d
