@@ -101,13 +101,13 @@ This operator can nest, e.g.: [“data”][“views”][“total”]. It associa
 Here is a program containing different examples of the `[]` operator and their return values based on the following JSON:
 
 ```
-#~~ [“data”][“views”][“total”] returns an int.
+#~~ ["data"]["views"]["total"] returns an int. ~~#
 
-we iterate through each "data" object with a total viewcount less than 100 ~~#
+#~~ We iterate through each "data" object with a total viewcount less than 100 ~~#
 
-where ([“data”][“views”][“total”] < 80) as item {
-    #~~ item[“data”][“users”] returns an array ~~#
-    array users = item[“data”][“users”]
+where (["data"]["views"]["total"] < 80) as item {
+    #~~ item["data"]["users"] returns an array ~~#
+    array users = item["data"]["users"]
     
     #~~ iterate through the array ~~#
     for (int i = 0; i < users.length; i++) {
@@ -115,36 +115,36 @@ where ([“data”][“views”][“total”] < 80) as item {
         print users[i]
     }
     
-    #~~ item[“data”][“items”][“category”] returns a string ~~#
-    if (item[“data”][“items”][“category”] == “News”) {
+    #~~ item["data"]["items"]["category"] returns a string ~~#
+    if (item["data"]["items"]["category"] == “News”) {
         where (true) as name {
-            print “name”    
+            print "name"    
         } in users
     }
-} in json(“file1.json”)
+} in json("file1.json")
 
 
 file1.json:
 
-[{“data”: {
-    “views”: {
+[{"data": {
+    "views": {
         "total”: 80
     },
-    “items: {
-        “category”: “News”
+    "items": {
+        "category": "News"
     },
-    “users”: [
-        “Matt”,
-        “Evan”,
-        “Gary”
+    "users": [
+        "Matt",
+        "Evan",
+        "Gary"
     ]
 },
-{“data”: {
-    “views”: {
-        "total”: 1000
+{"data": {
+    "views": {
+        "total": 1000
     },
-    “items: {
-        “category”: “Sports”
+    "items": {
+        "category": "Sports"
     }
 }]
 ```
