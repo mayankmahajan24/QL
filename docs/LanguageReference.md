@@ -28,7 +28,7 @@ All non-primitive data types are passed by a reference in memory. They can each 
 
 
 #### 2.2.1 Arrays (`array`)
-Arrays represent multiple instances of one of the primitive data types represente as contiguous memory. The square bracket notation is used to create an array and then get direct access to elements. Each array must The size of the array is fixed at the time of its creation e.g. `[1,2,3]`, `["my", "name"]`, `[true, false, false, true]`
+Arrays represent multiple instances of one of the primitive data types represente as contiguous memory. The square bracket notation is used to create an array and then get direct access to elements. Each array must contain only a single type of primitives; for example, we can have either an array of `int`, an array of `float`, an array of `bool`, and an array of `string`, but no combinations of these types. The size of the array is fixed at the time of its creation e.g. `array(10)`.
 
 #### 2.2.2 JSON (`json`)
 Since the language must search and return results from JSON files, it supports Jsons as a non-primitive type. A `json` object can be created through multiple mechanisms. The first is directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. This will check `file1.json` to ensure it is a valid JSON, and if so, will store the JSON in the variable `a`. The second way to obtain a JSON object is by using a subset of a current JSON. For example, say the following variable is already set:
@@ -82,7 +82,8 @@ Booleans can take on one of two values: `true` or `false`. `true` evaluates to a
 A sequence of ASCII characters surrounded by double quotation marks on both sides.
 
 ## 4.0 Syntax
-### 4.1 Expressions
+### 4.1 Program Structure
+A QL program consists of a series of statements. There is no concept of a `main` method in our language. The commands are run in order. We can also define functions, which must be defined earlier in the program than they are used. QL is not an object-oriented, so there is no concept of a class or an object. Similar to languages like Python or AWK, the execution of a QL script will simply run the expressions present in our file.
 ### 4.2 Punctuation
 ### 4.3 Operators
 ### 4.4 Declarations
