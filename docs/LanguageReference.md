@@ -5,7 +5,7 @@
 ## 1.0 Introduction
 JavaScript Object Notation (JSON) is an open-standard format that uses human-readable format to capture attribute-value pairs. JSON has gained prominence replacing XML encoded-data in browser-server communication, particularly with the explosion of RESTful APIs and AJAX requests that often make use of JSON.
 
-While domain-specific languages like SQL and PostgreSQL work with relational databases, languages like AWK specialize in processing datatables, especially tab-separated files. We noticed a need for a language designed to interact with JSON data, to quickly search through JSON structures and run meaningful queries.
+While domain-specific languages like SQL and PostgreSQL work with relational databases, languages like AWK specialize in processing datatables, especially tab-separated files. We noticed a need for a language designed to interact with JSON data, to quickly search through JSON structures and run meaningful queries on the JSON data, all while using a syntax that aligned much more closely with the actual structure of the data we were using.
 
 ## 2.0 Data Types
 ### 2.1 Primitive Types
@@ -96,7 +96,7 @@ Statements are assignments, mathematical operations, or function calls.  They ar
 
 QL employs several different types of punctuation to signal certain directions of workflow or special blocks of code within programs.
 
-####4.2.1 `()`: hierarchical evaluation, function arguments, "where" clauses
+####4.2.1 `()`: hierarchical evaluation, function arguments, `where` clauses
 
 Parentheses can be used in three main cases:
 
@@ -112,7 +112,7 @@ function foo(array a, int b) : array {
 foo(arr1, myInt)
 ```
 
-- "Where" clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
+- `Where` clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
 
 ```
 where(["size"] > 10 & ["weight"] < 4) {
@@ -120,13 +120,16 @@ where(["size"] > 10 & ["weight"] < 4) {
 }
 ```
 
-####4.2.2 `{}`: Function definitions, Where clauses
+####4.2.2 `{}`: function definitions, `where` clauses
 
 Curly braces have two uses:
 
 - Function definitions: When a function is defined, the procedural code to be run must be enclosed in curly braces.
 
-- "Where" clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
+- `where` clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
+
+####4.2.3 `:`: function return types
+The colon has use in our language as the specifier of a function return type. Separated between our language identifier and its argument list, we specify a `:` to mark that we will not be specifying a return type. Immediately after this colon, then, comes our function return type, which can be any of the data types we described above.
 
 ### 4.3 Operators (listed in order of precedence)
 #### 4.3.1 `[]` : attribute access
@@ -268,6 +271,7 @@ expression \n
 ```
 
 The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
+
 #### 4.4.1 Declaration of Variables
 To declare a variable, a data type must be specified followed by the variable name and an equals sign.  After the equal sign, the user has to specify the datatype with the corresponding parameters to be passed into the constructor in parentheses.
 
