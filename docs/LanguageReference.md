@@ -274,7 +274,6 @@ A return statement ends the definition of a function which has a non-void return
 
 
 
-<<<<<<< HEAD
 ## 5 Standard Library Functions
 
 Standard library functions are included with the language for convenience for the user. The first few of these functions will give users the ability to perform basic modifying operations with arrays.
@@ -307,6 +306,3 @@ function sort(array arr) : array {
 ```
 
 The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array [1,4,3,5,2] passed into the sort() method would return [1,2,3,4,5]. The array [“c”,”e”,”a”,”c”,”f”] would return [“a”,”c”,”d”,”e”,”f”].
-=======
-## 5.0 Standard Library Functions
->>>>>>> c5e97789ea88d74d94cfbd796a23b0c6c7b0396d
