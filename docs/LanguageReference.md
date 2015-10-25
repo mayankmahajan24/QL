@@ -18,17 +18,18 @@ All primitive data types are passed by value. They can each be declared and then
 All non-primitive data types are passed by a reference in memory. They can each be declared and initialized later (their value is null in the interim) or declared and initialized in line.
     - Arrays (`array`): Represent multiple instances of one of the primitive data types represente as contiguous memory. The square bracket notation is used to create an array and then get direct access to elements. Each array must The size of the array is fixed at the time of its creation e.g. `[1,2,3]`, `["my", "name"]`, `[true, false, false, true]`
     - JSON (`json`):  Since the language must search and return results from JSON files, it supports Jsons as a non-primitive type. A `json` object can be created through multiple mechanisms. The first is directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. This will check `file1.json` to ensure it is a valid JSON, and if so, will store the JSON in the variable `a`. The second way to obtain a JSON object is by using a subset of a current JSON. For example, say the following variable is already set:
+    ```
+        b = {
+            "size":10,
+            "links": {
+                "1": 1,
+                "2": 2,
+                "3": 3
+            }
+        }   
+    ```
 
-    ```
-    b = {
-        "size":10,
-        "links": {
-            "1": 1,
-            "2": 2,
-            "3": 3
-        }
-    }
-    ```
+
 
     QL then allows for commands like:
 
