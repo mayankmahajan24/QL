@@ -128,7 +128,7 @@ file1.json:
 
 [{"data": {
     "views": {
-        "total”: 80
+        "total": 80
     },
     "items": {
         "category": "News"
