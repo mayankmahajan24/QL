@@ -272,9 +272,44 @@ elseif (__boolean condition__) {
 #### 4.5.4 Return statements
 A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
 
+#### 4.5.5 Loop statements
+##### 4.5.5.1 `where` clauses
 
 
-<<<<<<< HEAD
+```
+where (__boolean condition__) as __identifier__ {
+    #~~ List of statements ~~#
+} in __json__
+```
+
+##### 4.5.5.2 `for` loops
+
+```
+for (__initialization__, __boolean condition__, __update__) {
+    #~~ List of statements ~~#
+}
+```
+
+
+
+
+##### 4.5.5.3 `while` loops
+
+```
+while (__boolean condition__) {
+    #~~ List of statements ~~#
+}
+
+#### 4.5.6 Function-Call statement
+A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
+
+```
+<function_identifier>(<arg1>,<arg2>,...)
+```
+
+This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation.
+
+
 ## 5 Standard Library Functions
 
 Standard library functions are included with the language for convenience for the user. The first few of these functions will give users the ability to perform basic modifying operations with arrays.
