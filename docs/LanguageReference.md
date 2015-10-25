@@ -352,7 +352,7 @@ A function-call invokes a previously declared function by matching the unique fu
 This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation.
 
 
-## 5.0 Standard Library Functions
+## 5 Standard Library Functions
 
 Standard library functions are included with the language for convenience for the user. The first few of these functions will give users the ability to perform basic modifying operations with arrays.
 
@@ -384,3 +384,19 @@ function sort(array arr) : array {
 ```
 
 The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array `[1,4,3,5,2]` passed into the sort() method would return `[1,2,3,4,5]`. The array `["c","e","a","c","f"]` would return `["a","c","d","e","f"]`.
+
+### 5.4 `print`
+
+We also include a built-in print function to print strings and primitive types.
+
+```
+print(toPrint)
+```
+
+Multiple strings or primitives may be printed to console in one statement, separated by a `+`:
+
+```
+print(toPrint1 + toPrint2)
+```.
+
+Attempting to print something that is neither a string nor a primitive will result in an error.
