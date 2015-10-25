@@ -90,10 +90,10 @@ A sequence of ASCII characters surrounded by double quotation marks on both side
 This can be used in two different ways:
 
 - [int `index`]: accesses value at `index` of array
-	* Return type is the same as the array’s type.
+    * Return type is the same as the array’s type.
 
 - [string `key`]: accesses value at `key` of JSON
-	* Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, or a JSON.
+    * Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, or a JSON.
 
 
 This operator can nest, e.g.: [“data”][“views”][“total”]. It associates from left to right.
@@ -106,49 +106,49 @@ Here is a program containing different examples of the `[]` operator and their r
 we iterate through each "data" object with a total viewcount less than 100 ~~#
 
 where ([“data”][“views”][“total”] < 80) as item {
-	#~~ item[“data”][“users”] returns an array ~~#
-	array users = item[“data”][“users”]
-	
-	#~~ iterate through the array ~~#
-	for (int i = 0; i < users.length; i++) {
-		#~~ print the user at index i in the array ~~#
-		print users[i]
-	}
-	
-	#~~ item[“data”][“items”][“category”] returns a string ~~#
-	if (item[“data”][“items”][“category”] == “News”) {
-		where (true) as name {
-			print “name”	
-		} in users
-	}
+    #~~ item[“data”][“users”] returns an array ~~#
+    array users = item[“data”][“users”]
+    
+    #~~ iterate through the array ~~#
+    for (int i = 0; i < users.length; i++) {
+        #~~ print the user at index i in the array ~~#
+        print users[i]
+    }
+    
+    #~~ item[“data”][“items”][“category”] returns a string ~~#
+    if (item[“data”][“items”][“category”] == “News”) {
+        where (true) as name {
+            print “name”    
+        } in users
+    }
 } in json(“file1.json”)
 
 
 file1.json:
 
 [{“data”: {
-	“views”: {
-		"total”: 80
-	},
-	“items: {
-		“category”: “News”
-	},
-	“users”: [
-		“Matt”,
-		“Evan”,
-		“Gary”
-	]
+    “views”: {
+        "total”: 80
+    },
+    “items: {
+        “category”: “News”
+    },
+    “users”: [
+        “Matt”,
+        “Evan”,
+        “Gary”
+    ]
 },
 {“data”: {
-	“views”: {
-		"total”: 1000
-	},
-	“items: {
-		“category”: “Sports”
-	}
+    “views”: {
+        "total”: 1000
+    },
+    “items: {
+        “category”: “Sports”
+    }
 }]
 ```
-		
+        
 #### 4.3.2 `%` : mod
 
 - `int` % `int`: returns an int (the remainder of ($1 divided by $3))
@@ -182,7 +182,7 @@ For all other combinations of types, we throw an error (incompatible data types)
 - `double` - `int`, `int` - `double`,  `double` - `double`: returns double ($1  minus $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
-		
+        
 #### 4.3.7 `=` : assignment
 - `anytype` = `anytype`: sets value of $1 to $3.
 
@@ -270,13 +270,48 @@ elseif (__boolean condition__) {
 #### 4.5.4 Return statements
 A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
 
+#### 4.5.5 Loop statements
+##### 4.5.5.1 `where` clauses
+```
+where (__boolean condition__) as __identifier__ {
+    #~~ List of statements ~~#
+} in __json__
+```
+
+##### 4.5.5.2 `for` loops
+
+```
+for (__initialization__, __boolean condition__, __update__) {
+    #~~ List of statements ~~#
+}
+```
 
 
-## 5 Standard Library Functions
+
+
+##### 4.5.5.3 `while` loops
+
+```
+while (__boolean condition__) {
+    #~~ List of statements ~~#
+}
+```
+
+#### 4.5.6 Function-Call statement
+A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
+
+```
+<function_identifier>(<arg1>,<arg2>,...)
+```
+
+This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation.
+
+
+## 5.0 Standard Library Functions
 
 Standard library functions are included with the language for convenience for the user. The first few of these functions will give users the ability to perform basic modifying operations with arrays.
 
-###5.0 `append`
+### 5.1 `append`
 ```
 function append(array arr, int x) : array {
 
@@ -285,22 +320,22 @@ function append(array arr, int x) : array {
 
 The above function takes in an array and an integer as arguments and returns an array with size increased by 1 that contains that integer at the last index.
 
-### 5.1 `unique`
+### 5.2 `unique`
 
 ```
 function unique(array arr) : array {
-	
+    
 }
 ```
 
 The above function receives an array as argument and returns a copy of the array with duplicate values removed. Only the first appearance of each element will be conserved, and a resulting array is returned.
 
-### 5.2 `sort`
+### 5.3 `sort`
 
 ```
 function sort(array arr) : array {
-	
+    
 }
 ```
 
-The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array [1,4,3,5,2] passed into the sort() method would return [1,2,3,4,5]. The array [“c”,”e”,”a”,”c”,”f”] would return [“a”,”c”,”d”,”e”,”f”].
+The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array `[1,4,3,5,2]` passed into the sort() method would return `[1,2,3,4,5]`. The array `[“c”,”e”,”a”,”c”,”f”]` would return `[“a”,”c”,”d”,”e”,”f”]`.
