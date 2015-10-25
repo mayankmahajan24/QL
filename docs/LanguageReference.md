@@ -251,6 +251,10 @@ A return statement ends the definition of a function which has a non-void return
 
 #### 4.5.5 Loop statements
 ##### 4.5.5.1 `where` clauses
+The where clause allows the user to search through a JSON and find all of the elements within that JSON that match a certain boolean condition. This condition can be related to the structure of the element; for example, the condition can impose a condition of the certain property or key of the element itself. 
+
+A where condition must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the “as __identifier__”, which allows the user to identify the element within the JSON that is currently being processed. This must be included. Following this is an `{`, which marks the beginning of the body code which is applied to each element. A closing `}` signifies the end of the body. The last section is the “in” keyword, which is followed by the JSON through which the clause will iterate to extract elements.
+
 ```
 where (__boolean condition__) as __identifier__ {
     #~~ List of statements ~~#
@@ -258,6 +262,7 @@ where (__boolean condition__) as __identifier__ {
 ```
 
 ##### 4.5.5.2 `for` loops
+The for loop starts with the `for` keyword, followed by a set of three expressions separated by commas and enclosed by parentheses. The first expression is the initialization, where temporary variables can be initialized. The second expression is the boolean condition; at each iteration through the loop, the boolean condition will be checked. The loop will execute as long as the boolean condition is satisfied, and will exit as soon as the condition is evaluated to false. The third expression is the afterthought, where variables can be updated at each stage of the loop. Following these three expressions is an open `{` , followed by a list of statements, and then a close `}`. 
 
 ```
 for (__initialization__, __boolean condition__, __update__) {
@@ -265,10 +270,8 @@ for (__initialization__, __boolean condition__, __update__) {
 }
 ```
 
-
-
-
 ##### 4.5.5.3 `while` loops
+The while loop is initiated by the `while` keyword, followed by an open paren `(`, followed by a boolean expression, which is then followed by a close paren `)`. After this, there is a block of statements, enclosed by `{` and `}`, which are executed in succession until the condition inside the `while` parentheses is no longer satisfied. This behaves as `while` loops do in other languages.
 
 ```
 while (__boolean condition__) {
