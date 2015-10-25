@@ -82,9 +82,52 @@ Booleans can take on one of two values: `true` or `false`. `true` evaluates to a
 A sequence of ASCII characters surrounded by double quotation marks on both sides.
 
 ## 4.0 Syntax
-### 4.1 Expressions
+### 4.1 Statements
+Statements in QL have the form:
+
+```
+expression  \n
+```
+
+Statements are assignments, mathematical operations, or function calls.  They are separated by the newline character `\n`. The effects of the expression are evaluated prior to the next expression being evaluated.  The precedence of operators within the expression goes from highest to lowest.  To determine which operator binds tighter than another, check the operator precedence below.
+
 ### 4.2 Punctuation
-### 4.3 Operators
+
+QL employs several different types of punctuation to signal certain directions of workflow or special blocks of code within programs.
+
+####4.2.1 `()`: hierarchical evaluation, function arguments, “where” clauses
+
+Parentheses can be used in three main cases:
+
+- Numerical or Boolean statements: Forces the expression inside the parentheses to be evaluated before interacting with tokens outside of the parentheses. For example, in `1*(2-3)`, the expression `2-3` will be evaluated, and its result will then be multiplied with 1. These can also be nested, e.g. : (1 + (4-(5/3)*2)).
+
+- Function arguments: When providing arguments during a function call, the arguments must be listed within parentheses directly after the name of the function. For examples, foo(array a, int b) involves a function foo() that takes in an array and an integer enclosed in parentheses. The parentheses are also used for marking the argument list in the function definition, i.e.
+
+```
+function foo(array a, int b) : array {
+	#~~ code goes here ~~#
+}
+
+foo(arr1, myInt)
+```
+
+- “Where” clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
+
+```
+where([“size”] > 10 & [“weight”] < 4) {
+	#~~ code goes here ~~#
+}
+```
+
+####4.2.2 `{}`: Function definitions, Where clauses
+
+Curly braces have two uses:
+
+- Function definitions: When a function is defined, the procedural code to be run must be enclosed in curly braces.
+
+- “Where” clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
+
+### 4.3 Operators (listed in order of precedence)
 #### 4.3.1 `[]` : attribute access
 
 This can be used in two different ways:
@@ -108,17 +151,17 @@ we iterate through each "data" object with a total viewcount less than 100 ~~#
 where ([“data”][“views”][“total”] < 80) as item {
     #~~ item[“data”][“users”] returns an array ~~#
     array users = item[“data”][“users”]
-    
+
     #~~ iterate through the array ~~#
     for (int i = 0; i < users.length; i++) {
         #~~ print the user at index i in the array ~~#
         print users[i]
     }
-    
+
     #~~ item[“data”][“items”][“category”] returns a string ~~#
     if (item[“data”][“items”][“category”] == “News”) {
         where (true) as name {
-            print “name”    
+            print “name”
         } in users
     }
 } in json(“file1.json”)
@@ -148,7 +191,7 @@ file1.json:
     }
 }]
 ```
-        
+
 #### 4.3.2 `%` : mod
 
 - `int` % `int`: returns an int (the remainder of ($1 divided by $3))
@@ -182,23 +225,23 @@ For all other combinations of types, we throw an error (incompatible data types)
 - `double` - `int`, `int` - `double`,  `double` - `double`: returns double ($1  minus $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
-        
+
 #### 4.3.7 `=` : assignment
 - `anytype` = `anytype`: sets value of $1 to $3.
 
 If the type of $1 is different from the type of $3, we throw an error.
 
-#### 4.3.8 `!` : negation
+#### 4.3.8 `not` : negation
 
-- !`expr` = evaluates `expr` as a boolean (throws error if this is not possible); returns the opposite of `expr` (if `expr` was true, return false; if `expr` was false, return true)
+- not `expr` = evaluates `expr` as a boolean (throws error if this is not possible); returns the opposite of `expr` (if `expr` was true, return false; if `expr` was false, return true)
 
 If this operator is used on anything other than a bool, we throw an error.
 
 #### 4.3.9 Equivalency operators
 - == : equivalence,
 - != : non-equivalence,
-- \> : greater than, 
-- < : less than, 
+- \> : greater than,
+- < : less than,
 - \>= : greater than or equal to,
 - <= : less than or equal to
 
@@ -259,7 +302,7 @@ An example conditional statement is as follows:
 ```
 if (__boolean condition__) {
     #~~ List of statements ~~#
-} 
+}
 elseif (__boolean condition__) {
     #~~ List of statements ~~#
 } else {
@@ -324,7 +367,7 @@ The above function takes in an array and an integer as arguments and returns an 
 
 ```
 function unique(array arr) : array {
-    
+
 }
 ```
 
@@ -334,7 +377,7 @@ The above function receives an array as argument and returns a copy of the array
 
 ```
 function sort(array arr) : array {
-    
+
 }
 ```
 
