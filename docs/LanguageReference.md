@@ -198,6 +198,57 @@ If the types are anything other than these specified combinations, we throw an e
 
 ### 4.4 Declarations
 ### 4.5 Statements
+There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, math operations, and function calls. Statements are separated by the newline character `\n`, as follows:
+
+```
+expression \n
+```
+
+The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
+#### 4.5.1 Declaration of Variables
+To declare a variable, a data type must be specified followed by the variable name and an equals sign.  After the equal sign, the user has to specify the datatype with the corresponding parameters to be passed into the constructor in parentheses.
+
+```
+<data_type> <variable_name> = <data_type>(<parameter>)
+<parameter> = <identifier> | <literal>
+```
+
+Some examples of the declaration of variables would be:
+
+```
+array testArr = array(10)
+int i = int(0)
+float f = float(1.4e10)
+bool b = bool(true)
+string s = string("foo")
+```
+
+#### 4.5.2 Function Calls
+To call a function, the function’s name is used in conjunction with its arguments immediately following in parentheses. If necessary, there is also an assignment to a variable if the function returns a value. Some examples of function calls are:
+
+```
+sort(a)
+array a = append(a, int(2))
+```
+#### 4.5.3 Conditional Statements
+Our conditional statements behave as conditional statements in other languages do. They check the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required. We can provide an arbitrary number of `elseif` statements following the `if`, though there can also be none. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
+
+An example conditional statement is as follows:
+
+```
+if (__boolean condition__) {
+    #~~ List of statements ~~#
+} 
+elseif (__boolean condition__) {
+    #~~ List of statements ~~#
+} else {
+    #~~ List of statements ~~#
+}
+```
+
+#### 4.5.4 Return statements
+A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
+
 
 
 ## 5 Standard Library Functions
