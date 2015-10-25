@@ -95,7 +95,7 @@ Statements are assignments, mathematical operations, or function calls.  They ar
 
 QL employs several different types of punctuation to signal certain directions of workflow or special blocks of code within programs.
 
-####4.2.1 `()`: hierarchical evaluation, function arguments, “where” clauses
+####4.2.1 `()`: hierarchical evaluation, function arguments, "where" clauses
 
 Parentheses can be used in three main cases:
 
@@ -111,10 +111,10 @@ function foo(array a, int b) : array {
 foo(arr1, myInt)
 ```
 
-- “Where” clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
+- "Where" clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
 
 ```
-where([“size”] > 10 & [“weight”] < 4) {
+where(["size"] > 10 & ["weight"] < 4) {
 	#~~ code goes here ~~#
 }
 ```
@@ -125,7 +125,7 @@ Curly braces have two uses:
 
 - Function definitions: When a function is defined, the procedural code to be run must be enclosed in curly braces.
 
-- “Where” clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
+- "Where" clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
 
 ### 4.3 Operators (listed in order of precedence)
 #### 4.3.1 `[]` : attribute access
@@ -139,18 +139,18 @@ This can be used in two different ways:
     * Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, or a JSON.
 
 
-This operator can nest, e.g.: [“data”][“views”][“total”]. It associates from left to right.
+This operator can nest, e.g.: ["data"]["views"]["total"]. It associates from left to right.
 
 Here is a program containing different examples of the `[]` operator and their return values based on the following JSON:
 
 ```
-#~~ [“data”][“views”][“total”] returns an int.
+#~~ ["data"]["views"]["total"] returns an int. ~~#
 
-we iterate through each "data" object with a total viewcount less than 100 ~~#
+#~~ We iterate through each "data" object with a total viewcount less than 100 ~~#
 
-where ([“data”][“views”][“total”] < 80) as item {
-    #~~ item[“data”][“users”] returns an array ~~#
-    array users = item[“data”][“users”]
+where (["data"]["views"]["total"] < 80) as item {
+    #~~ item["data"]["users"] returns an array ~~#
+    array users = item["data"]["users"]
 
     #~~ iterate through the array ~~#
     for (int i = 0; i < users.length; i++) {
@@ -158,36 +158,36 @@ where ([“data”][“views”][“total”] < 80) as item {
         print users[i]
     }
 
-    #~~ item[“data”][“items”][“category”] returns a string ~~#
-    if (item[“data”][“items”][“category”] == “News”) {
+    #~~ item["data"]["items"]["category"] returns a string ~~#
+    if (item["data"]["items"]["category"] == "News") {
         where (true) as name {
-            print “name”
+            print "name"
         } in users
     }
-} in json(“file1.json”)
+} in json("file1.json")
 
 
 file1.json:
 
-[{“data”: {
-    “views”: {
-        "total”: 80
+[{"data": {
+    "views": {
+        "total": 80
     },
-    “items: {
-        “category”: “News”
+    "items": {
+        "category": "News"
     },
-    “users”: [
-        “Matt”,
-        “Evan”,
-        “Gary”
+    "users": [
+        "Matt",
+        "Evan",
+        "Gary"
     ]
 },
-{“data”: {
-    “views”: {
-        "total”: 1000
+{"data": {
+    "views": {
+        "total": 1000
     },
-    “items: {
-        “category”: “Sports”
+    "items": {
+        "category": "Sports"
     }
 }]
 ```
@@ -315,6 +315,10 @@ A return statement ends the definition of a function which has a non-void return
 
 #### 4.5.5 Loop statements
 ##### 4.5.5.1 `where` clauses
+The where clause allows the user to search through a JSON and find all of the elements within that JSON that match a certain boolean condition. This condition can be related to the structure of the element; for example, the condition can impose a condition of the certain property or key of the element itself.
+
+A where condition must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the "as __identifier__", which allows the user to identify the element within the JSON that is currently being processed. This must be included. Following this is an `{`, which marks the beginning of the body code which is applied to each element. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON through which the clause will iterate to extract elements.
+
 ```
 where (__boolean condition__) as __identifier__ {
     #~~ List of statements ~~#
@@ -322,6 +326,7 @@ where (__boolean condition__) as __identifier__ {
 ```
 
 ##### 4.5.5.2 `for` loops
+The for loop starts with the `for` keyword, followed by a set of three expressions separated by commas and enclosed by parentheses. The first expression is the initialization, where temporary variables can be initialized. The second expression is the boolean condition; at each iteration through the loop, the boolean condition will be checked. The loop will execute as long as the boolean condition is satisfied, and will exit as soon as the condition is evaluated to false. The third expression is the afterthought, where variables can be updated at each stage of the loop. Following these three expressions is an open `{` , followed by a list of statements, and then a close `}`.
 
 ```
 for (__initialization__, __boolean condition__, __update__) {
@@ -329,10 +334,8 @@ for (__initialization__, __boolean condition__, __update__) {
 }
 ```
 
-
-
-
 ##### 4.5.5.3 `while` loops
+The while loop is initiated by the `while` keyword, followed by an open paren `(`, followed by a boolean expression, which is then followed by a close paren `)`. After this, there is a block of statements, enclosed by `{` and `}`, which are executed in succession until the condition inside the `while` parentheses is no longer satisfied. This behaves as `while` loops do in other languages.
 
 ```
 while (__boolean condition__) {
@@ -381,4 +384,4 @@ function sort(array arr) : array {
 }
 ```
 
-The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array `[1,4,3,5,2]` passed into the sort() method would return `[1,2,3,4,5]`. The array `[“c”,”e”,”a”,”c”,”f”]` would return `[“a”,”c”,”d”,”e”,”f”]`.
+The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array `[1,4,3,5,2]` passed into the sort() method would return `[1,2,3,4,5]`. The array `["c","e","a","c","f"]` would return `["a","c","d","e","f"]`.
