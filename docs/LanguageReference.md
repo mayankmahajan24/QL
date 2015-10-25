@@ -56,9 +56,30 @@ links = {
 
 ## 3.0 Lexical Conventions
 ### 3.1 Identifiers
+Identifiers are combinations of letters and numbers. They must start with a lowercase letter, and can be any combination of lowercase letters, uppercase letters, and numbers. Lowercase letters and uppercase letters are seen as being distinct. We also reject dashes in identifiers. Identifiers can refer to three things in our language: variables, functions, and function arguments.
 ### 3.2 Keywords
+The following words are defined as keywords and are reserved for the use of the language; thus, they cannot be used as identifiers to name either a variable, a function, or a function argument:
+
+```
+int, float, bool, string, json, array, where, in, as, for, while, return, function, true, false, if, elseif, else, void, not
+```
 ### 3.3 Comments
+We reserve the symbol `#~~` to introduce a comment and the symbol `~~#` to close a comment. Comments cannot be nested, and they do not occur within string literals. A comment looks as follows:
+
+```
+#~~ This is a comment. ~~#
+```
+
 ### 3.4 Literals
+Our language supports several different types of literals.
+#### 3.4.1 `int` literals
+A string of numeric digits of arbitrary size that does not contain a decimal point with an optional ‘-’ to indicate a negative number.
+#### 3.4.2 `float` literals
+A string of numeric digits of arbitrary size, followed by a single ‘.’ digit character, followed by another string of numeric digits of arbitrary size. It can also contain an optional ‘-’ to indicate a negative number.
+#### 3.4.3 `boolean` literals
+Booleans can take on one of two values: `true` or `false`. `true` evaluates to an integer value of 1 and `false` evaluates to an integer value of  0. Thus, something like `true == 1` would evaluate to `true`, and something like `if(1)` would be valid.
+#### 3.4.4 `string` literals
+A sequence of ASCII characters surrounded by double quotation marks on both sides.
 
 ## 4.0 Syntax
 ### 4.1 Expressions
@@ -68,4 +89,4 @@ links = {
 ### 4.5 Statements
 
 
-### 5.0 Standard Library Functions
+## 5.0 Standard Library Functions
