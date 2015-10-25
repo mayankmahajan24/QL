@@ -82,6 +82,7 @@ Booleans can take on one of two values: `true` or `false`. `true` evaluates to a
 A sequence of ASCII characters surrounded by double quotation marks on both sides.
 
 ## 4.0 Syntax
+The following sections define the specifics of the syntax of our language.
 ### 4.1 Statements
 Statements in QL have the form:
 
@@ -259,9 +260,7 @@ If the types are anything other than these specified combinations, we throw an e
 
 - `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
 
-
-### 4.4 Declarations
-### 4.5 Statements
+### 4.4 Statements
 There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, math operations, and function calls. Statements are separated by the newline character `\n`, as follows:
 
 ```
@@ -269,7 +268,7 @@ expression \n
 ```
 
 The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
-#### 4.5.1 Declaration of Variables
+#### 4.4.1 Declaration of Variables
 To declare a variable, a data type must be specified followed by the variable name and an equals sign.  After the equal sign, the user has to specify the datatype with the corresponding parameters to be passed into the constructor in parentheses.
 
 ```
@@ -287,14 +286,14 @@ bool b = bool(true)
 string s = string("foo")
 ```
 
-#### 4.5.2 Function Calls
+#### 4.4.2 Function Calls
 To call a function, the function’s name is used in conjunction with its arguments immediately following in parentheses. If necessary, there is also an assignment to a variable if the function returns a value. Some examples of function calls are:
 
 ```
 sort(a)
 array a = append(a, int(2))
 ```
-#### 4.5.3 Conditional Statements
+#### 4.4.3 Conditional Statements
 Our conditional statements behave as conditional statements in other languages do. They check the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required. We can provide an arbitrary number of `elseif` statements following the `if`, though there can also be none. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
 
 An example conditional statement is as follows:
@@ -310,11 +309,11 @@ elseif (__boolean condition__) {
 }
 ```
 
-#### 4.5.4 Return statements
+#### 4.4.4 Return statements
 A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
 
-#### 4.5.5 Loop statements
-##### 4.5.5.1 `where` clauses
+#### 4.4.5 Loop statements
+##### 4.4.5.1 `where` clauses
 The where clause allows the user to search through a JSON and find all of the elements within that JSON that match a certain boolean condition. This condition can be related to the structure of the element; for example, the condition can impose a condition of the certain property or key of the element itself.
 
 A where condition must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the "as __identifier__", which allows the user to identify the element within the JSON that is currently being processed. This must be included. Following this is an `{`, which marks the beginning of the body code which is applied to each element. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON through which the clause will iterate to extract elements.
@@ -325,7 +324,7 @@ where (__boolean condition__) as __identifier__ {
 } in __json__
 ```
 
-##### 4.5.5.2 `for` loops
+##### 4.4.5.2 `for` loops
 The for loop starts with the `for` keyword, followed by a set of three expressions separated by commas and enclosed by parentheses. The first expression is the initialization, where temporary variables can be initialized. The second expression is the boolean condition; at each iteration through the loop, the boolean condition will be checked. The loop will execute as long as the boolean condition is satisfied, and will exit as soon as the condition is evaluated to false. The third expression is the afterthought, where variables can be updated at each stage of the loop. Following these three expressions is an open `{` , followed by a list of statements, and then a close `}`.
 
 ```
@@ -334,7 +333,7 @@ for (__initialization__, __boolean condition__, __update__) {
 }
 ```
 
-##### 4.5.5.3 `while` loops
+##### 4.4.5.3 `while` loops
 The while loop is initiated by the `while` keyword, followed by an open paren `(`, followed by a boolean expression, which is then followed by a close paren `)`. After this, there is a block of statements, enclosed by `{` and `}`, which are executed in succession until the condition inside the `while` parentheses is no longer satisfied. This behaves as `while` loops do in other languages.
 
 ```
@@ -343,7 +342,7 @@ while (__boolean condition__) {
 }
 ```
 
-#### 4.5.6 Function-Call statement
+#### 4.4.6 Function-Call statement
 A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
 
 ```
