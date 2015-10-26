@@ -393,6 +393,6 @@ Multiple ints or floats  may be printed to console in one statement, separated b
 
 ```
 print(toPrint1 + toPrint2)
-```.
+```
 
 Attempting to print something that is neither a string nor a primitive will result in an error.
