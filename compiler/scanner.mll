@@ -34,11 +34,14 @@ rule token = parse
 | '*'         { TIMES }     | '/'         { DIVIDE }
 | '='         { ASSIGN }
 
-(* Relational Operators *)
+(* Equivalency Operators *)
 | "!="        { NEQ }       | "=="        { EQ }
 | "<="        { LEQ }       | '<'         { LT }
 | ">="        { GEQ }       | '>'         { GT }
 | "not"       { NOT }
+
+(* Logical Operators *)
+| "&"        { AND }       | "|"        { OR }
 
 (* Conditional Keywords *)
 | "if"        { IF }        | "else"      { ELSE }
