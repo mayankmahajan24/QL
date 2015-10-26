@@ -208,10 +208,12 @@ For all other combinations of types, we throw an error (incompatible data types)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-#### 4.2.5 `+` : addition
+#### 4.2.5 `+` : addition, concatenation
 - `int` + `int`: returns int ($1 added to $3)
 
 - `float` + `int`, `int` + `float`,  `float` + `float`: returns float ($1 added to $3)
+
+- `string` + `int`, `int` + `string`, `float` + `string`, `string` + `float`: returns string ($1 concatenated with $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
@@ -385,10 +387,10 @@ We also include a built-in print function to print strings and primitive types.
 print(toPrint)
 ```
 
-Multiple ints or floats  may be printed to console in one statement, separated by a `+`:
+Multiple primitives  may be printed to console in one statement, concatenated by a `+`:
 
 ```
 print(toPrint1 + toPrint2)
 ```
 
-Attempting to print something that is neither a string nor a primitive will result in an error.
+Attempting to print something that is not a primitive will result in an error.
