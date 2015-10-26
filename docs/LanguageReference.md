@@ -283,7 +283,13 @@ string s = string("foo")
 ```
 
 #### 4.3.2 Function Calls
-To call a function, the function’s name is used in conjunction with its arguments immediately following in parentheses. If necessary, there is also an assignment to a variable if the function returns a value. Some examples of function calls are:
+A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
+
+```
+<function_identifier>(<arg1>,<arg2>,...)
+```
+
+This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation. Some examples of possible function calls are:
 
 ```
 sort(a)
@@ -337,16 +343,6 @@ while (__boolean condition__) {
     #~~ List of statements ~~#
 }
 ```
-
-#### 4.3.6 Function-Call statement
-A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
-
-```
-<function_identifier>(<arg1>,<arg2>,...)
-```
-
-This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation.
-
 
 ## 5 Standard Library Functions
 
