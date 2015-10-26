@@ -75,7 +75,7 @@ Our language supports several different types of literals.
 #### 3.4.1 `int` literals
 A string of numeric digits of arbitrary size that does not contain a decimal point with an optional ‘-’ to indicate a negative number.
 #### 3.4.2 `float` literals
-A string of numeric digits of arbitrary size, followed by a single ‘.’ digit character, followed by another string of numeric digits of arbitrary size. It can also contain an optional ‘-’ to indicate a negative number.
+A string of numeric digits of arbitrary size, followed by a single ‘.’ digit character, followed by another string of numeric digits of arbitrary size. It can also contain an optional ‘-’ to indicate a negative number.  In addition, we are following Brian Kernighan and Dennis Ritchie's explanation in *The C Programming Language*: "A floating constant consists of an integer part, a decimal part, a fraction part, an e, and an optionally signed integer exponent. The integer and fraction parts both consist of a sequence of digits. Either the integer part, or the fraction part (not both) may be missing; either the decimal point or the e and the exponent (not both) may be missing."
 #### 3.4.3 `boolean` literals
 Booleans can take on one of two values: `true` or `false`. `true` evaluates to an integer value of 1 and `false` evaluates to an integer value of  0. Thus, something like `true == 1` would evaluate to `true`, and something like `if(1)` would be valid.
 #### 3.4.4 `string` literals
@@ -83,20 +83,12 @@ A sequence of ASCII characters surrounded by double quotation marks on both side
 
 ## 4.0 Syntax
 The following sections define the specifics of the syntax of our language.
-### 4.1 Statements
-Statements in QL have the form:
 
-```
-expression  \n
-```
-
-Statements are assignments, mathematical operations, or function calls.  They are separated by the newline character `\n`. The effects of the expression are evaluated prior to the next expression being evaluated.  The precedence of operators within the expression goes from highest to lowest.  To determine which operator binds tighter than another, check the operator precedence below.
-
-### 4.2 Punctuation
+### 4.1 Punctuation
 
 QL employs several different types of punctuation to signal certain directions of workflow or special blocks of code within programs.
 
-####4.2.1 `()`: hierarchical evaluation, function arguments, `where` clauses
+####4.1.1 `()`: hierarchical evaluation, function arguments, `where` clauses
 
 Parentheses can be used in three main cases:
 
@@ -115,12 +107,12 @@ foo(arr1, myInt)
 - `Where` clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
 
 ```
-where(["size"] > 10 & ["weight"] < 4) {
+where(["size"] > 10 & ["weight"] < 4) as item {
 	#~~ code goes here ~~#
 }
 ```
 
-####4.2.2 `{}`: function definitions, `where` clauses
+####4.1.2 `{}`: function definitions, `where` clauses
 
 Curly braces have two uses:
 
@@ -128,11 +120,11 @@ Curly braces have two uses:
 
 - `where` clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
 
-####4.2.3 `:`: function return types
+####4.1.3 `:`: function return types
 The colon has use in our language as the specifier of a function return type. Separated between our language identifier and its argument list, we specify a `:` to mark that we will not be specifying a return type. Immediately after this colon, then, comes our function return type, which can be any of the data types we described above.
 
-### 4.3 Operators (listed in order of precedence)
-#### 4.3.1 `[]` : attribute access
+### 4.2 Operators (listed in order of precedence)
+#### 4.2.1 `[]` : attribute access
 
 This can be used in two different ways:
 
@@ -196,52 +188,52 @@ file1.json:
 }]
 ```
 
-#### 4.3.2 `%` : mod
+#### 4.2.2 `%` : mod
 
 - `int` % `int`: returns an int (the remainder of ($1 divided by $3))
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-#### 4.3.3 `*` : multiplication
+#### 4.2.3 `*` : multiplication
 - `int` * `int`: returns int ($1 multiplied by $3)
 
 - `double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1 multiplied by $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-#### 4.3.4 `/` : division
+#### 4.2.4 `/` : division
 - `int` / `int`: returns an int (the floor of ($1 divided by $3))
 
 - `double` / `int`, `int` / `double`,  `double` / `double`: returns a double ($1 divided by $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-#### 4.3.5 `+` : addition
+#### 4.2.5 `+` : addition
 - `int` / `int`: returns int ($1 added to $3)
 
 - `double` + `int`, `int` + `double`,  `double` + `double`: returns double ($1 added to $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-#### 4.3.6 `-` : subtraction
+#### 4.2.6 `-` : subtraction
 - `int` - `int`: returns int ($1 minus $3)
 
 - `double` - `int`, `int` - `double`,  `double` - `double`: returns double ($1  minus $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-#### 4.3.7 `=` : assignment
+#### 4.2.7 `=` : assignment
 - `anytype` = `anytype`: sets value of $1 to $3.
 
 If the type of $1 is different from the type of $3, we throw an error.
 
-#### 4.3.8 `not` : negation
+#### 4.2.8 `not` : negation
 
 - not `expr` = evaluates `expr` as a boolean (throws error if this is not possible); returns the opposite of `expr` (if `expr` was true, return false; if `expr` was false, return true)
 
 If this operator is used on anything other than a bool, we throw an error.
 
-#### 4.3.9 Equivalency operators
+#### 4.2.9 Equivalency operators
 - == : equivalence,
 - != : non-equivalence,
 - \> : greater than,
@@ -257,14 +249,14 @@ If this operator is used on anything other than a bool, we throw an error.
 
 If the types are anything other than these specified combinations, we throw an error.
 
-#### 4.3.10 Logical operators
+#### 4.2.10 Logical operators
 
 - `expr1` & `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if they both evaluate to true; otherwise, returns false.
 
 - `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
 
-### 4.4 Statements
-There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, math operations, and function calls. Statements are separated by the newline character `\n`, as follows:
+### 4.3 Statements
+There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, mathematical operations, and function calls. Statements are separated by the newline character `\n`, as follows:
 
 ```
 expression \n
@@ -272,7 +264,7 @@ expression \n
 
 The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
 
-#### 4.4.1 Declaration of Variables
+#### 4.3.1 Declaration of Variables
 To declare a variable, a data type must be specified followed by the variable name and an equals sign.  After the equal sign, the user has to specify the datatype with the corresponding parameters to be passed into the constructor in parentheses.
 
 ```
@@ -290,14 +282,14 @@ bool b = bool(true)
 string s = string("foo")
 ```
 
-#### 4.4.2 Function Calls
+#### 4.3.2 Function Calls
 To call a function, the function’s name is used in conjunction with its arguments immediately following in parentheses. If necessary, there is also an assignment to a variable if the function returns a value. Some examples of function calls are:
 
 ```
 sort(a)
 array a = append(a, int(2))
 ```
-#### 4.4.3 Conditional Statements
+#### 4.3.3 Conditional Statements
 Our conditional statements behave as conditional statements in other languages do. They check the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required. We can provide an arbitrary number of `elseif` statements following the `if`, though there can also be none. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
 
 An example conditional statement is as follows:
@@ -313,11 +305,11 @@ elseif (__boolean condition__) {
 }
 ```
 
-#### 4.4.4 Return statements
+#### 4.3.4 Return statements
 A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
 
-#### 4.4.5 Loop statements
-##### 4.4.5.1 `where` clauses
+#### 4.3.5 Loop statements
+##### 4.3.5.1 `where` clauses
 The where clause allows the user to search through a JSON and find all of the elements within that JSON that match a certain boolean condition. This condition can be related to the structure of the element; for example, the condition can impose a condition of the certain property or key of the element itself.
 
 A where condition must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the "as __identifier__", which allows the user to identify the element within the JSON that is currently being processed. This must be included. Following this is an `{`, which marks the beginning of the body code which is applied to each element. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON through which the clause will iterate to extract elements.
@@ -328,7 +320,7 @@ where (__boolean condition__) as __identifier__ {
 } in __json__
 ```
 
-##### 4.4.5.2 `for` loops
+##### 4.3.5.2 `for` loops
 The for loop starts with the `for` keyword, followed by a set of three expressions separated by commas and enclosed by parentheses. The first expression is the initialization, where temporary variables can be initialized. The second expression is the boolean condition; at each iteration through the loop, the boolean condition will be checked. The loop will execute as long as the boolean condition is satisfied, and will exit as soon as the condition is evaluated to false. The third expression is the afterthought, where variables can be updated at each stage of the loop. Following these three expressions is an open `{` , followed by a list of statements, and then a close `}`.
 
 ```
@@ -337,7 +329,7 @@ for (__initialization__, __boolean condition__, __update__) {
 }
 ```
 
-##### 4.4.5.3 `while` loops
+##### 4.3.5.3 `while` loops
 The while loop is initiated by the `while` keyword, followed by an open paren `(`, followed by a boolean expression, which is then followed by a close paren `)`. After this, there is a block of statements, enclosed by `{` and `}`, which are executed in succession until the condition inside the `while` parentheses is no longer satisfied. This behaves as `while` loops do in other languages.
 
 ```
@@ -346,7 +338,7 @@ while (__boolean condition__) {
 }
 ```
 
-#### 4.4.6 Function-Call statement
+#### 4.3.6 Function-Call statement
 A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
 
 ```
