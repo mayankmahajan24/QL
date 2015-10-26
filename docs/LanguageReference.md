@@ -190,35 +190,35 @@ file1.json:
 
 #### 4.2.2 `%` : mod
 
-- `int` % `int`: returns an int (the remainder of ($1 divided by $3))
+- `int` % `int`: returns int (the remainder of ($1 divided by $3))
 
 For all other combinations of types, we throw an error (incompatible data types).
 
 #### 4.2.3 `*` : multiplication
 - `int` * `int`: returns int ($1 multiplied by $3)
 
-- `double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1 multiplied by $3)
+- `float` * `int`, `int` * `float`,  `float` * `float`: returns float ($1 multiplied by $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
 #### 4.2.4 `/` : division
 - `int` / `int`: returns an int (the floor of ($1 divided by $3))
 
-- `double` / `int`, `int` / `double`,  `double` / `double`: returns a double ($1 divided by $3)
+- `float` / `int`, `int` / `float`,  `float` / `float`: returns float ($1 divided by $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
 #### 4.2.5 `+` : addition
-- `int` / `int`: returns int ($1 added to $3)
+- `int` + `int`: returns int ($1 added to $3)
 
-- `double` + `int`, `int` + `double`,  `double` + `double`: returns double ($1 added to $3)
+- `float` + `int`, `int` + `float`,  `float` + `float`: returns float ($1 added to $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
 #### 4.2.6 `-` : subtraction
 - `int` - `int`: returns int ($1 minus $3)
 
-- `double` - `int`, `int` - `double`,  `double` - `double`: returns double ($1  minus $3)
+- `float` - `int`, `int` - `float`,  `float` - `float`: returns float ($1  minus $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
@@ -312,7 +312,7 @@ A return statement ends the definition of a function which has a non-void return
 ##### 4.3.5.1 `where` clauses
 The where clause allows the user to search through a JSON and find all of the elements within that JSON that match a certain boolean condition. This condition can be related to the structure of the element; for example, the condition can impose a condition of the certain property or key of the element itself.
 
-A where condition must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the "as __identifier__", which allows the user to identify the element within the JSON that is currently being processed. This must be included. Following this is an `{`, which marks the beginning of the body code which is applied to each element. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON through which the clause will iterate to extract elements.
+A where condition must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the `as __identifier__`, which allows the user to identify the element within the JSON that is currently being processed. This must be included. Following this is an `{`, which marks the beginning of the body code which is applied to each element. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON through which the clause will iterate to extract elements.
 
 ```
 where (__boolean condition__) as __identifier__ {
@@ -389,7 +389,7 @@ We also include a built-in print function to print strings and primitive types.
 print(toPrint)
 ```
 
-Multiple strings or primitives may be printed to console in one statement, separated by a `+`:
+Multiple ints or floats  may be printed to console in one statement, separated by a `+`:
 
 ```
 print(toPrint1 + toPrint2)
