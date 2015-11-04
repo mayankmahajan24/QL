@@ -404,3 +404,6 @@ print(toPrint1 + toPrint2)
 ```.
 
 Attempting to print something that is neither a string nor a primitive will result in an error.
+=======
+The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array [1,4,3,5,2] passed into the sort() method would return [1,2,3,4,5]. The array [“c”,”e”,”a”,”c”,”f”] would return [“a”,”c”,”d”,”e”,”f”].
+>>>>>>> 65769989ce1a4faa93b19f14c3c87bde6dd82d75
