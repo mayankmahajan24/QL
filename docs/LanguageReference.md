@@ -5,7 +5,7 @@
 ## 1.0 Introduction
 JavaScript Object Notation (JSON) is an open-standard format that uses human-readable format to capture attribute-value pairs. JSON has gained prominence replacing XML encoded-data in browser-server communication, particularly with the explosion of RESTful APIs and AJAX requests that often make use of JSON.
 
-While domain-specific languages like SQL and PostgreSQL work with relational databases, languages like AWK specialize in processing datatables, especially tab-separated files. We noticed a need for a language designed to interact with JSON data, to quickly search through JSON structures and run meaningful queries.
+While domain-specific languages like SQL and PostgreSQL work with relational databases, languages like AWK specialize in processing datatables, especially tab-separated files. We noticed a need for a language designed to interact with JSON data, to quickly search through JSON structures and run meaningful queries on the JSON data, all while using a syntax that aligned much more closely with the actual structure of the data we were using.
 
 ## 2.0 Data Types
 ### 2.1 Primitive Types
@@ -82,145 +82,188 @@ Booleans can take on one of two values: `true` or `false`. `true` evaluates to a
 A sequence of ASCII characters surrounded by double quotation marks on both sides.
 
 ## 4.0 Syntax
-### 4.1 Program Structure
-A QL program consists of a series of statements. There is no concept of a `main` method in our language. The commands are run in order. We can also define functions, which must be defined earlier in the program than they are used. QL is not an object-oriented, so there is no concept of a class or an object. Similar to languages like Python or AWK, the execution of a QL script will simply run the expressions present in our file.
+The following sections define the specifics of the syntax of our language.
+### 4.1 Statements
+Statements in QL have the form:
+
+```
+expression  \n
+```
+
+Statements are assignments, mathematical operations, or function calls.  They are separated by the newline character `\n`. The effects of the expression are evaluated prior to the next expression being evaluated.  The precedence of operators within the expression goes from highest to lowest.  To determine which operator binds tighter than another, check the operator precedence below.
+
 ### 4.2 Punctuation
-### 4.3 Operators
-[] : attribute access
+
+QL employs several different types of punctuation to signal certain directions of workflow or special blocks of code within programs.
+
+####4.2.1 `()`: hierarchical evaluation, function arguments, `where` clauses
+
+Parentheses can be used in three main cases:
+
+- Numerical or Boolean statements: Forces the expression inside the parentheses to be evaluated before interacting with tokens outside of the parentheses. For example, in `1*(2-3)`, the expression `2-3` will be evaluated, and its result will then be multiplied with 1. These can also be nested, e.g. : (1 + (4-(5/3)*2)).
+
+- Function arguments: When providing arguments during a function call, the arguments must be listed within parentheses directly after the name of the function. For examples, foo(array a, int b) involves a function foo() that takes in an array and an integer enclosed in parentheses. The parentheses are also used for marking the argument list in the function definition, i.e.
+
+```
+function foo(array a, int b) : array {
+	#~~ code goes here ~~#
+}
+
+foo(arr1, myInt)
+```
+
+- `Where` clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
+
+```
+where(["size"] > 10 & ["weight"] < 4) {
+	#~~ code goes here ~~#
+}
+```
+
+####4.2.2 `{}`: function definitions, `where` clauses
+
+Curly braces have two uses:
+
+- Function definitions: When a function is defined, the procedural code to be run must be enclosed in curly braces.
+
+- `where` clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
+
+####4.2.3 `:`: function return types
+The colon has use in our language as the specifier of a function return type. Separated between our language identifier and its argument list, we specify a `:` to mark that we will not be specifying a return type. Immediately after this colon, then, comes our function return type, which can be any of the data types we described above.
+
+### 4.3 Operators (listed in order of precedence)
+#### 4.3.1 `[]` : attribute access
 
 This can be used in two different ways:
 
 - [int `index`]: accesses value at `index` of array
-	* Return type is the same as the array’s type.
+    * Return type is the same as the array’s type.
 
 - [string `key`]: accesses value at `key` of JSON
-	* Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, or a JSON.
+    * Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, or a JSON.
 
 
-This operator can nest, e.g.: [“data”][“views”][“total”]. It associates from left to right.
+This operator can nest, e.g.: ["data"]["views"]["total"]. It associates from left to right.
 
 Here is a program containing different examples of the `[]` operator and their return values based on the following JSON:
 
 ```
-#~~ [“data”][“views”][“total”] returns an int.
+#~~ ["data"]["views"]["total"] returns an int. ~~#
 
-we iterate through each "data" object with a total viewcount less than 100 ~~#
+#~~ We iterate through each "data" object with a total viewcount less than 100 ~~#
 
-where ([“data”][“views”][“total”] < 80) as item {
-	#~~ item[“data”][“users”] returns an array ~~#
-	array users = item[“data”][“users”]
-	
-	#~~ iterate through the array ~~#
-	for (int i = 0; i < users.length; i++) {
-		#~~ print the user at index i in the array ~~#
-		print users[i]
-	}
-	
-	#~~ item[“data”][“items”][“category”] returns a string ~~#
-	if (item[“data”][“items”][“category”] == “News”) {
-		where (true) as name {
-			print “name”	
-		} in users
-	}
-} in json(“file1.json”)
+where (["data"]["views"]["total"] < 80) as item {
+    #~~ item["data"]["users"] returns an array ~~#
+    array users = item["data"]["users"]
+
+    #~~ iterate through the array ~~#
+    for (int i = 0; i < users.length; i++) {
+        #~~ print the user at index i in the array ~~#
+        print users[i]
+    }
+
+    #~~ item["data"]["items"]["category"] returns a string ~~#
+    if (item["data"]["items"]["category"] == "News") {
+        where (true) as name {
+            print "name"
+        } in users
+    }
+} in json("file1.json")
 
 
 file1.json:
 
-[{“data”: {
-	“views”: {
-		"total”: 80
-	},
-	“items: {
-		“category”: “News”
-	},
-	“users”: [
-		“Matt”,
-		“Evan”,
-		“Gary”
-	]
+[{"data": {
+    "views": {
+        "total": 80
+    },
+    "items": {
+        "category": "News"
+    },
+    "users": [
+        "Matt",
+        "Evan",
+        "Gary"
+    ]
 },
-{“data”: {
-	“views”: {
-		"total”: 1000
-	},
-	“items: {
-		“category”: “Sports”
-	}
+{"data": {
+    "views": {
+        "total": 1000
+    },
+    "items": {
+        "category": "Sports"
+    }
 }]
 ```
-		
-		% : mod
-			`int` % `int`: returns int (remainder of ($1 divided by $3))
+
+#### 4.3.2 `%` : mod
+
+- `int` % `int`: returns an int (the remainder of ($1 divided by $3))
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-		[ASTERISK] : multiplication
-			`int` * `int`: returns int ($1 multiplied by $3)
+#### 4.3.3 `*` : multiplication
+- `int` * `int`: returns int ($1 multiplied by $3)
 
-`double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1                                                                                                                                              multiplied by $3)
-
-For all other combinations of types, we throw an error (incompatible data types).
-		/ : division
-			`int` / `int`: returns int (floor($1 divided by $3))
-
-`double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1  divided by $3)
+- `double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1 multiplied by $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
-		[PLUS] : addition
-			`int` / `int`: returns int ($1 added to $3)
+#### 4.3.4 `/` : division
+- `int` / `int`: returns an int (the floor of ($1 divided by $3))
 
-`double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1  added to $3)
+- `double` / `int`, `int` / `double`,  `double` / `double`: returns a double ($1 divided by $3)
+
+For all other combinations of types, we throw an error (incompatible data types).
+
+#### 4.3.5 `+` : addition
+- `int` / `int`: returns int ($1 added to $3)
+
+- `double` + `int`, `int` + `double`,  `double` + `double`: returns double ($1 added to $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
 
+#### 4.3.6 `-` : subtraction
+- `int` - `int`: returns int ($1 minus $3)
 
-		[MINUS] : subtraction
-			`int` / `int`: returns int ($1 minus $3)
-
-`double` * `int`, `int` * `double`,  `double` * `double`: returns double ($1  minus $3)
+- `double` - `int`, `int` - `double`,  `double` - `double`: returns double ($1  minus $3)
 
 For all other combinations of types, we throw an error (incompatible data types).
-		
-		= : assignment
-			`anytype` = `anytype`: sets value of $1 to $3.
 
-If the type of $1 is different from the type of $3, we throw an error (no casting).
+#### 4.3.7 `=` : assignment
+- `anytype` = `anytype`: sets value of $1 to $3.
 
-		not : negation
-not `bool` = returns a bool (if bool was true, return false; if bool was false, return true)
+If the type of $1 is different from the type of $3, we throw an error.
+
+#### 4.3.8 `not` : negation
+
+- not `expr` = evaluates `expr` as a boolean (throws error if this is not possible); returns the opposite of `expr` (if `expr` was true, return false; if `expr` was false, return true)
 
 If this operator is used on anything other than a bool, we throw an error.
 
-		== : equivalence,
-		!= : non-equivalence,
-		> : greater than, 
-		< : less than, 
-		>= : greater than or equal to,
-		<= : less than or equal to
+#### 4.3.9 Equivalency operators
+- == : equivalence,
+- != : non-equivalence,
+- \> : greater than,
+- < : less than,
+- \>= : greater than or equal to,
+- <= : less than or equal to
 
 `anytype` OP `anytype`: returns a bool (true if $1 OP $3 e.g. `3 == 3` returns true)
 
-			if $1 and $3 are strings, we do a lexical comparison
+- if $1 and $3 are strings, we do a lexical comparison
 
-			if $1 and $3 are both ints, or both floats, we see if they are equal
+- if $1 and $3 are both ints, or both floats, we see if they are equal
 
-if the types are anything else, throws an error (no casting)
+If the types are anything other than these specified combinations, we throw an error.
 
-		& :
-`bool1` & `bool2`: returns true if they both are true, otherwise returns false
+#### 4.3.10 Logical operators
 
-`expr1` & `expr2`: evaluates expr1 and expr2 as booleans (throws error if this is not possible), and returns true if they both evaluate to true; otherwise, returns false.
+- `expr1` & `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if they both evaluate to true; otherwise, returns false.
 
-		| :
-`bool1` | `bool2`: returns true if either bool1 or bool2 is true, otherwise returns false
+- `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
 
-`expr1` | `expr2`: evaluates expr1 and expr2 as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
-
-
-### 4.4 Declarations
-### 4.5 Statements
+### 4.4 Statements
 There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, math operations, and function calls. Statements are separated by the newline character `\n`, as follows:
 
 ```
@@ -228,7 +271,8 @@ expression \n
 ```
 
 The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
-#### 4.5.1 Declaration of Variables
+
+#### 4.4.1 Declaration of Variables
 To declare a variable, a data type must be specified followed by the variable name and an equals sign.  After the equal sign, the user has to specify the datatype with the corresponding parameters to be passed into the constructor in parentheses.
 
 ```
@@ -246,14 +290,14 @@ bool b = bool(true)
 string s = string("foo")
 ```
 
-#### 4.5.2 Function Calls
+#### 4.4.2 Function Calls
 To call a function, the function’s name is used in conjunction with its arguments immediately following in parentheses. If necessary, there is also an assignment to a variable if the function returns a value. Some examples of function calls are:
 
 ```
 sort(a)
 array a = append(a, int(2))
 ```
-#### 4.5.3 Conditional Statements
+#### 4.4.3 Conditional Statements
 Our conditional statements behave as conditional statements in other languages do. They check the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required. We can provide an arbitrary number of `elseif` statements following the `if`, though there can also be none. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
 
 An example conditional statement is as follows:
@@ -261,7 +305,7 @@ An example conditional statement is as follows:
 ```
 if (__boolean condition__) {
     #~~ List of statements ~~#
-} 
+}
 elseif (__boolean condition__) {
     #~~ List of statements ~~#
 } else {
@@ -269,16 +313,54 @@ elseif (__boolean condition__) {
 }
 ```
 
-#### 4.5.4 Return statements
+#### 4.4.4 Return statements
 A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
 
+#### 4.4.5 Loop statements
+##### 4.4.5.1 `where` clauses
+The where clause allows the user to search through a JSON and find all of the elements within that JSON that match a certain boolean condition. This condition can be related to the structure of the element; for example, the condition can impose a condition of the certain property or key of the element itself.
+
+A where condition must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the "as __identifier__", which allows the user to identify the element within the JSON that is currently being processed. This must be included. Following this is an `{`, which marks the beginning of the body code which is applied to each element. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON through which the clause will iterate to extract elements.
+
+```
+where (__boolean condition__) as __identifier__ {
+    #~~ List of statements ~~#
+} in __json__
+```
+
+##### 4.4.5.2 `for` loops
+The for loop starts with the `for` keyword, followed by a set of three expressions separated by commas and enclosed by parentheses. The first expression is the initialization, where temporary variables can be initialized. The second expression is the boolean condition; at each iteration through the loop, the boolean condition will be checked. The loop will execute as long as the boolean condition is satisfied, and will exit as soon as the condition is evaluated to false. The third expression is the afterthought, where variables can be updated at each stage of the loop. Following these three expressions is an open `{` , followed by a list of statements, and then a close `}`.
+
+```
+for (__initialization__, __boolean condition__, __update__) {
+    #~~ List of statements ~~#
+}
+```
+
+##### 4.4.5.3 `while` loops
+The while loop is initiated by the `while` keyword, followed by an open paren `(`, followed by a boolean expression, which is then followed by a close paren `)`. After this, there is a block of statements, enclosed by `{` and `}`, which are executed in succession until the condition inside the `while` parentheses is no longer satisfied. This behaves as `while` loops do in other languages.
+
+```
+while (__boolean condition__) {
+    #~~ List of statements ~~#
+}
+```
+
+#### 4.4.6 Function-Call statement
+A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
+
+```
+<function_identifier>(<arg1>,<arg2>,...)
+```
+
+This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation.
 
 
 ## 5 Standard Library Functions
 
 Standard library functions are included with the language for convenience for the user. The first few of these functions will give users the ability to perform basic modifying operations with arrays.
 
-###5.0 `append`
+### 5.1 `append`
 ```
 function append(array arr, int x) : array {
 
@@ -287,22 +369,41 @@ function append(array arr, int x) : array {
 
 The above function takes in an array and an integer as arguments and returns an array with size increased by 1 that contains that integer at the last index.
 
-### 5.1 `unique`
+### 5.2 `unique`
 
 ```
 function unique(array arr) : array {
-	
+
 }
 ```
 
 The above function receives an array as argument and returns a copy of the array with duplicate values removed. Only the first appearance of each element will be conserved, and a resulting array is returned.
 
-### 5.2 `sort`
+### 5.3 `sort`
 
 ```
 function sort(array arr) : array {
-	
+
 }
 ```
 
+The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array `[1,4,3,5,2]` passed into the sort() method would return `[1,2,3,4,5]`. The array `["c","e","a","c","f"]` would return `["a","c","d","e","f"]`.
+
+### 5.4 `print`
+
+We also include a built-in print function to print strings and primitive types.
+
+```
+print(toPrint)
+```
+
+Multiple strings or primitives may be printed to console in one statement, separated by a `+`:
+
+```
+print(toPrint1 + toPrint2)
+```.
+
+Attempting to print something that is neither a string nor a primitive will result in an error.
+=======
 The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array [1,4,3,5,2] passed into the sort() method would return [1,2,3,4,5]. The array [“c”,”e”,”a”,”c”,”f”] would return [“a”,”c”,”d”,”e”,”f”].
+>>>>>>> 65769989ce1a4faa93b19f14c3c87bde6dd82d75
