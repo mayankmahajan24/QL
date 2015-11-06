@@ -54,7 +54,7 @@
 /* Start Program */
 program:
   | /* Nothing */
-  | decls EOF
+  | stmt_list EOF
 
 /* Literals */
 literal:
@@ -78,7 +78,7 @@ array_literal: ARRAY LPAREN INT_LITERAL RPAREN
 json_literal: JSON LPAREN STRING_LITERAL RPAREN
 
 /* Operators */
-boolean_operator:
+bool_operator:
   | AND
   | OR
 
@@ -99,10 +99,6 @@ data_type:
   | ARRAY
   | JSON
 
-return_type:
-  | data_type
-  | VOID
-
 /* Functions */
 func-dec: FUNCTION ID LPAREN formals_opt RPAREN COLON return_type LBRACK stmt_list RBRACK
 
@@ -121,6 +117,34 @@ formal_list:
 arg_decl:
   | data-type ID
 
+/* Function statement list can contain all statements as well as return */
+func_stmt_list:
+  | /* Nothing */
+  | stmt_list
+  | func_stmt_list return_stmt
+
+return_stmt: RETURN expr ENDLINE
+
+////////////////////////////////////////////////////
+//////////////////// STATEMENTS ////////////////////
+////////////////////////////////////////////////////
+
+stmt_list_opt:
+  | /* Nothing */
+  | stmt_list
+
+stmt_list:
+  | stmt
+  | stmt_list stmt
+
+/* NOTE: I think using end of the line for for loops is hard. */
+stmt:
+  | expr ENDLINE
+  | for_loop ENDLINE
+  | while_loop ENDLINE
+  | where_stmt ENDLINE
+  | if_elseif_else_stmt ENDLINE
+
 /* Where Statements */
 where_stmt: WHERE LPAREN where_expr_opt RPAREN AS ID LBRACK stmt_list RBRACK IN where_lit
 
@@ -131,7 +155,7 @@ where_expr_opt:
 
 where_expr_list:
   | where_expr
-  | where_expr_list boolean_operator where_expr
+  | where_expr_list bool_operator where_expr
 
 where_expr:
   | where_arg comparison_operator where_arg
@@ -146,6 +170,36 @@ where_selector: LBRACE STRING_LITERAL RBRACE
 where_lit:
   | ID
   | json_literal
+
+/* Loops */
+for_loop: FOR LPAREN expr COMMA bool_expr COMMA expr RPAREN LBRACK stmt_list RBRACK
+
+while_loop: WHILE LPAREN expr RPAREN LBRACK stmt_list RBRACK 
+
+/* If/ElseIf/Else */
+if_elseif_else_stmt: if_stmt else_if_stmt_list_opt else_stmt_opt
+
+if_stmt: IF LPAREN bool_expr_list RPAREN LBRACK stmt_list_opt RBRACK
+
+else_if_stmt_list_opt:
+  | /* Nothing */
+  | else_if_stmt_list
+
+else_if_stmt_list:
+  | else_if_stmt
+  | else_if_stmt_list else_if_stmt
+
+else_if_stmt: ELSEIF LPAREN bool_expr_list RPAREN LBRACK stmt_list_opt RBRACK 
+
+else_stmt_opt:
+  | /* Nothing */
+  | else_stmt
+
+else_stmt: ELSE LBRACK stmt_list_opt RBRACK
+
+bool_expr_list:
+  | bool_expr
+  | bool_expr_list bool_operator bool_expr
 
 /* Expressions */
 expr:
@@ -173,6 +227,12 @@ actuals_list:
   | expr
   | actuals_list, expr
 
-
-
-
+bool_expr:
+  | expr EQ expr
+  | expr NEQ expr
+  | expr LT expr
+  | expr LEQ expr
+  | expr GT expr
+  | expr GEQ expr
+  | boolean_literal
+  | ID
