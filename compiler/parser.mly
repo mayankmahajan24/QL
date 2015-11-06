@@ -38,6 +38,9 @@
 /* Assignment */
 %token ASSIGN
 
+/* Boolean Operators */
+%token AND OR
+
 /* TODO: Add the types of our tokens. (int_literal, float_literal, etc.) */
 
 /* Precedence */
@@ -66,7 +69,7 @@ int_literal: INT LPAREN INT_LITERAL RPAREN
 
 float_literal: FLOAT LPAREN FLOAT_LITERAL RPAREN
 
-boolean_literal: BOOLEAN LPAREN BOOLEAN_LITERAL RPAREN
+boolean_literal: BOOL LPAREN BOOL_LITERAL RPAREN
 
 string_literal: STRING LPAREN STRING_LITERAL RPAREN
 
@@ -74,10 +77,75 @@ array_literal: ARRAY LPAREN INT_LITERAL RPAREN
 
 json_literal: JSON LPAREN STRING_LITERAL RPAREN
 
+/* Operators */
+boolean_operator:
+  | AND
+  | OR
+
+comparison_operator:
+  | NEQ
+  | EQ
+  | LEQ
+  | GEQ
+  | LT
+  | GT
+
+/* Variables */
+data_type:
+  | INT
+  | FLOAT
+  | BOOL
+  | STRING
+  | ARRAY
+  | JSON
+
+return_type:
+  | data_type
+  | VOID
+
 /* Functions */
-func-dec: FUNCTION ID LPAREN formals_opt RPAREN COLON LBRACK stmt_list RBRACK
+func-dec: FUNCTION ID LPAREN formals_opt RPAREN COLON return_type LBRACK stmt_list RBRACK
 
+return_type:
+  | data_type
+  | VOID
 
+formals_opt:
+  | /* Nothing */
+  | formal_list
+
+formal_list:
+  | arg_decl
+  | formal_list COMMA arg_decl
+
+arg_decl:
+  | data-type ID
+
+/* Where Statements */
+where_stmt: WHERE LPAREN where_expr_opt RPAREN AS ID LBRACK stmt_list RBRACK IN where_lit
+
+/* TODO: This part is hard. Make sure it's right. */
+where_expr_opt:
+  | /* Nothing */
+  | where_expr_list
+
+where_expr_list:
+  | where_expr
+  | where_expr_list boolean_operator where_expr
+
+where_expr:
+  | where_arg comparison_operator where_arg
+  | NOT where_arg
+
+where_arg:
+  | where_selector
+  | literal
+
+where_selector: LBRACE STRING_LITERAL RBRACE
+
+where_lit:
+  | ID
+  | json_literal
 
 /* Expressions */
 expr:
@@ -96,6 +164,14 @@ expr:
   | NOT expr
   | ID LPAREN actuals_opt RPAREN
   | LPAREN expr RPAREN
+
+actuals_opt:
+  | /* Nothing */
+  | actuals_list
+
+actuals_list:
+  | expr
+  | actuals_list, expr
 
 
 
