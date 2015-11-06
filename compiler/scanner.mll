@@ -27,8 +27,9 @@ rule token = parse
 
 (* Punctuation *)
 | '('         { LPAREN }    | ')'         { RPAREN }
-| '{'         { LBRACE }    | '}'         { RBRACE }
+| '{'         { LBRACK }    | '}'         { RBRACK }
 | ';'         { SEMICOLON } | ','         { COMMA }
+| '['         { LBRACE }    | ']'         { RBRACK }
 
 (* Math Operators *)
 | '+'         { PLUS }      | '-'         { MINUS }
