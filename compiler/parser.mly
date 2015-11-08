@@ -59,11 +59,11 @@
 
 /* Start Program */
 program:
-  stmt_list EOF    { List.rev $1 }
+    stmt_list EOF    { List.rev $1 }
 
 /* Literals */
 literal:
-  | INT_LITERAL     { Literal_int($1) }
+    INT_LITERAL     { Literal_int($1) }
   | FLOAT_LITERAL   { Literal_float($1) }
   | BOOL_LITERAL    { Literal_bool($1) }
   | STRING_LITERAL  { Literal_string($1) }
@@ -80,8 +80,8 @@ array_literal:
     LSQUARE primitive_literal_list RSQUARE    { List.rev $2 }
 
 primitive_literal_list:
-      /* Nothing */         { [] }
-    | primitive_literal_list COMMA primitive_literal    { $3 :: $1 }
+    /* Nothing */         { [] }
+  | primitive_literal_list COMMA primitive_literal    { $3 :: $1 }
 
 json_literal:
     JSON LPAREN STRING_LITERAL RPAREN { Json_from_file($3) } /*String literal refers to filename*/
@@ -89,7 +89,7 @@ json_literal:
 /* Variables */
 /* ~~~~~~~~~~~~~~~~~~~ PLEASE REVISIT ~~~~~~~~~~~~~~~~~~~ */
 data_type:
-  | INT     { "int" }      
+    INT     { "int" }      
   | FLOAT   { "float" }
   | BOOL    { "bool" }
   | STRING  { "string" }
@@ -97,15 +97,15 @@ data_type:
   | JSON    { "json" }
 
 return_type:
-  | data_type   { $1 }
+    data_type   { $1 }
   | VOID        { "void" }
 
 formals_opt:
-  | /* Nothing */   { [] }
+    /* Nothing */   { [] }
   | formal_list     { List.rev $1 }
 
 formal_list:
-  | arg_decl                    { [$1] }
+    arg_decl                    { [$1] }
   | formal_list COMMA arg_decl  { $3 :: $1 }
 
 arg_decl:
@@ -142,7 +142,7 @@ stmt:
   | RETURN expr ENDLINE                         { Return($2) }
 
 where_lit:
-  | ID              { Id($1) }
+    ID              { Id($1) }
   | json_literal    { $1 }
 
 actuals_opt:
@@ -155,7 +155,7 @@ actuals_list:
 
 /* Expressions */
 expr:
-  | literal                       { $1 }
+    literal                       { $1 }
   | ID                            { Id($1) }
   | expr PLUS expr                { Binop($1, Add,   $3) }
   | expr MINUS expr               { Binop($1, Sub,   $3) }
@@ -165,7 +165,7 @@ expr:
   | LPAREN expr RPAREN            { $2 }
 
 bool_expr:
-  | BOOL_LITERAL            { Literal_bool($1) }
+    BOOL_LITERAL            { Literal_bool($1) }
   | ID                      { Id($1) }
   | expr EQ expr            { Binop($1, Equal,   $3) }
   | expr NEQ expr           { Binop($1, Neq,   $3) }
