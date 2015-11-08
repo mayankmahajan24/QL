@@ -30,7 +30,7 @@
 %token NEQ, EQ, LEQ, GEQ, LT, GT, NOT
 
 /* Punctuation */
-%token LPAREN RPAREN LBRACE RBRACE LBRACK RBRACK SEMICOLON COMMA EOF
+%token LPAREN RPAREN LCURLY RCURLY LSQUARE RSQUARE SEMICOLON COMMA EOF
 
 /* Types */
 %token INT FLOAT VOID STRING JSON ARRAY BOOL
@@ -57,7 +57,7 @@
 
 /* Start Program */
 program:
-  stmt_list EOF    { $1 }
+  stmt_list EOF    { List.rev $1 }
 
 /* Literals */
 literal:
@@ -75,7 +75,7 @@ primitive_literal:
   | STRING_LITERAL  { Literal_string($1) }
 
 array_literal:
-    LBRACK primitive_literal_list RBRACK    { List.rev $2 }
+    LSQUARE primitive_literal_list RSQUARE    { List.rev $2 }
 
 primitive_literal_list:
       /* Nothing */         { [] }
@@ -85,7 +85,7 @@ json_literal:
     JSON LPAREN STRING_LITERAL RPAREN { Json_from_file($3) }
 
 /* Variables */
-/* ~~~~~~~~~~~~~~~~~~~# PLEASE REVISIT ~~~~~~~~~~~~~~~~~~~# */
+/* ~~~~~~~~~~~~~~~~~~~ PLEASE REVISIT ~~~~~~~~~~~~~~~~~~~ */
 data_type:
   | INT     { "int" }      
   | FLOAT   { "float" }
@@ -95,68 +95,65 @@ data_type:
   | JSON    { "json" }
 
 /* Functions */
-func_dec: FUNCTION ID LPAREN formals_opt RPAREN COLON return_type LBRACK stmt_list RBRACK   {
+func_dec: FUNCTION ID LPAREN formals_opt RPAREN COLON 
+    return_type LSQUARE stmt_list RSQUARE   { Declare_func($2, $4, $7, List.rev $9) }
 
 return_type:
-  | data_type
-  | VOID
+  | data_type   { $1 }
+  | VOID        { "void" }
 
 formals_opt:
-   /* Nothing */
-  | formal_list
+  | /* Nothing */   { [] }
+  | formal_list     { List.rev $1 }
 
 formal_list:
-  | arg_decl
-  | formal_list COMMA arg_decl
+  | arg_decl                    { [$1] }
+  | formal_list COMMA arg_decl  { $3 :: $1 }
 
 arg_decl:
-  | data_type ID
-
-/* Function statement list can contain all statements as well as return */
-func_stmt_list:
-   /* Nothing */
-  | stmt_list
-  | func_stmt_list return_stmt
-
-return_stmt: RETURN expr ENDLINE
+   data_type ID     { Declare_arg($1, $2) }
 
 ////////////////////////////////////////////////////
 //////////////////// STATEMENTS ////////////////////
 ////////////////////////////////////////////////////
 
 stmt_list:
-      { [] }
+  /* Nothing */    { [] }
   | stmt_list stmt {$2 :: $1}
 
 /* NOTE: I think using end of the line for for loops is hard. */
+
+for (x = 1; x < 10; while(x < 10) x++;) {System.out.println ("Made it");}
+
 stmt:
-  | expr ENDLINE
-  | for_loop ENDLINE
+  | expr ENDLINE                 { Expr($1) } 
+  | FOR LPAREN expr COMMA bool_expr COMMA
+    assignment_stmt RPAREN LCURLY stmt_list RCURLY ENDLINE             { For($3, $5, $7, ) 
   | while_loop ENDLINE
   | where_stmt ENDLINE
   | if_elseif_else_stmt ENDLINE
   | assignment_stmt ENDLINE
   | func_dec ENDLINE
+  | return_stmt ENDLINE
 
-
-/*TODO: Add assignment to above and its possible derivations */
+/*TODO: Add assignment to above and its possible derivations*/
 
 /* Where Statements */
-where_stmt: WHERE LPAREN bool_expr_list RPAREN AS ID LBRACK stmt_list RBRACK IN where_lit
+where_stmt: WHERE LPAREN bool_expr_list RPAREN AS ID LCURLY stmt_list RCURLY IN where_lit
 
 where_lit:
   | ID
   | json_literal
 
 /* Loops */
-for_loop: FOR LPAREN expr COMMA bool_expr COMMA expr RPAREN LBRACK stmt_list RBRACK
+for_loop: 
 
-while_loop: WHILE LPAREN expr RPAREN LBRACK stmt_list RBRACK 
+while_loop: WHILE LPAREN expr RPAREN LCURLY stmt_list RCURLY 
 
 /* If/ElseIf/Else */
 if_elseif_else_stmt: if_stmt else_if_stmt_list_opt else_stmt_opt
 
-if_stmt: IF LPAREN bool_expr_list RPAREN LBRACK stmt_list_opt RBRACK
+if_stmt: IF LPAREN bool_expr_list RPAREN LCURLY stmt_list_opt RCURLY
 
 else_if_stmt_list_opt:
   | /* Nothing */
@@ -166,17 +163,17 @@ else_if_stmt_list:
   | else_if_stmt
   | else_if_stmt_list else_if_stmt
 
-else_if_stmt: ELSEIF LPAREN bool_expr_list RPAREN LBRACK stmt_list_opt RBRACK 
+else_if_stmt: ELSEIF LPAREN bool_expr_list RPAREN LCURLY stmt_list_opt RCURLY 
 
 else_stmt_opt:
   | /* Nothing */
   | else_stmt
 
-else_stmt: ELSE LBRACK stmt_list_opt RBRACK
+else_stmt: ELSE LCURLY stmt_list_opt RCURLY
 
 /*Assignment*/
 assignment_stmt:
-  | data_type ID ASSIGN expr {Asn($1, $2, $3)}
+  | data_type ID ASSIGN expr {Assign($1, $2, $3)}
 
 bool_expr_list:
   | bool_expr
