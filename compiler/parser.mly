@@ -82,7 +82,7 @@ primitive_literal_list:
     | primitive_literal_list COMMA primitive_literal    { $3 :: $1 }
 
 json_literal:
-    JSON LPAREN STRING_LITERAL RPAREN { Json_from_file($3) }
+    JSON LPAREN STRING_LITERAL RPAREN { Json_from_file($3) } /*String literal refers to filename*/
 
 /* Variables */
 /* ~~~~~~~~~~~~~~~~~~~ PLEASE REVISIT ~~~~~~~~~~~~~~~~~~~ */
@@ -93,10 +93,6 @@ data_type:
   | STRING  { "string" }
   | ARRAY   { "array" }
   | JSON    { "json" }
-
-/* Functions */
-func_dec: FUNCTION ID LPAREN formals_opt RPAREN COLON 
-    return_type LSQUARE stmt_list RSQUARE   { Declare_func($2, $4, $7, List.rev $9) }
 
 return_type:
   | data_type   { $1 }
@@ -121,72 +117,39 @@ stmt_list:
   /* Nothing */    { [] }
   | stmt_list stmt {$2 :: $1}
 
-/* NOTE: I think using end of the line for for loops is hard. */
-
-for (x = 1; x < 10; while(x < 10) x++;) {System.out.println ("Made it");}
-
 stmt:
-  | expr ENDLINE                 { Expr($1) } 
+    expr ENDLINE                                { Expr($1) } 
   | FOR LPAREN expr COMMA bool_expr COMMA
-    assignment_stmt RPAREN LCURLY stmt_list RCURLY ENDLINE             { For($3, $5, $7, ) 
-  | while_loop ENDLINE
-  | where_stmt ENDLINE
-  | if_elseif_else_stmt ENDLINE
-  | assignment_stmt ENDLINE
-  | func_dec ENDLINE
-  | return_stmt ENDLINE
-
-/*TODO: Add assignment to above and its possible derivations*/
-
-/* Where Statements */
-where_stmt: WHERE LPAREN bool_expr_list RPAREN AS ID LCURLY stmt_list RCURLY IN where_lit
+    assignment_stmt RPAREN
+    LCURLY stmt_list RCURLY ENDLINE             { For($3, $5, $7, $10) } 
+  | WHILE LPAREN bool_expr RPAREN
+    LCURLY stmt_list RCURLY ENDLINE             { While($3, $6) }
+  | WHERE LPAREN bool_expr RPAREN AS ID
+    LCURLY stmt_list RCURLY
+    IN where_lit ENDLINE                        { Where($3, $6, $8, $10) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY stmt_list RCURLY
+    %prec NOELSE ENDLINE                        { If($3, $6, Block([])) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY stmt_list RCURLY
+    ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $5, $7) }
+  | data_type ID ASSIGN expr ENDLINE            { Assign($1, $2, $3) }
+  | FUNCTION ID LPAREN formals_opt RPAREN
+    COLON return_type
+    LCURLY stmt_list RCURLY ENDLINE             { Declare_func($2, $4, $7, List.rev $9) }
+  | RETURN expr ENDLINE                         { Return($2) }
 
 where_lit:
-  | ID
-  | json_literal
-
-/* Loops */
-for_loop: 
-
-while_loop: WHILE LPAREN expr RPAREN LCURLY stmt_list RCURLY 
-
-/* If/ElseIf/Else */
-if_elseif_else_stmt: if_stmt else_if_stmt_list_opt else_stmt_opt
-
-if_stmt: IF LPAREN bool_expr_list RPAREN LCURLY stmt_list_opt RCURLY
-
-else_if_stmt_list_opt:
-  | /* Nothing */
-  | else_if_stmt_list
-
-else_if_stmt_list:
-  | else_if_stmt
-  | else_if_stmt_list else_if_stmt
-
-else_if_stmt: ELSEIF LPAREN bool_expr_list RPAREN LCURLY stmt_list_opt RCURLY 
-
-else_stmt_opt:
-  | /* Nothing */
-  | else_stmt
-
-else_stmt: ELSE LCURLY stmt_list_opt RCURLY
-
-/*Assignment*/
-assignment_stmt:
-  | data_type ID ASSIGN expr {Assign($1, $2, $3)}
-
-bool_expr_list:
-  | bool_expr
-  | bool_expr_list bool_operator bool_expr
+  | ID              { Id($1) }
+  | json_literal    { $1 }
 
 actuals_opt:
-  | /* Nothing */
-  | actuals_list
+    /* nothing */ { [] }
+  | actuals_list  { List.rev $1 }
 
 actuals_list:
-  | expr
-  | actuals_list, expr
-
+    expr                    { [$1] }
+  | actuals_list COMMA expr { $3 :: $1 }
 
 /* Expressions */
 expr:
@@ -199,24 +162,15 @@ expr:
   | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
   | LPAREN expr RPAREN            { $2 }
 
-
-actuals_opt:
-  | /* Nothing */
-  | actuals_list
-
-actuals_list:
-  | expr
-  | actuals_list, expr
-
 bool_expr:
-  | BOOL_LITERAL          { Literal_bool($1) }
-  | ID                    { Id($1) }
-  | expr EQ expr          { Binop($1, Equal,   $3) }
-  | expr NEQ expr         { Binop($1, Neq,   $3) }
-  | expr LT expr          { Binop($1, Less,   $3) }
-  | expr LEQ expr         { Binop($1, Leq,   $3) }
-  | expr GT expr          { Binop($1, Greater,   $3) }
-  | expr GEQ expr         { Binop($1, Geq,   $3) }
-  | bool_expr AND bool_expr    { Binop($1, And,   $3) }
-  | bool_expr OR bool_expr     { Binop($1, Or,   $3) }
+  | BOOL_LITERAL            { Literal_bool($1) }
+  | ID                      { Id($1) }
+  | expr EQ expr            { Binop($1, Equal,   $3) }
+  | expr NEQ expr           { Binop($1, Neq,   $3) }
+  | expr LT expr            { Binop($1, Less,   $3) }
+  | expr LEQ expr           { Binop($1, Leq,   $3) }
+  | expr GT expr            { Binop($1, Greater,   $3) }
+  | expr GEQ expr           { Binop($1, Geq,   $3) }
+  | bool_expr AND bool_expr { Binop($1, And,   $3) }
+  | bool_expr OR bool_expr  { Binop($1, Or,   $3) }
   
