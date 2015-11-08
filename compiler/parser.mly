@@ -21,7 +21,7 @@
 %token WHERE IN AS FOR WHILE
 
 /* Conditionals */
-%token IF ELSEIF ELSEIF
+%token IF ELSEIF ELSE
 
 /* Math Operators */
 %token PLUS MINUS TIMES DIVIDE
@@ -49,6 +49,8 @@
 
 /* Precedence */
 /* TODO: Establish the precedence definitions for our operators. */
+
+%nonassoc NOELSE
 
 %start program
 %type <Ast.program> program
@@ -129,7 +131,7 @@ stmt:
     IN where_lit ENDLINE                        { Where($3, $6, $8, $10) }
   | IF LPAREN bool_expr RPAREN
     LCURLY stmt_list RCURLY
-    %prec NOELSE ENDLINE                        { If($3, $6, Block([])) }
+    ENDLINE %prec NOELSE                        { If($3, $6, Block([])) }
   | IF LPAREN bool_expr RPAREN
     LCURLY stmt_list RCURLY
     ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $5, $7) }
