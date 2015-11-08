@@ -41,7 +41,11 @@
 /* Boolean Operators */
 %token AND OR
 
-/* TODO: Add the types of our tokens. (int_literal, float_literal, etc.) */
+%token <int> INT_LITERAL
+%token <float> FLOAT_LITERAL
+%token <string> STRING_LITERAL
+%token <string> BOOLEAN_LITERAL          
+%token <string> ID
 
 /* Precedence */
 /* TODO: Establish the precedence definitions for our operators. */
@@ -137,28 +141,12 @@ stmt:
   | while_loop ENDLINE
   | where_stmt ENDLINE
   | if_elseif_else_stmt ENDLINE
+  | assignment_stmt ENDLINE
+
+/*TODO: Add assignment to above and its possible derivations*/
 
 /* Where Statements */
-where_stmt: WHERE LPAREN where_expr_opt RPAREN AS ID LBRACK stmt_list RBRACK IN where_lit
-
-/* TODO: This part is hard. Make sure it's right. */
-where_expr_opt:
-  | /* Nothing */
-  | where_expr_list
-
-where_expr_list:
-  | where_expr
-  | where_expr_list bool_operator where_expr
-
-where_expr:
-  | where_arg comparison_operator where_arg
-  | NOT where_arg
-
-where_arg:
-  | where_selector
-  | literal
-
-where_selector: LBRACE STRING_LITERAL RBRACE
+where_stmt: WHERE LPAREN bool_expr_list RPAREN AS ID LBRACK stmt_list RBRACK IN where_lit
 
 where_lit:
   | ID
