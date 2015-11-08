@@ -58,21 +58,14 @@ program:
 
 /* Literals */
 literal:
-  | int_literal
-  | float_literal
-  | boolean_literal
-  | string_literal
+  | INT_LITERAL
+  | FLOAT_LITERAL
+  | BOOL_LITERAL
+  | STRING_LITERAL
   | array_literal
   | json_literal
 
-int_literal: INT LPAREN INT_LITERAL RPAREN
-
-float_literal: FLOAT LPAREN FLOAT_LITERAL RPAREN
-
-boolean_literal: BOOL LPAREN BOOL_LITERAL RPAREN
-
-string_literal: STRING LPAREN STRING_LITERAL RPAREN
-
+/* TODO DEFINE THESE PROPERLY */
 array_literal: ARRAY LPAREN INT_LITERAL RPAREN
 
 json_literal: JSON LPAREN STRING_LITERAL RPAREN
@@ -100,7 +93,7 @@ data_type:
   | JSON
 
 /* Functions */
-func-dec: FUNCTION ID LPAREN formals_opt RPAREN COLON return_type LBRACK stmt_list RBRACK
+func_dec: FUNCTION ID LPAREN formals_opt RPAREN COLON return_type LBRACK stmt_list RBRACK
 
 return_type:
   | data_type
@@ -115,7 +108,7 @@ formal_list:
   | formal_list COMMA arg_decl
 
 arg_decl:
-  | data-type ID
+  | data_type ID
 
 /* Function statement list can contain all statements as well as return */
 func_stmt_list:
@@ -228,11 +221,11 @@ actuals_list:
   | actuals_list, expr
 
 bool_expr:
-  | expr EQ expr
-  | expr NEQ expr
-  | expr LT expr
-  | expr LEQ expr
-  | expr GT expr
-  | expr GEQ expr
-  | boolean_literal
-  | ID
+  | BOOL_LITERAL          { Binop($1, Equal,   $3) }
+  | ID                    { Binop($1, Equal,   $3) }
+  | expr EQ expr          { Binop($1, Equal,   $3) }
+  | expr NEQ expr         { Binop($1, Equal,   $3) }
+  | expr LT expr          { Binop($1, Equal,   $3) }
+  | expr LEQ expr         { Binop($1, Equal,   $3) }
+  | expr GT expr          { Binop($1, Equal,   $3) }
+  | expr GEQ expr         { Binop($1, Equal,   $3) }
