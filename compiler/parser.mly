@@ -57,22 +57,32 @@
 
 /* Start Program */
 program:
-  | /* Nothing */
-  | stmt_list EOF
+  stmt_list EOF    { $1 }
 
 /* Literals */
 literal:
-  | INT_LITERAL
-  | FLOAT_LITERAL
-  | BOOL_LITERAL
-  | STRING_LITERAL
-  | array_literal
-  | json_literal
+  | INT_LITERAL     { Literal_int($1) }
+  | FLOAT_LITERAL   { Literal_float($1) }
+  | BOOL_LITERAL    { Literal_bool($1) }
+  | STRING_LITERAL  { Literal_string($1) }
+  | array_literal   { $1 }
+  | json_literal    { $1 }
 
-/* TODO DEFINE THESE PROPERLY */
-array_literal: ARRAY LPAREN INT_LITERAL RPAREN
+primitive_literal:
+    INT_LITERAL     { Literal_int($1) }
+  | FLOAT_LITERAL   { Literal_float($1) }
+  | BOOL_LITERAL    { Literal_bool($1) }
+  | STRING_LITERAL  { Literal_string($1) }
 
-json_literal: JSON LPAREN STRING_LITERAL RPAREN
+array_literal:
+    LBRACK primitive_literal_list RBRACK    { List.rev $2 }
+
+primitive_literal_list:
+      /* Nothing */         { [] }
+    | primitive_literal_list COMMA primitive_literal    { $3 :: $1 }
+
+
+json_literal: JSON LPAREN STRING_LITERAL RPAREN     {Json_file($1)}
 
 /* Operators */
 bool_operator:
@@ -126,13 +136,9 @@ return_stmt: RETURN expr ENDLINE
 //////////////////// STATEMENTS ////////////////////
 ////////////////////////////////////////////////////
 
-stmt_list_opt:
-  | /* Nothing */
-  | stmt_list
-
 stmt_list:
-  | stmt
-  | stmt_list stmt
+  /* Nothing */    { [] }
+  | stmt_list stmt {$2 :: $1}
 
 /* NOTE: I think using end of the line for for loops is hard. */
 stmt:
@@ -142,6 +148,8 @@ stmt:
   | where_stmt ENDLINE
   | if_elseif_else_stmt ENDLINE
   | assignment_stmt ENDLINE
+  | func_dec ENDLINE
+
 
 /*TODO: Add assignment to above and its possible derivations*/
 
@@ -178,27 +186,36 @@ else_stmt_opt:
 
 else_stmt: ELSE LBRACK stmt_list_opt RBRACK
 
+/*Assignment*/
+assignment_stmt:
+  | data_type ID ASSIGN expr {Asn($1, $2, $3)}
+
 bool_expr_list:
   | bool_expr
   | bool_expr_list bool_operator bool_expr
 
+
+actuals_opt:
+  | /* Nothing */
+  | actuals_list
+
+actuals_list:
+  | expr
+  | actuals_list, expr
+
+
 /* Expressions */
 expr:
-  | literal
-  | ID
-  | expr PLUS expr
-  | expr MINUS expr
-  | expr TIMES expr
-  | expr DIVIDE expr
-  | expr EQ expr
-  | expr NEQ expr
-  | expr LEQ expr
-  | expr GEQ expr
-  | expr AND expr
-  | expr OR expr
-  | NOT expr
-  | ID LPAREN actuals_opt RPAREN
-  | LPAREN expr RPAREN
+  | literal                       { $1 }
+  | ID                            { Id($1) }
+  | expr PLUS expr                { Binop($1, Add,   $3) }
+  | expr MINUS expr               { Binop($1, Sub,   $3) }
+  | expr TIMES expr               { Binop($1, Mult,  $3) }
+  | expr DIVIDE expr              { Binop($1, Div,   $3) }
+  | bool_expr                     { $1 }
+  | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
+  | LPAREN expr RPAREN            { $2 }
+
 
 actuals_opt:
   | /* Nothing */
@@ -209,11 +226,14 @@ actuals_list:
   | actuals_list, expr
 
 bool_expr:
-  | BOOL_LITERAL          { Binop($1, Equal,   $3) }
-  | ID                    { Binop($1, Equal,   $3) }
+    BOOL_LITERAL          { Literal_bool($1) }
+  | ID                    { Id($1) }
   | expr EQ expr          { Binop($1, Equal,   $3) }
-  | expr NEQ expr         { Binop($1, Equal,   $3) }
-  | expr LT expr          { Binop($1, Equal,   $3) }
-  | expr LEQ expr         { Binop($1, Equal,   $3) }
-  | expr GT expr          { Binop($1, Equal,   $3) }
-  | expr GEQ expr         { Binop($1, Equal,   $3) }
+  | expr NEQ expr         { Binop($1, Neq,   $3) }
+  | expr LT expr          { Binop($1, Less,   $3) }
+  | expr LEQ expr         { Binop($1, Leq,   $3) }
+  | expr GT expr          { Binop($1, Greater,   $3) }
+  | expr GEQ expr         { Binop($1, Geq,   $3) }
+  | expr AND expr         { Binop($1, And,   $3) }
+  | expr OR expr          { Binop($1, Or,   $3) }
+  
