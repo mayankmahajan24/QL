@@ -51,6 +51,12 @@
 
 %nonassoc NOELSE
 
+%right ASSIGN
+%left AND OR
+%left NOT
+%left PLUS MINUS
+%left TIMES DIVIDE
+
 %start program
 %type <Ast.program> program
 
@@ -134,14 +140,15 @@ stmt:
   | IF LPAREN bool_expr RPAREN
     LCURLY stmt_list RCURLY
     ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
-  | assignment_stmt                             { $1 }
+  | assignment_stmt ENDLINE                     { $1 }
   | FUNCTION ID LPAREN formals_opt RPAREN
     COLON return_type
     LCURLY stmt_list RCURLY ENDLINE             { Declare_func($2, $4, $7, List.rev $9) }
   | RETURN expr ENDLINE                         { Return($2) }
 
 /* Assignment */
-assignment_stmt: data_type ID ASSIGN expr { Assign($1, $2, $4) }
+assignment_stmt:
+    data_type ID ASSIGN expr { Assign($1, $2, $4) }
 
 /* Where Statements */
 where_expr_list_opt:
