@@ -1,12 +1,16 @@
-
+OCAMLC=ocamlc
+OCAMLDEP=ocamldep
+OCAMLLEX=ocamllex
+OCAMLYACC=ocamlyacc
 
 main: scanner parser
 
-scanner:
-	ocamllex scanner.mll
+scanner: scanner.mll
+	$(OCAMLLEX) scanner.mll
 
-parser:
-	ocamlyacc parser.mly
+parser: parser.mly
+	$(OCAMLYACC) parser.mly
 
+.PHONY: clean
 clean:
-	rm -rf scanner.ml parser.ml parser.mli
+	rm -rf scanner.ml parser.ml parser.mli *.cmo *.cmi *.out *.diff

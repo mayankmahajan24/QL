@@ -114,7 +114,12 @@ formal_list:
   | formal_list COMMA arg_decl  { $3 :: $1 }
 
 arg_decl:
-   data_type ID     { Declare_arg($1, $2) }
+    data_type ID
+    {{
+        var_type   = $1;
+        var_name   = $2;
+    }}
+
 
 ////////////////////////////////////////////////////
 //////////////////// STATEMENTS ////////////////////
@@ -141,10 +146,18 @@ stmt:
     LCURLY stmt_list RCURLY
     ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
   | assignment_stmt ENDLINE                     { $1 }
-  | FUNCTION ID LPAREN formals_opt RPAREN
-    COLON return_type
-    LCURLY stmt_list RCURLY ENDLINE             { Declare_func($2, $4, $7, List.rev $9) }
+  | func_decl                                   { $1 }
   | RETURN expr ENDLINE                         { Return($2) }
+
+/* Function Declaration */
+func_decl:
+    | FUNCTION ID LPAREN formals_opt RPAREN COLON return_type LCURLY stmt_list RCURLY ENDLINE
+    {{
+        fname = $2;
+        args = $4;
+        return = $7;
+        body = List.rev $9
+    }}
 
 /* Assignment */
 assignment_stmt:
@@ -157,8 +170,8 @@ where_expr_list_opt:
 
 where_expr_list:
   where_expr                    { [$1] }
-  | where_expr AND where_expr   { Where_cond($1, AND, $3) }
-  | where_expr OR where_expr    { Where_cond($1, OR, $3) }
+  | where_expr AND where_expr   { Where_cond($1, And, $3) }
+  | where_expr OR where_expr    { Where_cond($1, And, $3) }
 
 where_expr:
   where_arg EQ where_arg      { Where_eval($1, Equal, $3) }
