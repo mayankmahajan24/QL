@@ -20,7 +20,7 @@ type expr =
     | Literal_string of string
     | Literal_bool of bool
     | Id of string
-    | Binop of expr * op * expr
+    | Binop of expr * math_op * expr
     | Call of string * expr list
     (* Need to include array accessor here. -- Matt*)
 
@@ -72,6 +72,10 @@ type func_decl = {
 }
 
 type program = stmt list
+
+let string_of_program (vars, funcs) =
+  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
+  String.concat "\n" (List.map string_of_fdecl funcs)
 
 let program_s (vars, funcs) = "([" ^ String.concat ", " vars ^ "],\n" ^
   String.concat "\n" (List.map func_decl_s funcs) ^ ")"
