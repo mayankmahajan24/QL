@@ -171,7 +171,7 @@ where_expr_list_opt:
 where_expr_list:
   where_expr                    { [$1] }
   | where_expr AND where_expr   { Where_cond($1, And, $3) }
-  | where_expr OR where_expr    { Where_cond($1, And, $3) }
+  | where_expr OR where_expr    { Where_cond($1, Or, $3) }
 
 where_expr:
   where_arg EQ where_arg      { Where_eval($1, Equal, $3) }
