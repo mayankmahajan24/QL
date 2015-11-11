@@ -20,7 +20,7 @@ type expr =
     | Literal_string of string
     | Literal_bool of bool
     | Id of string
-    | Binop of expr * math_op * expr
+    | Binop of expr * op * expr
     | Call of string * expr list
     (* Need to include array accessor here. -- Matt*)
 
