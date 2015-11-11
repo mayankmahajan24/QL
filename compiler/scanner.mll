@@ -81,7 +81,3 @@ rule token = parse
 and comment = parse
 | "~~#" { token lexbuf }      (* End of comments *)
 | _    { comment lexbuf }    (* Still a comment *)
-
-
-
-

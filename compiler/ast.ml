@@ -72,3 +72,6 @@ type func_decl = {
 }
 
 type program = stmt list
+
+let program_s (vars, funcs) = "([" ^ String.concat ", " vars ^ "],\n" ^
+  String.concat "\n" (List.map func_decl_s funcs) ^ ")"
