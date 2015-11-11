@@ -225,6 +225,6 @@ bool_expr:
   | expr LEQ expr           { Binop($1, Leq,   $3) }
   | expr GT expr            { Binop($1, Greater,   $3) }
   | expr GEQ expr           { Binop($1, Geq,   $3) }
-  | bool_expr AND bool_expr { Binop($1, And,   $3) }
-  | bool_expr OR bool_expr  { Binop($1, Or,   $3) }
+  | bool_expr AND bool_expr { Bool_binop($1, And,   $3) }
+  | bool_expr OR bool_expr  { Bool_binop($1, Or,   $3) }
   | NOT bool_expr           { Not($2) }
