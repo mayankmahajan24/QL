@@ -9,6 +9,5 @@ let _ =
   let lexbuf = Lexing.from_channel stdin in
   let program = Parser.program Scanner.token lexbuf in
   match action with
-    Raw -> print_string (Ast.program_s program)
-  | Ast -> let listing = Ast.string_of_program program
-           in print_string listing
+    Raw -> print_endline "TODO: Add a printer that does something"
+  | Ast -> print_endline "TODO: Add a printer that does something"

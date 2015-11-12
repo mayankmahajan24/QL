@@ -18,10 +18,12 @@ type expr =
     | Literal_int of int
     | Literal_float of float
     | Literal_string of string
-    | Literal_bool of bool
+    | Literal_bool of string
+    | Literal_array of expr list
     | Id of string
     | Binop of expr * math_op * expr
     | Call of string * expr list
+    | Json_from_file of string
     (* Need to include array accessor here. -- Matt*)
 
 type arg_decl = {
@@ -30,9 +32,11 @@ type arg_decl = {
 }
 
 type bool_expr =
+    | Literal_bool of string
     | Binop of expr * bool_op * expr
     | Bool_binop of bool_expr * conditional * bool_expr
     | Not of bool_expr
+    | Id of string
 
 type data_type =
     | Int
@@ -42,34 +46,34 @@ type data_type =
     | Json
     | Array of data_type
 
-type assignment_stmt =
-    | Assign of data_type * string * expr
+type json_selector =
+    | Json_string of string
+
+type where_arg =
+    | Json_selector_list of json_selector list
+    | Expr of expr
+
 
 type where_expr =
-    | Where_eval of expr * bool_op * expr
+    | Where_eval of where_arg * bool_op * where_arg
+    | Not of where_expr
 
+(*
 type where_expr_list =
     | Where_cond of where_expr * conditional * where_expr
-
-type where_lit =
-    | Id of string
-    | Json_from_file of string
+*)
 
 type stmt =
     | Expr of expr
-    | For of expr * bool_expr * assignment_stmt * stmt list
+    | For of expr * bool_expr * stmt * stmt list
     | While of bool_expr * stmt list
-    | Where of where_expr_list * string * stmt list * where_lit
+    | Where of where_expr * string * stmt list * expr
     | If of bool_expr * stmt list * stmt list
     | Return of expr
     | Not of expr
-
-type func_decl = {
-    fname      : string;
-    args       : arg_decl list;
-    return     : string;
-    body       : stmt list;
-}
+    | Assign of string * string * expr
+    | Func_decl of string * arg_decl list * string * stmt list
+    (* Look into making return type limited to certain set *)
 
 type program = stmt list
 

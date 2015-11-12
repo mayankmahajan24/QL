@@ -73,7 +73,7 @@ rule token = parse
 (* Literals *)
 | num as intlit      { INT_LITERAL(int_of_string intlit) }
 | flt as fltlit      { FLOAT_LITERAL(float_of_string fltlit) }
-| boolean as boollit { BOOLEAN_LITERAL(bool_of_string boollit) }
+| boolean as boollit { BOOL_LITERAL(boollit) }
 | '"' ([^'"']* as strlit) '"' { STRING_LITERAL(strlit) }
 | '\'' ([^'\'']* as strlit) '\'' {STRING_LITERAL(strlit)}
 
