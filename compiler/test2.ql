@@ -1,4 +1,4 @@
-String file_name = "file.json"
+string file_name = "file.json"
 int a = 4
 int sum = 0
 
