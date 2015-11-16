@@ -4,3 +4,10 @@
 *.diff
 *.log
 *-gen.out
+*.cmi
+*.cmo
+parser.ml
+parser.mli
+ql
+scanner.ml
+

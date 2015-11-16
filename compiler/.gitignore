@@ -1,6 +1,0 @@
-*.cmi
-*.cmo
-parser.ml
-parser.mli
-ql
-scanner.ml
