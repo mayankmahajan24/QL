@@ -38,7 +38,6 @@ Run() {
 }
 
 Check() {
-  rm Test.java
   error=0
 
   # strip ".ql" off filename
@@ -61,6 +60,8 @@ Check() {
     echo "###### FAILED" 1>&2
     globalerror=$error
   fi
+
+  rm Test.java
 }
 
 shift `expr $OPTIND - 1`
@@ -72,9 +73,13 @@ else
   files="tests/test-*.ql"
 fi
 
+make all >& /dev/null
+
 for file in $files
 do
   Check $file 2>> $globallog
 done
+
+make clean >& /dev/null
 
 exit $globalerror
