@@ -36,7 +36,7 @@ let start_compiling stmt_list =
 			JSONParser parser = new JSONParser();
 		 	JSONArray a = (JSONArray) parser.parse(new FileReader(\"file.json\"));
 
- 		" ^ List.hd java_string ^ "
+ 		" ^ string_of_int (List.length stmt_list) ^ "
 
 		}
 	}

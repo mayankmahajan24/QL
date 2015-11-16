@@ -6,7 +6,7 @@
 			JSONParser parser = new JSONParser();
 		 	JSONArray a = (JSONArray) parser.parse(new FileReader("file.json"));
 
- 		hi
+ 		0
 
 		}
 	}
