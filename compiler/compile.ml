@@ -13,14 +13,15 @@ let write_to_file prog_str =
     let file = open_out "test.java" in
         Printf.fprintf file "%s" prog_str 
 
-let rec match_expr expr = function
-	Call(x, _) -> x
+let rec match_expr expr = match expr
+	with Call(x, _) -> x
 	| _ -> "mess2"
 
 (* compile AST to java syntax *)
-let translate stmt = function
-	Expr(e1) -> "match_expr e1"
-	| _ -> "mess"
+let translate stmt = match stmt
+	with Expr(e1) -> "mess"
+	| _ -> "deeznuts"
+
 	(* stmt_list contains func --> if func_name is print --> create Java syntax for printing
 	 anything fails, reject program *)
 
