@@ -44,13 +44,15 @@ Check() {
   # strip ".ql" off filename
   basename=`echo $1 | sed 's/.ql//'`
 
-  echo -n "$basename..."
+  echo "$basename..."
 
   echo 1>&2
   echo "###### Testing $basename" 1>&2
 
   Run "compiler/ql" "<" $1 &&
-  Compare ${basename}.out Test.java ${basename}.i.diff
+  javac Test.java &&
+  java Test > ${basename}-gen.out &&
+  Compare ${basename}-gen.out ${basename}-exp.out ${basename}.i.diff
 
   if [ $error -eq 0 ] ; then
     echo "OK"
