@@ -10,8 +10,8 @@ type env = {
 
 (* write program to .java file *)
 let write_to_file prog_str =
-    let file = open_out "test.java" in
-        Printf.fprintf file "%s" prog_str 
+    let file = open_out "Test.java" in
+        Printf.fprintf file "%s" prog_str
 
 let rec match_expr expr = match expr
 	with Call(x, y) -> (match x
@@ -29,7 +29,7 @@ let translate stmt = match stmt
 	 anything fails, reject program *)
 
 (* entry point into compiler *)
-let start_compiling stmt_list = 
+let start_compiling stmt_list =
 	let java_string = List.map translate stmt_list in
 	let out = "
 	public class Test {
