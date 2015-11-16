@@ -3,4 +3,4 @@
 *.test
 *.diff
 *.log
-*(?!exp).out
+*-gen.out

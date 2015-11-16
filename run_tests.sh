@@ -51,8 +51,8 @@ Check() {
 
   Run "compiler/ql" "<" $1 &&
   javac Test.java &&
-  java Test > ${basename}.out &&
-  Compare ${basename}.out ${basename}-exp.out ${basename}.i.diff
+  java Test > ${basename}-gen.out &&
+  Compare ${basename}-gen.out ${basename}-exp.out ${basename}.i.diff
 
   if [ $error -eq 0 ] ; then
     echo "OK"
