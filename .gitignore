@@ -1,0 +1,6 @@
+*.java
+*.class
+*.test
+*.diff
+*.log
+*(?!exp).out

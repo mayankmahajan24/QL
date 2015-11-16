@@ -2,7 +2,7 @@ OCAMLC=ocamlc
 OCAMLDEP=ocamldep
 OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
-OBJS=ast.cmo parser.cmo scanner.cmo compile.cmo ql.cmo 
+OBJS=ast.cmo parser.cmo scanner.cmo compile.cmo ql.cmo
 
 ql: $(OBJS)
 	ocamlc -o ql $(OBJS)
@@ -33,7 +33,7 @@ sast.cmo : ast.cmo
 sast.cmx : ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
-ql.cmo : scanner.cmo parser.cmi ast.cmo compile.cmo 
+ql.cmo : scanner.cmo parser.cmi ast.cmo compile.cmo
 ql.cmx : scanner.cmx parser.cmx ast.cmx compile.cmx
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
