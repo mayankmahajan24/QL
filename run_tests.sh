@@ -38,31 +38,21 @@ Run() {
 }
 
 Check() {
+  rm Test.java
   error=0
 
   # strip ".ql" off filename
   basename=`echo $1 | sed 's/.ql//'`
 
-  echo -n "$basename..."
+  echo "$basename..."
 
   echo 1>&2
   echo "###### Testing $basename" 1>&2
 
-  generatedfiles="$generatedfiles ${basename}.i.out" &&
-  Run "menhir" "-v" "<" $1 ">" ${basename}.i.out &&
-  Compare ${basename}.i.out ${basename}.out ${basename}.i.diff
-
-  # The following lines will make more sense when we can actually run QL programs
-
-  # generatedfiles="$generatedfiles ${basename}.i.out" &&
-  # Run "../ql" "-i" "<" $1 ">" ${basename}.i.out &&
-  # Compare ${basename}.i.out ${reffile}.out ${basename}.i.diff
-
-  # generatedfiles="$generatedfiles ${basename}.c.out" &&
-  # Run "../ql" "-c" "<" $1 ">" ${basename}.c.out &&
-  # Compare ${basename}.c.out ${reffile}.out ${basename}.c.diff
-
-  # Report the status and clean up the generated files
+  Run "compiler/ql" "<" $1 &&
+  javac Test.java &&
+  java Test > ${basename}-gen.out &&
+  Compare ${basename}-gen.out ${basename}-exp.out ${basename}.i.diff
 
   if [ $error -eq 0 ] ; then
     echo "OK"
@@ -79,7 +69,7 @@ if [ $# -ge 1 ]
 then
   files=$@
 else
-  files="tests/test-*.mc"
+  files="tests/test-*.ql"
 fi
 
 for file in $files
