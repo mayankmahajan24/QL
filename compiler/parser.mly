@@ -135,7 +135,7 @@ stmt:
     LCURLY stmt_list RCURLY ENDLINE             { While($3, $6) }
   | WHERE LPAREN where_expr RPAREN AS ID
     LCURLY stmt_list RCURLY
-    IN expr ENDLINE                        { Where($3, $6, $8, $11) }
+    IN expr ENDLINE                             { Where($3, $6, $8, $11) }
   | IF LPAREN bool_expr RPAREN
     LCURLY stmt_list RCURLY
     ENDLINE %prec NOELSE                        { If($3, $6, []) }

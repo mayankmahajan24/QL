@@ -1,4 +1,4 @@
 #/bin/sh
 make
-./ql | cat test2.ql
+./ql | cat test3.ql
 cat test.java
