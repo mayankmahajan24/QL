@@ -5,6 +5,7 @@ module VariableMap = Map.Make(String);;
 
 exception VarAlreadyDeclared;;
 exception VarNotDeclared;;
+exception FunctionAlreadyDeclared;;
 
 type func_info  = {
   id : string; 
@@ -51,3 +52,21 @@ let var_type (id : string) (env : symbol_table) =
     VariableMap.find id env.var_map
   else
     raise VarNotDeclared
+
+let create_func (func_name: string) (ret_type : string) (args : arg_decl list) =
+  {
+    id = func_name;
+    return = (string_to_data_type ret_type);
+    args = List.map (fun arg -> string_to_data_type arg.var_type) args;
+    arg_names = List.map (fun arg -> arg.var_name) args;
+  }
+
+let declare_func (func_name : string) (ret_type : string) (args : arg_decl list) (env : symbol_table) =
+  if FunctionMap.mem func_name env.func_map then
+    raise FunctionAlreadyDeclared
+  else
+    let update_func_map = FunctionMap.add func_name (create_func func_name ret_type args) env.func_map in
+    (* Define each of the parameters as a variable in this scope *)
+    update update_func_map env.var_map
+
+
