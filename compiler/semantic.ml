@@ -19,7 +19,7 @@ let write_to_file prog_str =
 (* let rec check_expr_type (expr : Ast.expr) = match expr
 	_ -> print_endline "lol"
  *)
-let string_to_data_type (s: string) = match s
+let string_to_data_type (s : string) = match s
 	with "int" -> Int
 	| "float" -> Float
 	| "bool" -> Bool
@@ -28,6 +28,14 @@ let string_to_data_type (s: string) = match s
 	| "json" -> Json
 	| _ -> raise (Failure "unsupported data type")
 
+let data_type_to_string (s : data_type) = match s
+	with Int -> "int"
+	| Float -> "float"
+	| Bool -> "bool"
+	| String -> "string"
+	| Array -> "array"
+	| Json -> "json"
+	| _ -> raise (Failure "unsupported data type")
 
 let check_expr_data_type (expr : Ast.expr) = match expr
 	with Literal_int(i) -> Int
@@ -40,8 +48,7 @@ let check_expr_data_type (expr : Ast.expr) = match expr
 
 let equate e1 e2 =
 	if (e1 != e2) then
-		(* print type e1 and e2 - gary*)
-		raise (Failure "data_type mismatch")
+		raise (Failure ("data_type: " ^ (data_type_to_string e1) ^ " ; expr: " ^ (data_type_to_string e2)))
 	else
 		print_endline "passed!"
 
