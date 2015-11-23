@@ -4,6 +4,9 @@ open Environment;;
 
 type data_type = Int | Float | Bool | String | Array | Json | AnyType
 
+
+exception ReturnStatementMissing;;
+
 (* write program to .java file *)
 let write_to_file prog_str =
     let file = open_out "Test.java" in
@@ -78,7 +81,7 @@ let handle_expr_statement (expr : Ast.expr) = match expr
 	| _ -> ()
 
 (* compile AST to java syntax *)
-let check_statement (stmt : Ast.stmt) (env: Environment.symbol_table) = match stmt
+let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
 	with Expr(e1) ->
 		handle_expr_statement(e1);
 		env
@@ -88,15 +91,40 @@ let check_statement (stmt : Ast.stmt) (env: Environment.symbol_table) = match st
 			declare_var id data_type env
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
 		let func_env = declare_func func_name return_type arg_list env in
+		(* TODO: Implement void functions *)
+		if return_type != "void" && List.length arg_list == 0 then
+			raise ReturnStatementMissing
+		else
+		check_function_statements (List.rev stmt_list) func_env return_type;
 		env
 	| _ -> raise (Failure "Unimplemented functionality")
 
-let rec check_statements stmts env = match stmts with
-    [] -> env
+and check_statements stmts env = match stmts
+    with [] -> env
   | [stmt] -> check_statement stmt env
   | stmt :: other_stmts ->
   		let env = check_statement stmt env in
   		check_statements other_stmts env
+
+and check_function_statements stmts env return_type = match stmts
+    with [] ->
+    if return_type != "void" then raise ReturnStatementMissing else
+    env
+  | [stmt] ->
+  	check_return_statement stmt env return_type
+  | stmt :: other_stmts ->
+  		let env = check_statement stmt env in
+  		check_function_statements other_stmts env return_type
+
+and check_return_statement (stmt : Ast.stmt) (env : Environment.symbol_table) (return_type : string) =
+	if return_type != "void" then match stmt
+		with Return(expr) ->
+			let left = string_to_data_type(return_type) and right = check_expr_type (expr) (env) in
+				equate left right;
+				env
+		| _ -> raise (Failure "Function must end with return statement")
+	else
+		check_statement stmt env
 
 (* entry point into semantic checker *)
 let check_program (stmt_list : Ast.program) =
