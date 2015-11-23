@@ -3,6 +3,8 @@
 # Adapted from Prof. Edwards' test script for MicroC.
 
 QL="compiler/ql"
+PASS=0
+FAIL=0
 # Time limit for operations
 ulimit -t 100
 
@@ -61,8 +63,10 @@ Check() {
 
     if [ $error -eq 0 ] ; then
       echo "FAIL: This test should not have passed"
+      let FAIL+=1
     else
       echo "OK"
+      let PASS+=1
       rm ${basename}-gen.out
     fi
 
@@ -79,8 +83,10 @@ Check() {
       echo "###### SUCCESS" 1>&2
       rm ${basename}-gen.out
       rm ${basename}.i.diff
+      let PASS+=1
     else
       echo "###### FAILED" 1>&2
+      let FAIL+=1
       globalerror=$error
     fi
   fi
@@ -103,6 +109,8 @@ for file in $files
 do
   Check $file 2>> $globallog
 done
+
+echo "Tests passed: $PASS. Tests failed: $FAIL"
 
 make clean >& /dev/null
 
