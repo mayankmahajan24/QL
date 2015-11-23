@@ -29,15 +29,21 @@ let string_to_data_type (s: string) = match s
 	| "json" -> Json
 	| _ -> raise (Failure "unsupported data type")
 
+let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : data_type) = match (left_expr, op, right_expr)
+	with (Int, _, Int) -> Int
+	| (Float, _, Float) -> Float
+	| (String, Add, String) -> String
+	| (_, _, _) -> raise (Failure "cannot perform binary operations with provided arguments")
 
-let check_expr_data_type (expr : Ast.expr) = match expr
+let rec check_expr_data_type (expr : Ast.expr) = match expr
 	with Literal_int(i) -> Int
 	| Literal_float(i) -> Float
 	| Literal_bool(i) -> Bool
 	| Literal_string(i) -> String
 	| Literal_array(i) -> Array
 	| Json_from_file(i) -> Json
-	| _ -> raise (Failure "unsupported expr check error")
+	| Binop(left_expr, op, right_expr) -> check_binop_type (check_expr_data_type(left_expr)) op (check_expr_data_type(right_expr))
+	| _ -> raise (Failure "unimplemented expression")
 
 let equate e1 e2 =
 	if (e1 != e2) then raise (Failure "data_type mismatch")
@@ -49,10 +55,22 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| Literal_string(i) -> i
 	| _ -> raise (Failure "we can't print this")
 
+(* TODO: Get rid of this garbage function. *)
+let handle_print_function (print_term : string) =
+	let prog_str = "
+	public class Test {
+		public static void main(String[] args) {
+ 		" ^ "System.out.println(\"" ^ print_term  ^ "\"); " ^ "
+		}
+	}
+	" in
+	let file = open_out "Test.java" in
+  	Printf.fprintf file "%s" prog_str
+
 let handle_expr_statement (expr : Ast.expr) = match expr
-	with Call(f_name, args) -> match f_name
-		with "print" -> print_endline (string_data_literal(List.hd args))
-		| _ -> print_endline "TODO: Implement function calls"
+	with Call(f_name, args) -> (match f_name
+		with "print" -> handle_print_function (string_data_literal(List.hd args))
+		| _ -> print_endline "TODO: Implement function calls")
 	| _ -> ()
 
 (* compile AST to java syntax *)
