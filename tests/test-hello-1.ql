@@ -1,1 +1,1 @@
-print("Hi wow")
+print("Hello world, this is QL.")

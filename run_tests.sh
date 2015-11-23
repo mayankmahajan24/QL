@@ -68,6 +68,7 @@ Check() {
 
   else
     RunPass $QL "<" $1 &&
+    touch ${basename}-gen.out &&
     javac Test.java &&
     java Test > ${basename}-gen.out &&
     generatedfiles="$generatedfiles ${basename}-gen.out"
@@ -83,6 +84,8 @@ Check() {
       globalerror=$error
     fi
   fi
+
+  rm Test.java
 }
 
 shift `expr $OPTIND - 1`
