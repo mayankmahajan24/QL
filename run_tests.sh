@@ -2,6 +2,7 @@
 
 # Adapted from Prof. Edwards' test script for MicroC.
 
+QL="compiler/ql"
 # Time limit for operations
 ulimit -t 100
 
@@ -48,14 +49,17 @@ Check() {
   echo 1>&2
   echo "###### Testing $basename" 1>&2
 
-  Run "compiler/ql" "<" $1 &&
+  Run $QL "<" $1 &&
   javac Test.java &&
+  touch ${basename}-gen.out &&
   java Test > ${basename}-gen.out &&
+  generatedfiles="$generatedfiles ${basename}-gen.out"
   Compare ${basename}-gen.out ${basename}-exp.out ${basename}.i.diff
 
   if [ $error -eq 0 ] ; then
     echo "OK"
     echo "###### SUCCESS" 1>&2
+    rm ${basename}-gen.out
   else
     echo "###### FAILED" 1>&2
     globalerror=$error
