@@ -30,11 +30,18 @@ Compare() {
   }
 }
 
-Run() {
+RunPass() {
   echo $* 1>&2
   eval $* || {
     SignalError "$1 failed on $*"
     return 1
+  }
+}
+
+RunFail() {
+  echo $* 1>&2
+  eval $* || {
+    error=1
   }
 }
 
@@ -49,23 +56,33 @@ Check() {
   echo 1>&2
   echo "###### Testing $basename" 1>&2
 
-  Run $QL "<" $1 &&
-  javac Test.java &&
-  touch ${basename}-gen.out &&
-  java Test > ${basename}-gen.out &&
-  generatedfiles="$generatedfiles ${basename}-gen.out"
-  Compare ${basename}-gen.out ${basename}-exp.out ${basename}.i.diff
+  if [[ "$basename" =~ .*-fail.* ]]; then
+    RunFail $QL "<" $1
 
-  if [ $error -eq 0 ] ; then
-    echo "OK"
-    echo "###### SUCCESS" 1>&2
-    rm ${basename}-gen.out
+    if [ $error -eq 0 ] ; then
+      echo "FAIL: This test should not have passed"
+    else
+      echo "OK"
+      rm ${basename}-gen.out
+    fi
+
   else
-    echo "###### FAILED" 1>&2
-    globalerror=$error
-  fi
+    RunPass $QL "<" $1 &&
+    javac Test.java &&
+    java Test > ${basename}-gen.out &&
+    generatedfiles="$generatedfiles ${basename}-gen.out"
+    Compare ${basename}-gen.out ${basename}-exp.out ${basename}.i.diff
 
-  rm Test.java
+    if [ $error -eq 0 ] ; then
+      echo "OK"
+      echo "###### SUCCESS" 1>&2
+      rm ${basename}-gen.out
+      rm ${basename}.i.diff
+    else
+      echo "###### FAILED" 1>&2
+      globalerror=$error
+    fi
+  fi
 }
 
 shift `expr $OPTIND - 1`

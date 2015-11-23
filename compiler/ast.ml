@@ -76,12 +76,3 @@ type stmt =
     (* Look into making return type limited to certain set *)
 
 type program = stmt list
-
-(*
-let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
-
-let program_s (vars, funcs) = "([" ^ String.concat ", " vars ^ "],\n" ^
-  String.concat "\n" (List.map func_decl_s funcs) ^ ")"
-*)
