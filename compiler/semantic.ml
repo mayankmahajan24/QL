@@ -55,6 +55,10 @@ let rec check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = matc
 	| Json_from_file(i) -> Json
 	| Binop(left_expr, op, right_expr) -> check_binop_type (check_expr_type left_expr env) op (check_expr_type right_expr env)
 	| Id(i) -> ast_data_to_data((var_type i env))
+	| Call(func_name, arg_list) ->
+		let arg_types = List.map (fun expr -> (data_to_ast_data((check_expr_type (expr) (env))))) arg_list in
+		let func_return_type = func_return_type func_name env in
+		ast_data_to_data(func_return_type)
 	| _ -> raise (Failure "unimplemented expression")
 
 let equate e1 e2 =

@@ -83,3 +83,11 @@ let verify_func_call (func_name: string) (args : data_type list) (env : symbol_t
     List.iter (fun (left, right) -> if left != right then raise IncorrectFunctionParameterTypes) type_pairs;
   else
     raise FunctionNotDeclared
+
+let func_return_type (func_name : string) (env : symbol_table) =
+  if FunctionMap.mem func_name env.func_map then
+    let declared_func = FunctionMap.find func_name env.func_map in
+    declared_func.return
+  else
+    raise FunctionNotDeclared
+

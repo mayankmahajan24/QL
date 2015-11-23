@@ -110,7 +110,7 @@ do
   Check $file 2>> $globallog
 done
 
-echo "Tests passed: $PASS. Tests failed: $FAIL"
+echo "Tests passed: $PASS. Tests failed: $FAIL."
 
 make clean >& /dev/null
 
