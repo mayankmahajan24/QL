@@ -86,6 +86,10 @@ let check_statement (stmt : Ast.stmt) (env: Environment.symbol_table) = match st
 		let e1 = string_to_data_type(data_type) and e2 = check_expr_type (e1) (env) in
 			equate e1 e2;
 			declare_var id data_type env
+	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
+		let func_env = declare_func func_name return_type arg_list env in
+		env
+	| _ -> raise (Failure "Unimplemented functionality")
 
 let rec check_statements stmts env = match stmts with
     [] -> env

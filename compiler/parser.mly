@@ -144,7 +144,8 @@ stmt:
     ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
   | assignment_stmt                             { $1 }
   | FUNCTION ID LPAREN formals_opt RPAREN COLON 
-    return_type LCURLY stmt_list RCURLY ENDLINE { Func_decl($2, $4, $7, $9) }
+    return_type LCURLY ENDLINE stmt_list RCURLY
+    ENDLINE                                     { Func_decl($2, $4, $7, $10) }
   | RETURN expr ENDLINE                         { Return($2) }
 
 /* Assignment */
