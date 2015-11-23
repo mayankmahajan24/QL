@@ -107,8 +107,8 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		if return_type != "void" && List.length arg_list == 0 then
 			raise ReturnStatementMissing
 		else
-		check_function_statements (List.rev stmt_list) func_env_vars return_type;
-		func_env
+			check_function_statements (List.rev stmt_list) func_env_vars return_type;
+			func_env
 	| _ -> raise (Failure "Unimplemented functionality")
 
 and check_statements stmts env = match stmts
