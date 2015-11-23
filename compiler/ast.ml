@@ -45,6 +45,7 @@ type data_type =
     | String
     | Json
     | Array of data_type
+    | AnyType
 
 type json_selector =
     | Json_string of string

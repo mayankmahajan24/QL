@@ -22,6 +22,15 @@ let ast_data_to_data (dt : Ast.data_type) = match dt
 	| Json -> Json
 	| _ -> AnyType
 
+let data_to_ast_data (dt : data_type) = match dt
+	with Int -> Ast.Int
+	| Float -> Ast.Float
+	| Bool -> Ast.Bool
+	| String -> Ast.String
+	| Array -> Ast.Array(Ast.Int)
+	| Json -> Ast.Json
+	| _ -> Ast.AnyType
+
 let string_to_data_type (s : string) = match s
 	with "int" -> Int
 	| "float" -> Float
@@ -74,16 +83,18 @@ let handle_print_function (print_term : string) =
 	let prog_str = "System.out.println(\"" ^ print_term  ^ "\"); " in
 	print_to_file prog_str
 
-let handle_expr_statement (expr : Ast.expr) = match expr
+let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
 	with Call(f_name, args) -> (match f_name
 		with "print" -> handle_print_function (string_data_literal(List.hd args))
-		| _ -> print_endline "TODO: Implement function calls")
+		| _ ->
+			let arg_types = List.map (fun expr -> (data_to_ast_data((check_expr_type (expr) (env))))) args in
+			verify_func_call f_name arg_types env)
 	| _ -> ()
 
 (* compile AST to java syntax *)
 let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
 	with Expr(e1) ->
-		handle_expr_statement(e1);
+		handle_expr_statement (e1) (env);
 		env
 	| Assign(data_type, id, e1) ->
 		let e1 = string_to_data_type(data_type) and e2 = check_expr_type (e1) (env) in
@@ -91,12 +102,13 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			declare_var id data_type env
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
 		let func_env = declare_func func_name return_type arg_list env in
+		let func_env_vars = define_func_vars arg_list func_env in
 		(* TODO: Implement void functions *)
 		if return_type != "void" && List.length arg_list == 0 then
 			raise ReturnStatementMissing
 		else
-		check_function_statements (List.rev stmt_list) func_env return_type;
-		env
+		check_function_statements (List.rev stmt_list) func_env_vars return_type;
+		func_env
 	| _ -> raise (Failure "Unimplemented functionality")
 
 and check_statements stmts env = match stmts
