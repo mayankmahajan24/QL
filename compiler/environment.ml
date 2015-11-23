@@ -40,7 +40,7 @@ let string_to_data_type (s : string) = match s
   | "json" -> Json
   | _ -> raise (Failure "unsupported data type")
 
-let declare_var (id : string) (data_type : string) (env : symbol_table) = 
+let declare_var (id : string) (data_type : string) (env : symbol_table) =
   if VariableMap.mem id env.var_map then 
     raise VarAlreadyDeclared
   else 
@@ -61,12 +61,16 @@ let create_func (func_name: string) (ret_type : string) (args : arg_decl list) =
     arg_names = List.map (fun arg -> arg.var_name) args;
   }
 
+let rec define_func_vars (func_vars : arg_decl list) (env : symbol_table) = match func_vars
+  with [] -> env
+  | head::body ->
+    let new_env = declare_var head.var_name head.var_type env in
+    define_func_vars body new_env
+
 let declare_func (func_name : string) (ret_type : string) (args : arg_decl list) (env : symbol_table) =
   if FunctionMap.mem func_name env.func_map then
     raise FunctionAlreadyDeclared
   else
     let update_func_map = FunctionMap.add func_name (create_func func_name ret_type args) env.func_map in
-    (* Define each of the parameters as a variable in this scope *)
-    update update_func_map env.var_map
-
-
+    let new_func_env = update update_func_map env.var_map in
+    define_func_vars args new_func_env
