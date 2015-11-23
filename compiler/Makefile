@@ -2,7 +2,7 @@ OCAMLC=ocamlc
 OCAMLDEP=ocamldep
 OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
-OBJS=ast.cmo parser.cmo scanner.cmo compile.cmo ql.cmo
+OBJS=ast.cmo parser.cmo scanner.cmo semantic.cmo compile.cmo ql.cmo
 
 ql: $(OBJS)
 	ocamlc -o ql $(OBJS)
@@ -27,14 +27,16 @@ clean:
 # TODO: Make this generate our actual dependencies
 ast.cmo :
 ast.cmx :
+semantic.cmo : ast.cmo
+semantic.cmx : ast.cmx
 compile.cmo : ast.cmo
 compile.cmx : ast.cmx
 sast.cmo : ast.cmo
 sast.cmx : ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
-ql.cmo : scanner.cmo parser.cmi ast.cmo compile.cmo
-ql.cmx : scanner.cmx parser.cmx ast.cmx compile.cmx
+ql.cmo : scanner.cmo parser.cmi ast.cmo semantic.cmo compile.cmo
+ql.cmx : scanner.cmx parser.cmx ast.cmx semantic.cmx compile.cmx
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
 parser.cmi : ast.cmo

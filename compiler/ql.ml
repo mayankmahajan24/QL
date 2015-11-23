@@ -1,4 +1,4 @@
-type action = Raw | Ast | Compile
+type action = Raw | Ast | Semantic
 
 let _ =
   let action = if Array.length Sys.argv > 1 then
@@ -8,4 +8,4 @@ let _ =
   else Raw in
   let lexbuf = Lexing.from_channel stdin in
   let program = Parser.program Scanner.token lexbuf in
-  Compile.start_compiling program
+  Semantic.check_program program
