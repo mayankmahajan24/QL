@@ -49,6 +49,7 @@ let string_to_data_type (s : string) = match s
   | _ -> raise (Failure "unsupported data type")
 
 let declare_var (id : string) (data_type : string) (env : symbol_table) =
+  print_endline "reached";
   if VariableMap.mem id env.var_map then 
     raise VarAlreadyDeclared
   else 

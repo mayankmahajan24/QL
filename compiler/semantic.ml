@@ -128,7 +128,6 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				with Literal_array(exprs) ->
 					let expr_types = List.map (fun expr -> data_to_ast_data (check_expr_type (expr) (env))) exprs in
 					let declare_var_env = declare_var id data_type env in
-					let left_data_type = data_to_ast_data left in
 					define_array_type (expr_types) (declare_var_env) (id)
 				| _ -> declare_var id data_type env);
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
