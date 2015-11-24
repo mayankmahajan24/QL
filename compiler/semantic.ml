@@ -4,8 +4,10 @@ open Environment;;
 
 type data_type = Int | Float | Bool | String | Array | Json | AnyType
 
-
 exception ReturnStatementMissing;;
+exception ImproperBraceSelection;;
+exception ImproperBraceSelectorType;;
+exception MultiDimensionalArraysNotAllowed;;
 
 (* write program to .java file *)
 let write_to_file prog_str =
@@ -46,7 +48,22 @@ let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : da
 	| (String, Add, String) -> String
 	| (_, _, _) -> raise (Failure "cannot perform binary operations with provided arguments")
 
-let rec check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match expr
+let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) = match d_type
+	with Json ->
+		List.iter (fun expr ->
+			let expr_type = check_expr_type (expr) (env) in
+			if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
+		) selectors;
+		AnyType
+	| Array ->
+		if List.length selectors != 1 then raise MultiDimensionalArraysNotAllowed;
+		if check_expr_type (List.hd selectors) (env) != Int then raise ImproperBraceSelectorType;
+		let ast_array_type = array_type (id) (env) in
+		ast_data_to_data ast_array_type
+	(* Return the type being stored for this particular array *)
+	| _ -> raise ImproperBraceSelection
+
+and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match expr
 	with Literal_int(i) -> Int
 	| Literal_float(i) -> Float
 	| Literal_bool(i) -> Bool
@@ -59,10 +76,13 @@ let rec check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = matc
 		let arg_types = List.map (fun expr -> (data_to_ast_data((check_expr_type (expr) (env))))) arg_list in
 		let func_return_type = func_return_type func_name env in
 		ast_data_to_data(func_return_type)
-	| _ -> raise (Failure "unimplemented expression")
+	| Bracket_select(id, selectors) ->
+		let selector_ast_data_type = var_type id env in
+		let selector_data_type = ast_data_to_data selector_ast_data_type in
+		check_bracket_select_type (selector_data_type) (selectors) (env) (id)
 
 let equate e1 e2 =
-	if (e1 != e2) then raise (Failure "data_type mismatch")
+	if (e1 != e2) && (e1 != AnyType) && (e2 != AnyType) then raise (Failure "data_type mismatch")
 
 let string_data_literal (expr : Ast.expr) = match expr
 		with Literal_int(i) -> string_of_int i
@@ -101,9 +121,16 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		handle_expr_statement (e1) (env);
 		env
 	| Assign(data_type, id, e1) ->
-		let e1 = string_to_data_type(data_type) and e2 = check_expr_type (e1) (env) in
-			equate e1 e2;
-			declare_var id data_type env
+		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
+			equate left right;
+			(* If we're instantiating a new array, we need to establish it's type linkage *)
+			(match e1
+				with Literal_array(exprs) ->
+					let expr_types = List.map (fun expr -> data_to_ast_data (check_expr_type (expr) (env))) exprs in
+					let declare_var_env = declare_var id data_type env in
+					let left_data_type = data_to_ast_data left in
+					define_array_type (expr_types) (declare_var_env) (id)
+				| _ -> declare_var id data_type env);
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
 		let func_env = declare_func func_name return_type arg_list env in
 		let func_env_vars = define_func_vars arg_list func_env in

@@ -83,7 +83,7 @@ array_literal:
 
 primitive_literal_list:
     /* Nothing */         { [] }
-  | primitive_literal_list COMMA primitive_literal    { $3 :: $1 }
+  | primitive_literal SEMICOLON primitive_literal_list   { $1 :: $3 }
 
 json_literal:
     JSON LPAREN STRING_LITERAL RPAREN { Json_from_file($3) } /*String literal refers to filename*/
@@ -154,6 +154,12 @@ assignment_stmt:
 
 /* I removed some where_expr_list rules. Look in the Git history. */
 
+bracket_selector_list:
+  bracket_selector { [$1] }
+  | bracket_selector_list bracket_selector { $2 :: $1 }
+
+bracket_selector: LSQUARE expr RSQUARE { $2 }
+
 where_expr:
   where_arg EQ where_arg      { Where_eval($1, Equal, $3) }
   | where_arg NEQ where_arg   { Where_eval($1, Neq, $3) }
@@ -192,6 +198,7 @@ expr:
   | expr DIVIDE expr              { Binop($1, Div,   $3) }
   | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
   | LPAREN expr RPAREN            { $2 }
+  | ID bracket_selector_list      { Bracket_select($1, $2) }
 
 bool_expr:
     BOOL_LITERAL            { Literal_bool($1) }

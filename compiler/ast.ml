@@ -24,6 +24,7 @@ type expr =
     | Binop of expr * math_op * expr
     | Call of string * expr list
     | Json_from_file of string
+    | Bracket_select of string * expr list
     (* Need to include array accessor here. -- Matt*)
 
 type arg_decl = {
