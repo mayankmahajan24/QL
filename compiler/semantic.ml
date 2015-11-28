@@ -123,13 +123,13 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;
-			(* If we're instantiating a new array, we need to establish it's type linkage *)
-			(match e1
-				with Literal_array(exprs) ->
-					let expr_types = List.map (fun expr -> data_to_ast_data (check_expr_type (expr) (env))) exprs in
-					let declare_var_env = declare_var id data_type env in
-					define_array_type (expr_types) (declare_var_env) (id)
-				| _ -> declare_var id data_type env);
+			declare_var id data_type env;
+	| Array_assign(expected_data_type, id, e1) ->
+		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
+			let inferred_type = List.map (fun expr -> data_to_ast_data (check_expr_type (expr) (env))) e1 in
+				let declare_var_env = declare_var id "array" env in
+					define_array_type (left) (inferred_type) (declare_var_env) (id)
+
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
 		let func_env = declare_func func_name return_type arg_list env in
 		let func_env_vars = define_func_vars arg_list func_env in

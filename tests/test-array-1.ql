@@ -1,2 +1,2 @@
-array a = ["matt" ; "is" ; "cool" ; "he's" ; "the" ; "bomb";]
-string s = a[0]
+array string a = ["matt";"is";"cool";"hes";"the";"bomb"]
+string matt = a[0]

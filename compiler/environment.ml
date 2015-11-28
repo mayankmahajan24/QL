@@ -10,7 +10,7 @@ exception FunctionAlreadyDeclared;;
 exception FunctionNotDeclared;;
 exception IncorrectFunctionParameterTypes;;
 exception MixedTypeArray;;
-exception ArrayLiteralTypeMismatch;;
+exception ArrayInferTypeMismatch;;
 
 type func_info  = {
   id : string; 
@@ -49,7 +49,6 @@ let string_to_data_type (s : string) = match s
   | _ -> raise (Failure "unsupported data type")
 
 let declare_var (id : string) (data_type : string) (env : symbol_table) =
-  print_endline "reached";
   if VariableMap.mem id env.var_map then 
     raise VarAlreadyDeclared
   else 
@@ -70,15 +69,20 @@ let create_func (func_name: string) (ret_type : string) (args : arg_decl list) =
     arg_names = List.map (fun arg -> arg.var_name) args;
   }
 
-let define_array_type (args : data_type list) (env : symbol_table) (id : string) =
-  if List.length args != 0 then
-    let first_type = List.hd args in
+let define_array_type (expected_type: data_type)
+  (inferred_type : data_type list) (env : symbol_table) (id : string) =
+  if List.length inferred_type != 0 then
+    let first_type = List.hd inferred_type in
     (* Verify all types are the same *)
-    List.iter (fun (data_type) -> if first_type != data_type then raise MixedTypeArray) args;
-    let update_array_type_map = ArrayTypeMap.add id first_type env.array_type_map in
-    update env.func_map env.var_map update_array_type_map
+    List.iter (fun (data_type) -> if first_type != data_type then raise MixedTypeArray) inferred_type;
+    (if first_type == expected_type then
+      let update_array_type_map = ArrayTypeMap.add id first_type env.array_type_map in
+      update env.func_map env.var_map update_array_type_map
+    else
+      raise ArrayInferTypeMismatch)
   else
-    let update_array_type_map = ArrayTypeMap.add id Ast.AnyType env.array_type_map in
+    (* Empty array created *)
+    let update_array_type_map = ArrayTypeMap.add id expected_type env.array_type_map in
     update env.func_map env.var_map update_array_type_map
 
 let array_type (id : string) (env : symbol_table) =

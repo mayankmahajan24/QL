@@ -69,7 +69,6 @@ program:
 /* Literals */
 literal:
     primitive_literal { $1 }
-  | array_literal   { Literal_array($1) } 
   | json_literal    { $1 }
 
 primitive_literal:
@@ -82,7 +81,7 @@ array_literal:
   LSQUARE primitive_literal_list_opt RSQUARE    { $2 }
 
 primitive_literal_list_opt:
-                                                           { [] }
+                                                              { [] }
   | primitive_literal_list                                  { List.rev $1 }
 
 primitive_literal_list:
