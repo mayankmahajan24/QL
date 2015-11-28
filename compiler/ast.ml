@@ -24,6 +24,7 @@ type expr =
     | Binop of expr * math_op * expr
     | Call of string * expr list
     | Json_from_file of string
+    | Bracket_select of string * expr list
     (* Need to include array accessor here. -- Matt*)
 
 type arg_decl = {
@@ -45,6 +46,7 @@ type data_type =
     | String
     | Json
     | Array of data_type
+    | AnyType
 
 type json_selector =
     | Json_string of string
@@ -76,12 +78,3 @@ type stmt =
     (* Look into making return type limited to certain set *)
 
 type program = stmt list
-
-(*
-let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
-
-let program_s (vars, funcs) = "([" ^ String.concat ", " vars ^ "],\n" ^
-  String.concat "\n" (List.map func_decl_s funcs) ^ ")"
-*)
