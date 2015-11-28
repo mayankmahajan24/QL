@@ -120,6 +120,16 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	with Expr(e1) ->
 		handle_expr_statement (e1) (env);
 		env
+	| Update_variable (id, e1) ->
+		let ast_dt = var_type id env in
+		let data_type = ast_data_to_data ast_dt in
+			let right = check_expr_type (e1) (env) in
+				equate data_type right;
+				env;
+    | If(bool_expr, then_stmt, else_stmt) ->
+    	let then_clause = check_statements then_stmt env
+    		and else_clause = check_statements else_stmt env in
+    	env
 	| Assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;

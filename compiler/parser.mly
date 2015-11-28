@@ -146,22 +146,36 @@ stmt:
   | WHERE LPAREN where_expr RPAREN AS ID
     LCURLY stmt_list RCURLY
     IN expr ENDLINE                             { Where($3, $6, $8, $11) }
-  | IF LPAREN bool_expr RPAREN
-    LCURLY stmt_list RCURLY
-    ENDLINE %prec NOELSE                        { If($3, $6, []) }
-  | IF LPAREN bool_expr RPAREN
-    LCURLY stmt_list RCURLY
-    ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
+  | if_else_stmt                                { $1 }
   | assignment_stmt                             { $1 }
   | FUNCTION ID LPAREN formals_opt RPAREN COLON 
     return_type LCURLY ENDLINE stmt_list RCURLY
     ENDLINE                                     { Func_decl($2, $4, $7, $10) }
   | RETURN expr ENDLINE                         { Return($2) }
 
+/* Different forms of if_else */
+if_else_stmt:
+  IF LPAREN bool_expr RPAREN
+    LCURLY stmt_list RCURLY
+    ENDLINE %prec NOELSE                        { If($3, $6, []) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY ENDLINE
+    stmt_list
+    RCURLY ENDLINE %prec NOELSE                 { If($3, $7, []) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY stmt_list RCURLY
+    ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY ENDLINE
+    stmt_list RCURLY
+    ELSE LCURLY ENDLINE
+    stmt_list RCURLY ENDLINE                    { If($3, $7, $12) }
+
 /* Assignment */
 assignment_stmt:
     ARRAY assignment_data_type ID ASSIGN array_literal ENDLINE { Array_assign($2, $3, $5) }
     | assignment_data_type ID ASSIGN expr ENDLINE { Assign($1, $2, $4) }
+    | ID ASSIGN expr ENDLINE { Update_variable($1, $3) }
 
 /* I removed some where_expr_list rules. Look in the Git history. */
 
