@@ -1,0 +1,1 @@
+array string a = [1; 7; 2; 3; 6]

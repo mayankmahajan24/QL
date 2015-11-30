@@ -29,7 +29,7 @@ type expr =
 
 type arg_decl = {
     var_type   : string;
-    var_name   : string;
+    var_name   : string; 
 }
 
 type bool_expr =
@@ -74,6 +74,8 @@ type stmt =
     | Return of expr
     | Not of expr
     | Assign of string * string * expr
+    | Update_variable of string * expr
+    | Array_assign of string * string * expr list
     | Func_decl of string * arg_decl list * string * stmt list
     (* Look into making return type limited to certain set *)
 

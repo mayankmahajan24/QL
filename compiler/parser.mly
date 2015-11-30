@@ -69,7 +69,6 @@ program:
 /* Literals */
 literal:
     primitive_literal { $1 }
-  | array_literal   { Literal_array($1) }
   | json_literal    { $1 }
 
 primitive_literal:
@@ -79,11 +78,15 @@ primitive_literal:
   | STRING_LITERAL  { Literal_string($1) }
 
 array_literal:
-    LSQUARE primitive_literal_list RSQUARE    { List.rev $2 }
+  LSQUARE primitive_literal_list_opt RSQUARE    { $2 }
+
+primitive_literal_list_opt:
+                                                              { [] }
+  | primitive_literal_list                                  { List.rev $1 }
 
 primitive_literal_list:
-    /* Nothing */         { [] }
-  | primitive_literal SEMICOLON primitive_literal_list   { $1 :: $3 }
+  primitive_literal                                     { [$1] }
+  | primitive_literal_list SEMICOLON primitive_literal    { $3 :: $1 }
 
 json_literal:
     JSON LPAREN STRING_LITERAL RPAREN { Json_from_file($3) } /*String literal refers to filename*/
@@ -96,6 +99,13 @@ data_type:
   | BOOL    { "bool" }
   | STRING  { "string" }
   | ARRAY   { "array" }
+  | JSON    { "json" }
+
+assignment_data_type:
+    INT     { "int" }      
+  | FLOAT   { "float" }
+  | BOOL    { "bool" }
+  | STRING  { "string" }
   | JSON    { "json" }
 
 return_type:
@@ -136,21 +146,36 @@ stmt:
   | WHERE LPAREN where_expr RPAREN AS ID
     LCURLY stmt_list RCURLY
     IN expr ENDLINE                             { Where($3, $6, $8, $11) }
-  | IF LPAREN bool_expr RPAREN
-    LCURLY stmt_list RCURLY
-    ENDLINE %prec NOELSE                        { If($3, $6, []) }
-  | IF LPAREN bool_expr RPAREN
-    LCURLY stmt_list RCURLY
-    ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
+  | if_else_stmt                                { $1 }
   | assignment_stmt                             { $1 }
   | FUNCTION ID LPAREN formals_opt RPAREN COLON 
     return_type LCURLY ENDLINE stmt_list RCURLY
     ENDLINE                                     { Func_decl($2, $4, $7, $10) }
   | RETURN expr ENDLINE                         { Return($2) }
 
+/* Different forms of if_else */
+if_else_stmt:
+  IF LPAREN bool_expr RPAREN
+    LCURLY stmt_list RCURLY
+    ENDLINE %prec NOELSE                        { If($3, $6, []) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY ENDLINE
+    stmt_list
+    RCURLY ENDLINE %prec NOELSE                 { If($3, $7, []) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY stmt_list RCURLY
+    ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY ENDLINE
+    stmt_list RCURLY
+    ELSE LCURLY ENDLINE
+    stmt_list RCURLY ENDLINE                    { If($3, $7, $12) }
+
 /* Assignment */
 assignment_stmt:
-    data_type ID ASSIGN expr ENDLINE { Assign($1, $2, $4) }
+    ARRAY assignment_data_type ID ASSIGN array_literal ENDLINE { Array_assign($2, $3, $5) }
+    | assignment_data_type ID ASSIGN expr ENDLINE { Assign($1, $2, $4) }
+    | ID ASSIGN expr ENDLINE { Update_variable($1, $3) }
 
 /* I removed some where_expr_list rules. Look in the Git history. */
 
@@ -158,7 +183,7 @@ bracket_selector_list:
   bracket_selector { [$1] }
   | bracket_selector_list bracket_selector { $2 :: $1 }
 
-bracket_selector: LSQUARE expr RSQUARE { $2 }
+bracket_selector: LSQUARE expr RSQUARE { $2 } 
 
 where_expr:
   where_arg EQ where_arg      { Where_eval($1, Equal, $3) }
