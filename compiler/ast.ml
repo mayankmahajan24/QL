@@ -67,7 +67,7 @@ type where_expr_list =
 
 type stmt =
     | Expr of expr
-    | For of expr * bool_expr * stmt * stmt list
+    | For of stmt * bool_expr * stmt * stmt list
     | While of bool_expr * stmt list
     | Where of where_expr * string * stmt list * expr
     | If of bool_expr * stmt list * stmt list

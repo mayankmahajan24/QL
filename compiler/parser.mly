@@ -138,7 +138,7 @@ stmt_list:
 
 stmt:
     expr ENDLINE                                { Expr($1) } 
-  | FOR LPAREN expr COMMA bool_expr COMMA
+  | FOR LPAREN assignment_stmt COMMA bool_expr COMMA
     assignment_stmt RPAREN
     LCURLY stmt_list RCURLY ENDLINE             { For($3, $5, $7, $10) } 
   | WHILE LPAREN bool_expr RPAREN
@@ -147,7 +147,7 @@ stmt:
     LCURLY stmt_list RCURLY
     IN expr ENDLINE                             { Where($3, $6, $8, $11) }
   | if_else_stmt                                { $1 }
-  | assignment_stmt                             { $1 }
+  | assignment_stmt ENDLINE                            { $1 }
   | FUNCTION ID LPAREN formals_opt RPAREN COLON 
     return_type LCURLY ENDLINE stmt_list RCURLY
     ENDLINE                                     { Func_decl($2, $4, $7, $10) }
@@ -173,9 +173,9 @@ if_else_stmt:
 
 /* Assignment */
 assignment_stmt:
-    ARRAY assignment_data_type ID ASSIGN array_literal ENDLINE { Array_assign($2, $3, $5) }
-    | assignment_data_type ID ASSIGN expr ENDLINE { Assign($1, $2, $4) }
-    | ID ASSIGN expr ENDLINE { Update_variable($1, $3) }
+    ARRAY assignment_data_type ID ASSIGN array_literal  { Array_assign($2, $3, $5) }
+    | assignment_data_type ID ASSIGN expr  { Assign($1, $2, $4) }
+    | ID ASSIGN expr { Update_variable($1, $3) }
 
 /* I removed some where_expr_list rules. Look in the Git history. */
 
