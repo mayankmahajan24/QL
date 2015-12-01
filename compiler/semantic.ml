@@ -161,9 +161,10 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				equate data_type right;
 				env;
     | If(bool_expr, then_stmt, else_stmt) ->
-    	let then_clause = check_statements then_stmt env
-    		and else_clause = check_statements else_stmt env in
-    			env
+    	let is_boolean_expr = handle_bool_expr bool_expr env 
+    	and then_clause = check_statements then_stmt env
+    	and else_clause = check_statements else_stmt env in
+    		env
 	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
 		let init_env = check_statement init_stmt env in
 			let is_boolean = handle_bool_expr bool_expr init_env
@@ -171,7 +172,8 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				let body_env = check_statements stmt_list init_env in
 					env
 	| While(bool_expr, body) ->
-		let new_env = check_statements body env in
+		let is_boolean_expr = handle_bool_expr bool_expr env
+		and new_env = check_statements body env in
 			env
 	| Assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
