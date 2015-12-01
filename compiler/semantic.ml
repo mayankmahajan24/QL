@@ -8,6 +8,8 @@ exception ReturnStatementMissing;;
 exception ImproperBraceSelection;;
 exception ImproperBraceSelectorType;;
 exception MultiDimensionalArraysNotAllowed;;
+exception NotBoolExpr;;
+exception NotBoolExprNOBUENO;;
 
 (* write program to .java file *)
 let write_to_file prog_str =
@@ -115,6 +117,21 @@ let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = ma
 			verify_func_call f_name arg_types env)
 	| _ -> ()
 
+let handle_bool_expr (bool_expr : Ast.bool_expr) (env: Environment.symbol_table) = match bool_expr
+	with Literal_bool(i) -> true
+	| Binop(e1 ,op, e2) -> (let exists = 
+		check_expr_type bool_expr env in
+			true)
+	| Bool_binop(e1, conditional, e2) -> (let isBool1 = handle_bool_expr e1 env and 
+		isBool2 = handle_bool_expr e2 env in
+			true)
+	| Not(e1) -> (let isBool1 = handle_bool_expr e1 in
+					true)
+	| Id(i) -> (let varType = match var_type i env 
+				with "bool" -> true
+				| _ -> NotBoolExpr )
+	| _ -> NotBoolExprNOBUENO (*This should never come up*)
+
 (* compile AST to java syntax *)
 let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
 	with Expr(e1) ->
@@ -129,7 +146,13 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
     | If(bool_expr, then_stmt, else_stmt) ->
     	let then_clause = check_statements then_stmt env
     		and else_clause = check_statements else_stmt env in
-    	env
+    			env
+	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
+		let init_env = check_statement init_stmt env in
+			let is_boolean = handle_bool_expr bool_expr init_env
+			and update_env = check_statement update_stmt init_env in
+				let body_env = check_statements stmt_list init_env in
+					env
 	| Assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;

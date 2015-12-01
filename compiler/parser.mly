@@ -140,14 +140,14 @@ stmt:
     expr ENDLINE                                { Expr($1) } 
   | FOR LPAREN assignment_stmt COMMA bool_expr COMMA
     assignment_stmt RPAREN
-    LCURLY stmt_list RCURLY ENDLINE             { For($3, $5, $7, $10) } 
+    LCURLY stmt_list RCURLY ENDLINE             { For($3, $5, $7, $10) }
   | WHILE LPAREN bool_expr RPAREN
     LCURLY stmt_list RCURLY ENDLINE             { While($3, $6) }
   | WHERE LPAREN where_expr RPAREN AS ID
     LCURLY stmt_list RCURLY
     IN expr ENDLINE                             { Where($3, $6, $8, $11) }
   | if_else_stmt                                { $1 }
-  | assignment_stmt ENDLINE                            { $1 }
+  | assignment_stmt ENDLINE                     { $1 }
   | FUNCTION ID LPAREN formals_opt RPAREN COLON 
     return_type LCURLY ENDLINE stmt_list RCURLY
     ENDLINE                                     { Func_decl($2, $4, $7, $10) }
