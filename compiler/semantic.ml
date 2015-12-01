@@ -170,6 +170,9 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			and update_env = check_statement update_stmt init_env in
 				let body_env = check_statements stmt_list init_env in
 					env
+	| While(bool_expr, body) ->
+		let new_env = check_statements body env in
+			env
 	| Assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;
