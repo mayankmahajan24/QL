@@ -10,6 +10,7 @@ exception ImproperBraceSelectorType;;
 exception MultiDimensionalArraysNotAllowed;;
 exception NotBoolExpr;;
 exception NotBoolExprNOBUENO;;
+exception BadBinopType;;
 
 (* write program to .java file *)
 let write_to_file prog_str =
@@ -50,6 +51,21 @@ let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : da
 	| (String, Add, String) -> String
 	| (_, _, _) -> raise (Failure "cannot perform binary operations with provided arguments")
 
+let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right_expr : data_type) = match op 
+		with Equal | Neq -> (match (left_expr, right_expr)
+			with (Int, Int) -> Int
+			| (Float, Float) -> Float
+			| (String, String) -> String
+			| (Bool, Bool) -> Bool
+			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
+			)
+		| Less | Leq | Greater | Geq -> (match (left_expr, right_expr)
+			with (Int, Int) -> Int
+			| (Float, Float) -> Float
+			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
+			)
+		| _ -> raise BadBinopType
+	
 let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) = match d_type
 	with Json ->
 		List.iter (fun expr ->
@@ -117,20 +133,21 @@ let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = ma
 			verify_func_call f_name arg_types env)
 	| _ -> ()
 
-let handle_bool_expr (bool_expr : Ast.bool_expr) (env: Environment.symbol_table) = match bool_expr
+let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env: Environment.symbol_table) = match bool_expr
 	with Literal_bool(i) -> true
 	| Binop(e1 ,op, e2) -> (let exists = 
-		check_expr_type bool_expr env in
+		check_bool_expr_binop_type (check_expr_type e1 env) op (check_expr_type e2 env) in
 			true)
 	| Bool_binop(e1, conditional, e2) -> (let isBool1 = handle_bool_expr e1 env and 
 		isBool2 = handle_bool_expr e2 env in
 			true)
 	| Not(e1) -> (let isBool1 = handle_bool_expr e1 in
 					true)
-	| Id(i) -> (let varType = match var_type i env 
-				with "bool" -> true
-				| _ -> NotBoolExpr )
-	| _ -> NotBoolExprNOBUENO (*This should never come up*)
+	| Id(i) -> (match var_type i env 
+				with Bool -> 
+					true
+				| _ -> raise NotBoolExpr )
+	| _ -> raise NotBoolExprNOBUENO (*This should never come up*)
 
 (* compile AST to java syntax *)
 let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
