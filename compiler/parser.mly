@@ -139,8 +139,8 @@ stmt_list:
 stmt:
     expr ENDLINE                                { Expr($1) } 
   | FOR LPAREN assignment_stmt COMMA bool_expr COMMA
-    assignment_stmt RPAREN
-    LCURLY stmt_list RCURLY ENDLINE             { For($3, $5, $7, $10) }
+    assignment_stmt RPAREN LCURLY
+    ENDLINE stmt_list RCURLY ENDLINE            { For($3, $5, $7, $11) }
   | WHILE LPAREN bool_expr RPAREN
     LCURLY stmt_list RCURLY ENDLINE             { While($3, $6) }
   | WHERE LPAREN where_expr RPAREN AS ID
