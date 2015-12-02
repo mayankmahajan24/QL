@@ -15,7 +15,7 @@ let exp = 'e' ('+'|'-')? ['0'-'9']+
 let flt = '.'['0'-'9']+ exp?
 	| ['0'-'9']+ ( ('.' ['0'-'9']* exp?) | exp)
 
-let boolean = "true" | "false"
+let boolean = "True" | "False"
 
 rule token = parse
 (* Whitespace *)

@@ -53,6 +53,7 @@
 
 %right ASSIGN
 %left AND OR
+%left NEQ EQ LEQ GEQ LT GT NOT
 %left NOT
 %left PLUS MINUS
 %left TIMES DIVIDE
