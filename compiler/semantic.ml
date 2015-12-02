@@ -190,7 +190,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Where(where_expr, id, stmt_list, json_object) ->
 		let init_env = env in
 			let is_where_expr = handle_where_expr where_expr init_env
-			and update_env = declare_var id "Json" init_env in
+			and update_env = declare_var id "json" init_env in
 				let is_json = handle_json json_object init_env
 				and body_env = check_statements stmt_list init_env in
 					env
