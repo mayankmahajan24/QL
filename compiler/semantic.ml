@@ -9,7 +9,6 @@ exception ImproperBraceSelection;;
 exception ImproperBraceSelectorType;;
 exception MultiDimensionalArraysNotAllowed;;
 exception NotBoolExpr;;
-exception NotBoolExprNOBUENO;;
 exception BadBinopType;;
 exception IncorrectWhereType;;
 
@@ -52,12 +51,15 @@ let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : da
 	| (String, Add, String) -> String
 	| (_, _, _) -> raise (Failure "cannot perform binary operations with provided arguments")
 
+(*Possibly add int/float comparison*)
 let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right_expr : data_type) = match op
 		with Equal | Neq -> (match (left_expr, right_expr)
-			with (Int, Int) -> Int
-			| (Float, Float) -> Float
-			| (String, String) -> String
+			with (Int, Int) -> Bool
+			| (Float, Float) -> Bool
+			| (String, String) -> Bool
 			| (Bool, Bool) -> Bool
+			| (AnyType, _) -> Bool
+			| (_, AnyType) -> Bool
 			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
 			)
 		| Less | Leq | Greater | Geq -> (match (left_expr, right_expr)
@@ -159,7 +161,6 @@ let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_t
 				with Bool ->
 					Bool
 				| _ -> raise NotBoolExpr )
-	| _ -> raise NotBoolExprNOBUENO (*This should never come up*)
 
 (* compile AST to java syntax *)
 let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
