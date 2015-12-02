@@ -54,7 +54,6 @@
 %right ASSIGN
 %left AND OR
 %left NEQ EQ LEQ GEQ LT GT NOT
-%left NOT
 %left PLUS MINUS
 %left TIMES DIVIDE
 
@@ -95,7 +94,7 @@ json_literal:
 /* Variables */
 /* ~~~~~~~~~~~~~~~~~~~ PLEASE REVISIT ~~~~~~~~~~~~~~~~~~~ */
 data_type:
-    INT     { "int" }      
+    INT     { "int" }
   | FLOAT   { "float" }
   | BOOL    { "bool" }
   | STRING  { "string" }
@@ -103,7 +102,7 @@ data_type:
   | JSON    { "json" }
 
 assignment_data_type:
-    INT     { "int" }      
+    INT     { "int" }
   | FLOAT   { "float" }
   | STRING  { "string" }
   | JSON    { "json" }
@@ -137,21 +136,27 @@ stmt_list:
   | stmt_list stmt {$2 :: $1}
 
 stmt:
-    expr ENDLINE                                { Expr($1) } 
+    expr ENDLINE                                { Expr($1) }
   | FOR LPAREN assignment_stmt COMMA bool_expr COMMA
     assignment_stmt RPAREN LCURLY
     ENDLINE stmt_list RCURLY ENDLINE            { For($3, $5, $7, $11) }
   | WHILE LPAREN bool_expr RPAREN LCURLY
     ENDLINE stmt_list RCURLY ENDLINE            { While($3, $7) }
-  | WHERE LPAREN where_expr RPAREN AS ID
-    LCURLY stmt_list RCURLY
-    IN expr ENDLINE                             { Where($3, $6, $8, $11) }
+  | where_stmt                                  { $1 }
   | if_else_stmt                                { $1 }
   | assignment_stmt ENDLINE                     { $1 }
-  | FUNCTION ID LPAREN formals_opt RPAREN COLON 
+  | FUNCTION ID LPAREN formals_opt RPAREN COLON
     return_type LCURLY ENDLINE stmt_list RCURLY
     ENDLINE                                     { Func_decl($2, $4, $7, $10) }
   | RETURN expr ENDLINE                         { Return($2) }
+
+where_stmt:
+  WHERE LPAREN where_expr RPAREN AS ID
+    LCURLY stmt_list RCURLY
+    IN expr ENDLINE                             { Where($3, $6, $8, $11) }
+  | WHERE LPAREN where_expr RPAREN AS ID
+    LCURLY ENDLINE stmt_list RCURLY
+    IN expr ENDLINE                             { Where($3, $6, $9, $12) }
 
 /* Different forms of if_else */
 if_else_stmt:
@@ -184,7 +189,7 @@ bracket_selector_list:
   bracket_selector { [$1] }
   | bracket_selector_list bracket_selector { $2 :: $1 }
 
-bracket_selector: LSQUARE expr RSQUARE { $2 } 
+bracket_selector: LSQUARE expr RSQUARE { $2 }
 
 where_expr:
   where_arg EQ where_arg      { Where_eval($1, Equal, $3) }
@@ -194,6 +199,7 @@ where_expr:
   | where_arg GT where_arg    { Where_eval($1, Greater, $3) }
   | where_arg GEQ where_arg   { Where_eval($1, Geq, $3) }
   | NOT where_expr            { Not($2) }
+  | bool_expr                 { Bool_expr($1) }
 
 where_arg:
   json_selector_list  { Json_selector_list(List.rev $1) }

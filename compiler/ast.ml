@@ -29,7 +29,7 @@ type expr =
 
 type arg_decl = {
     var_type   : string;
-    var_name   : string; 
+    var_name   : string;
 }
 
 type bool_expr =
@@ -55,10 +55,10 @@ type where_arg =
     | Json_selector_list of json_selector list
     | Expr of expr
 
-
 type where_expr =
     | Where_eval of where_arg * bool_op * where_arg
     | Not of where_expr
+    | Bool_expr of bool_expr
 
 (*
 type where_expr_list =
