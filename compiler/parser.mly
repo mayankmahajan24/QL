@@ -142,15 +142,21 @@ stmt:
     ENDLINE stmt_list RCURLY ENDLINE            { For($3, $5, $7, $11) }
   | WHILE LPAREN bool_expr RPAREN LCURLY
     ENDLINE stmt_list RCURLY ENDLINE            { While($3, $7) }
-  | WHERE LPAREN where_expr RPAREN AS ID
-    LCURLY stmt_list RCURLY
-    IN expr ENDLINE                             { Where($3, $6, $8, $11) }
+  | where_stmt                                  { $1 }
   | if_else_stmt                                { $1 }
   | assignment_stmt ENDLINE                     { $1 }
   | FUNCTION ID LPAREN formals_opt RPAREN COLON
     return_type LCURLY ENDLINE stmt_list RCURLY
     ENDLINE                                     { Func_decl($2, $4, $7, $10) }
   | RETURN expr ENDLINE                         { Return($2) }
+
+where_stmt:
+  WHERE LPAREN where_expr RPAREN AS ID
+    LCURLY stmt_list RCURLY
+    IN expr ENDLINE                             { Where($3, $6, $8, $11) }
+  | WHERE LPAREN where_expr RPAREN AS ID
+    LCURLY ENDLINE stmt_list RCURLY
+    IN expr ENDLINE                             { Where($3, $6, $9, $12) }
 
 /* Different forms of if_else */
 if_else_stmt:
