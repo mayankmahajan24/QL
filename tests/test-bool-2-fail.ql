@@ -1,1 +1,2 @@
-bool b = True & 1
+int a = 1
+bool b = True & a
