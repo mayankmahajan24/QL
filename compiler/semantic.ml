@@ -134,18 +134,18 @@ let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = ma
 	| _ -> ()
 
 let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env: Environment.symbol_table) = match bool_expr
-	with Literal_bool(i) -> true
+	with Literal_bool(i) -> Bool
 	| Binop(e1 ,op, e2) -> (let exists = 
 		check_bool_expr_binop_type (check_expr_type e1 env) op (check_expr_type e2 env) in
-			true)
+			Bool)
 	| Bool_binop(e1, conditional, e2) -> (let isBool1 = handle_bool_expr e1 env and 
 		isBool2 = handle_bool_expr e2 env in
-			true)
+			Bool)
 	| Not(e1) -> (let isBool1 = handle_bool_expr e1 in
-					true)
+					Bool)
 	| Id(i) -> (match var_type i env 
 				with Bool -> 
-					true
+					Bool
 				| _ -> raise NotBoolExpr )
 	| _ -> raise NotBoolExprNOBUENO (*This should never come up*)
 
@@ -184,6 +184,10 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			let inferred_type = List.map (fun expr -> data_to_ast_data (check_expr_type (expr) (env))) e1 in
 				let declare_var_env = declare_var id "array" env in
 					define_array_type (left) (inferred_type) (declare_var_env) (id)
+	| Bool_assign(data_type, id, e1) ->
+		let left = string_to_data_type(data_type) and right = handle_bool_expr (e1) (env) in
+			equate left right;
+			declare_var id data_type env;
 
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
 		let func_env = declare_func func_name return_type arg_list env in

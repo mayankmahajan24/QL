@@ -76,6 +76,7 @@ type stmt =
     | Assign of string * string * expr
     | Update_variable of string * expr
     | Array_assign of string * string * expr list
+    | Bool_assign of string * string * bool_expr
     | Func_decl of string * arg_decl list * string * stmt list
     (* Look into making return type limited to certain set *)
 

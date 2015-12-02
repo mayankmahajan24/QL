@@ -104,7 +104,6 @@ data_type:
 assignment_data_type:
     INT     { "int" }      
   | FLOAT   { "float" }
-  | BOOL    { "bool" }
   | STRING  { "string" }
   | JSON    { "json" }
 
@@ -175,6 +174,7 @@ if_else_stmt:
 assignment_stmt:
     ARRAY assignment_data_type ID ASSIGN array_literal  { Array_assign($2, $3, $5) }
     | assignment_data_type ID ASSIGN expr  { Assign($1, $2, $4) }
+    | BOOL ID ASSIGN bool_expr             { Bool_assign("bool", $2, $4) }
     | ID ASSIGN expr { Update_variable($1, $3) }
 
 /* I removed some where_expr_list rules. Look in the Git history. */
