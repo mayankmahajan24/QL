@@ -250,7 +250,5 @@ and check_return_statement (stmt : Ast.stmt) (env : Environment.symbol_table) (r
 (* entry point into semantic checker *)
 let check_program (stmt_list : Ast.program) =
 	let env = Environment.create in
-	print_header "Test";
 	check_statements stmt_list env;
-	print_to_file " } }"
 

@@ -2,7 +2,7 @@
 
 # Adapted from Prof. Edwards' test script for MicroC.
 
-QL="compiler/ql"
+QL="compiler/qlc"
 PASS=0
 FAIL=0
 # Time limit for operations
