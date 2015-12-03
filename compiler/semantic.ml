@@ -8,6 +8,9 @@ exception ReturnStatementMissing;;
 exception ImproperBraceSelection;;
 exception ImproperBraceSelectorType;;
 exception MultiDimensionalArraysNotAllowed;;
+exception NotBoolExpr;;
+exception BadBinopType;;
+exception IncorrectWhereType;;
 
 (* write program to .java file *)
 let write_to_file prog_str =
@@ -47,6 +50,24 @@ let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : da
 	| (Float, _, Float) -> Float
 	| (String, Add, String) -> String
 	| (_, _, _) -> raise (Failure "cannot perform binary operations with provided arguments")
+
+(*Possibly add int/float comparison*)
+let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right_expr : data_type) = match op
+		with Equal | Neq -> (match (left_expr, right_expr)
+			with (Int, Int) -> Bool
+			| (Float, Float) -> Bool
+			| (String, String) -> Bool
+			| (Bool, Bool) -> Bool
+			| (AnyType, _) -> Bool
+			| (_, AnyType) -> Bool
+			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
+			)
+		| Less | Leq | Greater | Geq -> (match (left_expr, right_expr)
+			with (Int, Int) -> Int
+			| (Float, Float) -> Float
+			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
+			)
+		| _ -> raise BadBinopType
 
 let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) = match d_type
 	with Json ->
@@ -115,6 +136,32 @@ let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = ma
 			verify_func_call f_name arg_types env)
 	| _ -> ()
 
+let handle_json (json_expr : Ast.expr) (env : Environment.symbol_table) = match json_expr
+	with Id(i) -> (match var_type i env
+		with Json -> Json
+		| _ -> raise IncorrectWhereType)
+	| Json_from_file(json) -> Json
+	| _ -> raise IncorrectWhereType
+
+(* This ensures that where_expr is correctly typed and returns AnyType if that check passes *)
+let handle_where_expr (where_expr : Ast.where_expr) (env : Environment.symbol_table) =
+	AnyType
+
+let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_table) = match bool_expr
+	with Literal_bool(i) -> Bool
+	| Binop(e1, op, e2) -> (let exists =
+		check_bool_expr_binop_type (check_expr_type e1 env) op (check_expr_type e2 env) in
+			Bool)
+	| Bool_binop(e1, conditional, e2) -> (let isBool1 = handle_bool_expr e1 env and
+		isBool2 = handle_bool_expr e2 env in
+			Bool)
+	| Not(e1) -> (let isBool1 = handle_bool_expr e1 in
+					Bool)
+	| Id(i) -> (match var_type i env
+				with Bool ->
+					Bool
+				| _ -> raise NotBoolExpr )
+
 (* compile AST to java syntax *)
 let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
 	with Expr(e1) ->
@@ -127,9 +174,27 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				equate data_type right;
 				env;
     | If(bool_expr, then_stmt, else_stmt) ->
-    	let then_clause = check_statements then_stmt env
-    		and else_clause = check_statements else_stmt env in
-    	env
+    	let is_boolean_expr = handle_bool_expr bool_expr env
+    	and then_clause = check_statements then_stmt env
+    	and else_clause = check_statements else_stmt env in
+    		env
+	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
+		let init_env = check_statement init_stmt env in
+			let is_boolean = handle_bool_expr bool_expr init_env
+			and update_env = check_statement update_stmt init_env in
+				let body_env = check_statements stmt_list init_env in
+					env
+	| While(bool_expr, body) ->
+		let is_boolean_expr = handle_bool_expr bool_expr env
+		and new_env = check_statements body env in
+			env
+	| Where(where_expr, id, stmt_list, json_object) ->
+		let init_env = env in
+			let is_where_expr = handle_where_expr where_expr init_env
+			and update_env = declare_var id "json" init_env in
+				let is_json = handle_json json_object init_env
+				and body_env = check_statements stmt_list init_env in
+					env
 	| Assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;
@@ -139,6 +204,10 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			let inferred_type = List.map (fun expr -> data_to_ast_data (check_expr_type (expr) (env))) e1 in
 				let declare_var_env = declare_var id "array" env in
 					define_array_type (left) (inferred_type) (declare_var_env) (id)
+	| Bool_assign(data_type, id, e1) ->
+		let left = string_to_data_type(data_type) and right = handle_bool_expr (e1) (env) in
+			equate left right;
+			declare_var id data_type env;
 
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
 		let func_env = declare_func func_name return_type arg_list env in

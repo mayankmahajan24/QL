@@ -29,7 +29,7 @@ type expr =
 
 type arg_decl = {
     var_type   : string;
-    var_name   : string; 
+    var_name   : string;
 }
 
 type bool_expr =
@@ -55,10 +55,10 @@ type where_arg =
     | Json_selector_list of json_selector list
     | Expr of expr
 
-
 type where_expr =
     | Where_eval of where_arg * bool_op * where_arg
     | Not of where_expr
+    | Bool_expr of bool_expr
 
 (*
 type where_expr_list =
@@ -67,7 +67,7 @@ type where_expr_list =
 
 type stmt =
     | Expr of expr
-    | For of expr * bool_expr * stmt * stmt list
+    | For of stmt * bool_expr * stmt * stmt list
     | While of bool_expr * stmt list
     | Where of where_expr * string * stmt list * expr
     | If of bool_expr * stmt list * stmt list
@@ -76,6 +76,7 @@ type stmt =
     | Assign of string * string * expr
     | Update_variable of string * expr
     | Array_assign of string * string * expr list
+    | Bool_assign of string * string * bool_expr
     | Func_decl of string * arg_decl list * string * stmt list
     (* Look into making return type limited to certain set *)
 
