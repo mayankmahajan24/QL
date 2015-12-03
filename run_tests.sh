@@ -59,7 +59,7 @@ Check() {
   echo "###### Testing $basename" 1>&2
 
   if [[ "$basename" =~ .*-fail.* ]]; then
-    RunFail $QL "<" $1
+    RunFail $QL "Test" "<" $1
 
     if [ $error -eq 0 ] ; then
       echo "FAIL: This test should not have passed"
@@ -71,7 +71,7 @@ Check() {
     fi
 
   else
-    RunPass $QL "<" $1 &&
+    RunPass $QL "Test" "<" $1 &&
     touch ${basename}-gen.out &&
     javac Test.java &&
     java Test > ${basename}-gen.out &&
