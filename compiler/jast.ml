@@ -25,6 +25,7 @@ type expr =
 
 type stmt =
     | Assign of string * string * expr
+    | Expr of expr
     | Dummy_stmt of string
 
 type program = stmt list

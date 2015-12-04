@@ -1,7 +1,19 @@
 open Jast;;
 
-let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string : string) = 
-  (prog_string, func_string)
+let rec handle_expression (expr : Jast.expr) = match expr 
+  with Call(func_name, expr_list) -> (match func_name
+    with "print" -> 
+      "System.out.println(" ^ (handle_expression (List.hd expr_list)) ^ ");"
+    | _ -> "")
+  | Literal_string(i) -> "\"" ^ i ^ "\""
+  | _ -> ""
+
+let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string : string) = match stmt
+  with Expr(expr) ->
+    let expr_string = handle_expression expr in 
+    let new_prog_string = prog_string ^ expr_string in
+    (new_prog_string, func_string)
+  | _ -> (prog_string, func_string)
 
 (* This won't work for functions, which we need to define externally. Maybe give a separate string for these? *)
 and handle_statements (stmt_list : Jast.program) (prog_string : string) (func_string : string) = match stmt_list
