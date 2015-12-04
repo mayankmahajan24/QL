@@ -4,7 +4,7 @@ type math_op = Add | Sub | Mult | Div
 
 type data_type =
     | Int
-    | Float
+    | Double
     | Bool
     | String
     | Json
@@ -12,7 +12,7 @@ type data_type =
 
 type expr =
     | Literal_int of int
-    | Literal_float of float
+    | Literal_double of float
     | Literal_string of string
     | Literal_bool of string
     | Literal_array of expr list

@@ -106,6 +106,7 @@ assignment_data_type:
   | FLOAT   { "float" }
   | STRING  { "string" }
   | JSON    { "json" }
+  /* What happened to booleans? */
 
 return_type:
     data_type   { $1 }
