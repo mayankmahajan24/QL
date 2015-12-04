@@ -15,8 +15,19 @@ let rec handle_expression (expr : Jast.expr) = match expr
   | Literal_int(i) -> string_of_int i
   | Literal_double(i) -> string_of_float i
   | Id(i) -> i
+  | Array_select(id, interior) ->
+    let select_index = handle_expression interior in
+    id ^ "[" ^ select_index ^ "]"
   | Binop(left_expr, op, right_expr) -> handle_expression left_expr ^ " " ^ convert_operator op ^ " " ^ handle_expression right_expr
   | _ -> ""
+
+let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
+  with [] -> ""
+  | head :: exprs ->
+    if List.length exprs != 0 then
+      (handle_expression head) ^ "," ^ (comma_separate_list exprs)
+    else
+      (handle_expression head)
 
 let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string : string) = match stmt
   with Expr(expr) ->
@@ -27,6 +38,12 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
     let expr_string = handle_expression expr in
     let assign_string = data_type ^ " " ^ id ^ " = " ^ expr_string ^ ";\n" in
     let new_prog_string = prog_string ^ assign_string in 
+    (new_prog_string, func_string)
+  | Array_assign(expected_data, id, e1) ->
+    let new_prog_string = prog_string ^ expected_data ^ "[] " ^ id ^ " = {" ^ (comma_separate_list (e1)) ^ "};\n" in
+    (new_prog_string, func_string)
+  | Jast.Update_variable(id, expr) -> 
+    let new_prog_string = prog_string ^ id ^ " = " ^ (handle_expression (expr)) ^ ";\n" in
     (new_prog_string, func_string)
   | _ -> (prog_string, func_string)
 
