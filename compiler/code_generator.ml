@@ -6,6 +6,18 @@ let convert_operator (op : math_op) = match op
   | Mult -> "*"
   | Div -> "/"
 
+let convert_bool_operator (op : bool_op) = match op
+  with Equal -> "==" 
+  | Neq -> "!="
+  | Less -> "<"
+  | Leq -> "<="
+  | Greater -> ">"
+  | Geq -> ">="
+
+let convert_cond_op (cond : conditional) = match cond
+  with And -> "&&"
+  | Or -> "||"
+
 let rec handle_expression (expr : Jast.expr) = match expr 
   with Call(func_name, expr_list) -> (match func_name
     with "print" ->
@@ -18,8 +30,24 @@ let rec handle_expression (expr : Jast.expr) = match expr
   | Array_select(id, interior) ->
     let select_index = handle_expression interior in
     id ^ "[" ^ select_index ^ "]"
+  | Literal_bool(i) -> "\"" ^ i ^ "\""
+  (* Think about printing literal with the lower case to match those printed with identifiers *)
   | Binop(left_expr, op, right_expr) -> handle_expression left_expr ^ " " ^ convert_operator op ^ " " ^ handle_expression right_expr
   | _ -> ""
+
+let rec handle_bool_expr (expr : Jast.bool_expr) = match expr
+  with Literal_bool(i) ->
+    (match i
+      with "True" -> "true"
+      | "False" -> "false"
+      | _ -> "bad")
+  | Binop(left_expr, op, right_expr) ->
+    (handle_expression left_expr) ^ " " ^ (convert_bool_operator op) ^ " " ^ (handle_expression right_expr) 
+  | Bool_binop(left_expr, cond, right_expr) ->
+    (handle_bool_expr left_expr) ^ " " ^ (convert_cond_op cond) ^ " " ^ (handle_bool_expr right_expr)
+  | Not(expr) ->
+    "!" ^ (handle_bool_expr expr)
+  | Id(i) -> i
 
 let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
   with [] -> ""
@@ -44,6 +72,10 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
     (new_prog_string, func_string)
   | Jast.Update_variable(id, expr) -> 
     let new_prog_string = prog_string ^ id ^ " = " ^ (handle_expression (expr)) ^ ";\n" in
+    (new_prog_string, func_string)
+  | Bool_assign(id, expr) ->
+    (* Why can't we reassign to a boolean? Seems broken *)
+    let new_prog_string = prog_string ^ "boolean " ^ id ^ " = " ^ (handle_bool_expr expr) ^ ";\n" in
     (new_prog_string, func_string)
   | _ -> (prog_string, func_string)
 
