@@ -124,7 +124,7 @@ let func_return_type (func_name : string) (env : symbol_table) =
   else
     raise FunctionNotDeclared
 
-let json_selector_found (id : string) (data_type : string)  (env : symbol_table) =
+let json_selector_update (id : string) (data_type : string)  (env : symbol_table) =
   let serialized = id in
     if JsonSelectorMap.mem serialized env.json_selector_map then
       raise JsonSelectorAlreadyUsed

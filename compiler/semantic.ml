@@ -46,6 +46,13 @@ let string_to_data_type (s : string) = match s
 	| "json" -> Json
 	| _ -> raise (Failure "unsupported data type")
 
+let string_data_literal (expr : Ast.expr) = match expr
+		with Literal_int(i) -> string_of_int i
+	| Literal_float(i) -> string_of_float i
+	| Literal_bool(i) -> i
+	| Literal_string(i) -> i
+	| _ -> raise (Failure "we can't print this")
+
 let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : data_type) = match (left_expr, op, right_expr)
 	with (Int, _, Int) -> Int
 	| (Float, _, Float) -> Float
@@ -99,6 +106,16 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		check_bracket_select_type (selector_data_type) (selectors) (env) (id)
 	| Json_selector_list(i) -> AnyType
+
+let serialize (expr : Ast.expr) (env : symbol_table) = match expr
+	with Bracket_select(id, selectors) ->
+		let concat = List.fold_left (fun acc x ->
+			let expr_type = check_expr_type (x) (env) in
+				if expr_type == String then (acc ^ "[\"" ^ (string_data_literal x) ^ "\"]")
+				else acc
+			) "" (List.rev selectors) in
+					id ^ concat; 
+	| _ -> raise (Failure "incorrect usage of bracket syntax")
 
 let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
 	with Bracket_select(id, selectors) ->
@@ -198,7 +215,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Assign(data_type, id, e1) ->
 		if (json_selector_found e1 env) == true then
 			let updated_env = declare_var id data_type env in
-				json_selector_found (serialize e1) data_type updated_env;
+				json_selector_update (serialize e1 env) data_type updated_env;
 		else
 			let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;
