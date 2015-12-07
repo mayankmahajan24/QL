@@ -70,13 +70,7 @@ let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right
 		| _ -> raise BadBinopType
 
 let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) = match d_type
-	with Json ->
-		List.iter (fun expr ->
-			let expr_type = check_expr_type (expr) (env) in
-			if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
-		) selectors;
-		AnyType
-	| Array ->
+	with Array ->
 		if List.length selectors != 1 then raise MultiDimensionalArraysNotAllowed;
 		if check_expr_type (List.hd selectors) (env) != Int then raise ImproperBraceSelectorType;
 		let ast_array_type = array_type (id) (env) in
@@ -101,6 +95,20 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 		let selector_ast_data_type = var_type id env in
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		check_bracket_select_type (selector_data_type) (selectors) (env) (id)
+
+let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
+	with Bracket_select(id, selectors) ->
+		let selector_ast_data_type = var_type id env in
+		let selector_data_type = ast_data_to_data selector_ast_data_type in
+		if selector_data_type == Json then
+			(List.iter (fun expr ->
+				let expr_type = check_expr_type (expr) (env) in
+				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
+			) selectors;
+			true)
+		else
+			false
+	| _ -> false
 
 let equate e1 e2 =
 	if (e1 != e2) && (e1 != AnyType) && (e2 != AnyType) then raise (Failure "data_type mismatch")
@@ -199,7 +207,11 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				and body_env = check_statements stmt_list init_env in
 					env
 	| Assign(data_type, id, e1) ->
-		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
+		if (json_selector_found e1 env) == true then
+			let updated_env = declare_var id data_type env in
+				json_selector_found (serialize e1) data_type updated_env;
+		else
+			let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;
 			declare_var id data_type env;
 	| Array_assign(expected_data_type, id, e1) ->
