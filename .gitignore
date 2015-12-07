@@ -8,6 +8,6 @@
 *.cmo
 parser.ml
 parser.mli
-ql
+qlc
 scanner.ml
 
