@@ -141,6 +141,7 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| Literal_string(i) -> i
 	| _ -> raise (Failure "we can't print this")
 
+
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
 	with Call(f_name, args) -> (match f_name
 		with "print" ->
