@@ -187,7 +187,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 					if data_type == Json then 
 						raise (Failure "json aliasing not supported")
 					else
-						let right = check_expr_type (e1) (env) in 
+						let right = check_expr_type (e1) (env) in
 							equate data_type right;
 					env;
     | If(bool_expr, then_stmt, else_stmt) ->
