@@ -170,9 +170,12 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Update_variable (id, e1) ->
 		let ast_dt = var_type id env in
 		let data_type = ast_data_to_data ast_dt in
-			let right = check_expr_type (e1) (env) in
-				equate data_type right;
-				env;
+			if data_type == Json then 
+				raise (Failure "json aliasing not supported")
+			else
+				let right = check_expr_type (e1) (env) in 
+					equate data_type right;
+			env;
     | If(bool_expr, then_stmt, else_stmt) ->
     	let is_boolean_expr = handle_bool_expr bool_expr env
     	and then_clause = check_statements then_stmt env
