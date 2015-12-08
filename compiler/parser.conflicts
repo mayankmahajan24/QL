@@ -1,0 +1,28 @@
+
+** Conflict (shift/reduce) in state 63.
+** Tokens involved: NEQ LT LEQ GT GEQ EQ
+** The following explanations concentrate on token NEQ.
+** This state is reached from program after reading:
+
+stmt_list WHILE LPAREN expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+stmt_list EOF 
+stmt_list stmt 
+          WHILE LPAREN bool_expr RPAREN LCURLY ENDLINE stmt_list RCURLY ENDLINE 
+                       (?)
+
+** In state 63, looking ahead at NEQ, shifting is permitted
+** because of the following sub-derivation:
+
+expr . NEQ expr 
+
+** In state 63, looking ahead at NEQ, reducing production
+** where_arg -> expr 
+** is permitted because of the following sub-derivation:
+
+where_arg NEQ where_arg // lookahead token appears
+expr . 

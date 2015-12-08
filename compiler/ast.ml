@@ -24,6 +24,7 @@ type expr =
     | Binop of expr * math_op * expr
     | Call of string * expr list
     | Json_from_file of string
+    | Json_selector_list of string list
     | Bracket_select of string * expr list
     (* Need to include array accessor here. -- Matt*)
 
@@ -48,28 +49,11 @@ type data_type =
     | Array of data_type
     | AnyType
 
-type json_selector =
-    | Json_string of string
-
-type where_arg =
-    | Json_selector_list of json_selector list
-    | Expr of expr
-
-type where_expr =
-    | Where_eval of where_arg * bool_op * where_arg
-    | Not of where_expr
-    | Bool_expr of bool_expr
-
-(*
-type where_expr_list =
-    | Where_cond of where_expr * conditional * where_expr
-*)
-
 type stmt =
     | Expr of expr
     | For of stmt * bool_expr * stmt * stmt list
     | While of bool_expr * stmt list
-    | Where of where_expr * string * stmt list * expr
+    | Where of bool_expr * string * stmt list * expr
     | If of bool_expr * stmt list * stmt list
     | Return of expr
     | Not of expr
@@ -78,6 +62,7 @@ type stmt =
     | Array_assign of string * string * expr list
     | Bool_assign of string * string * bool_expr
     | Func_decl of string * arg_decl list * string * stmt list
+    | Noop
     (* Look into making return type limited to certain set *)
 
 type program = stmt list
