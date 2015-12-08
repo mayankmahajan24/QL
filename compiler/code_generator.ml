@@ -63,6 +63,14 @@ let rec handle_bool_expr (expr : Jast.bool_expr) = match expr
     "!" ^ (handle_bool_expr expr)
   | Id(i) -> i
 
+let rec comma_separate_arg_list (arg_decl_list : Jast.arg_decl list) = match arg_decl_list
+  with [] -> ""
+  | head :: arg_decls ->
+    if List.length arg_decls != 0 then
+      head.var_type ^ " " ^ head.var_name ^ "," ^ (comma_separate_arg_list arg_decls)
+    else
+      head.var_type ^ " " ^ head.var_name)
+
 let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string : string) = match stmt
   with Expr(expr) ->
     let expr_string = handle_expression expr in 
@@ -83,6 +91,8 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
     (* Why can't we reassign to a boolean? Seems broken *)
     let new_prog_string = prog_string ^ "boolean " ^ id ^ " = " ^ (handle_bool_expr expr) ^ ";" in
     (new_prog_string, func_string)
+  | Func_decl(id, arg_decl_list, return_type, body) ->
+    let new_func_string = func_string ^ "public " ^ return_type ^ id ^ "(" ^ comma_separate_arg_list arg_decl_list ^ ")" ^ "{\n" ^ handle_statements body ^ "}\n" 
   | _ -> (prog_string, func_string)
 
 (* This won't work for functions, which we need to define externally. Maybe give a separate string for these? *)

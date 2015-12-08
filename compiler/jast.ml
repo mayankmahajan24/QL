@@ -12,6 +12,11 @@ type data_type =
     | Json
     | Array of data_type
 
+type arg_decl = {
+    var_type   : string;
+    var_name   : string;
+}
+
 type expr =
     | Literal_int of int
     | Literal_double of float
@@ -40,5 +45,6 @@ type stmt =
     | Array_assign of string * string * expr list
     | Update_variable of string * expr
     | Bool_assign of string * bool_expr
+    | Func_decl of string * arg_decl list * string * stmt list
 
 type program = stmt list
