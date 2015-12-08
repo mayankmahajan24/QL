@@ -1,2 +1,2 @@
-bool a = 1
-a = 2
+bool a = True
+a = False
