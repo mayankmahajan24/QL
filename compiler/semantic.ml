@@ -112,25 +112,11 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| Literal_string(i) -> i
 	| _ -> raise (Failure "we can't print this")
 
-(* TODO: Get rid of this garbage function. *)
-let output_file =
-	open_out_gen [Open_creat; Open_text; Open_append] 0o640 "Test.java"
-
-let print_to_file (prog_str : string) =
-	let file = output_file in
-		Printf.fprintf file "%s" prog_str;;
-
-let print_header (class_name : string) =
-	let prog_str = "public class " ^ class_name ^ " { public static void main(String[] args) { " in
-	print_to_file prog_str
-
-let handle_print_function (print_term : string) =
-	let prog_str = "System.out.println(\"" ^ print_term  ^ "\"); " in
-	print_to_file prog_str
-
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
 	with Call(f_name, args) -> (match f_name
-		with "print" -> handle_print_function (string_data_literal(List.hd args))
+		with "print" ->
+			if List.length args != 1 then
+				raise (Failure "Print only takes one argument")
 		| _ ->
 			let arg_types = List.map (fun expr -> (data_to_ast_data((check_expr_type (expr) (env))))) args in
 			verify_func_call f_name arg_types env)
@@ -250,7 +236,5 @@ and check_return_statement (stmt : Ast.stmt) (env : Environment.symbol_table) (r
 (* entry point into semantic checker *)
 let check_program (stmt_list : Ast.program) =
 	let env = Environment.create in
-	print_header "Test";
 	check_statements stmt_list env;
-	print_to_file " } }"
 
