@@ -10,4 +10,4 @@ parser.ml
 parser.mli
 qlc
 scanner.ml
-
+compiler/parser.conflicts
