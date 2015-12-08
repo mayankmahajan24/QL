@@ -74,7 +74,6 @@ literal:
 primitive_literal:
     INT_LITERAL     { Literal_int($1) }
   | FLOAT_LITERAL   { Literal_float($1) }
-  | BOOL_LITERAL    { Literal_bool($1) }
   | STRING_LITERAL  { Literal_string($1) }
 
 array_literal:
