@@ -1,2 +1,2 @@
-int a = 1
-b = 2
+bool a = 1
+a = 2
