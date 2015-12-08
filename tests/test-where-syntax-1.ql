@@ -1,4 +1,5 @@
-json testJson = json("test.json")
-where (true) as dummyVar {
-  int a = 1
-} in testJson
+json test = json("test.json")
+
+where (True) as dummyVar {
+
+} in test

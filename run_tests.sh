@@ -13,6 +13,8 @@ globallog=run_tests.log
 rm -f $globallog
 error=0
 
+make all
+
 SignalError() {
   if [ $error -eq 0 ] ; then
     echo "FAILED"

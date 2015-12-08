@@ -63,8 +63,10 @@ let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right
 			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
 			)
 		| Less | Leq | Greater | Geq -> (match (left_expr, right_expr)
-			with (Int, Int) -> Int
-			| (Float, Float) -> Float
+			with (Int, Int) -> Bool
+			| (Float, Float) -> Bool
+			| (AnyType, _) -> Bool
+			| (_, AnyType) -> Bool
 			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
 			)
 		| _ -> raise BadBinopType
