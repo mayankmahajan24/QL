@@ -69,7 +69,7 @@ let rec comma_separate_arg_list (arg_decl_list : Jast.arg_decl list) = match arg
     if List.length arg_decls != 0 then
       head.var_type ^ " " ^ head.var_name ^ "," ^ (comma_separate_arg_list arg_decls)
     else
-      head.var_type ^ " " ^ head.var_name)
+      head.var_type ^ " " ^ head.var_name
 
 let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string : string) = match stmt
   with Expr(expr) ->
@@ -92,7 +92,9 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
     let new_prog_string = prog_string ^ "boolean " ^ id ^ " = " ^ (handle_bool_expr expr) ^ ";" in
     (new_prog_string, func_string)
   | Func_decl(id, arg_decl_list, return_type, body) ->
-    let new_func_string = func_string ^ "public " ^ return_type ^ id ^ "(" ^ comma_separate_arg_list arg_decl_list ^ ")" ^ "{\n" ^ handle_statements body ^ "}\n" 
+    let (prog, func) = handle_statements body "" "" in
+    let new_func_string = func_string ^ "public " ^ return_type ^ " " ^ id ^ "(" ^ comma_separate_arg_list arg_decl_list ^ ")" ^ "{\n" ^ prog ^ "}\n" in
+     (prog_string, new_func_string)
   | _ -> (prog_string, func_string)
 
 (* This won't work for functions, which we need to define externally. Maybe give a separate string for these? *)

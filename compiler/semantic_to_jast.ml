@@ -80,17 +80,14 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
   | Ast.Bool_assign(data_type, id, e1) -> Jast.Bool_assign(id, (convert_bool_expr (e1) (symbol_table)))
   | Ast.Func_decl(data_type, arg_decl_list, return_type, body) -> 
     let jast_arg_decl_list = List.map convert_arg_decl arg_decl_list in
-    let jast_body = (*[]*) build_list [] body symbol_table in
-    (*let f elem = 
-      jast_body = jast_body@[(convert_statement elem symbol_table)]) in
-    let () = List.iter f body in*)
+    let jast_body = build_list [] body symbol_table in
     Jast.Func_decl(ql_to_java_type data_type, jast_arg_decl_list, ql_to_java_type return_type, jast_body)
   | _ -> Jast.Dummy_stmt("Really just terrible programming")
 
 and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: Environment.symbol_table) = 
   match body
-    with head :: tl -> (build_list jast_body@[(convert_statement head symbol_table)] tl symbol_table)
-    | [head] -> jast_body@[(convert_statement head symbol_table)]
+    with [head] -> jast_body@[(convert_statement head symbol_table)] 
+    | head :: tl -> (build_list (jast_body@[(convert_statement head symbol_table)]) tl symbol_table)
     | _ -> []
 
 let convert_semantic (stmt_list : Ast.program) (symbol_table : Environment.symbol_table) = 
