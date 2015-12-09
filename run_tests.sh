@@ -114,6 +114,13 @@ done
 
 echo "Tests passed: $PASS. Tests failed: $FAIL."
 
+if [ $FAIL -eq 0 ]
+then
+  say "coooooooool"
+else
+  say "tests failed! not cool"
+fi
+
 make clean >& /dev/null
 
 exit $globalerror
