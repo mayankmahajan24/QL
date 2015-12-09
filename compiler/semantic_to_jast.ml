@@ -62,7 +62,7 @@ let rec convert_bool_expr (op : Ast.bool_expr) (symbol_table : Environment.symbo
 
 let convert_arg_decl (arg_decl : Ast.arg_decl) = 
   {
-    var_type = arg_decl.var_type;
+    var_type = ql_to_java_type arg_decl.var_type;
     var_name = arg_decl.var_name;
   }
 
@@ -78,15 +78,16 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let update_expr = convert_expr e1 symbol_table in
     Jast.Update_variable(id, update_expr)
   | Ast.Bool_assign(data_type, id, e1) -> Jast.Bool_assign(id, (convert_bool_expr (e1) (symbol_table)))
-  | Ast.Func_decl(data_type, arg_decl_list, return_type, body) -> 
+  | Ast.Return(e1) -> Jast.Return(convert_expr e1 symbol_table)
+  | Ast.Func_decl(id, arg_decl_list, return_type, body) -> 
     let jast_arg_decl_list = List.map convert_arg_decl arg_decl_list in
     let jast_body = build_list [] body symbol_table in
-    Jast.Func_decl(ql_to_java_type data_type, jast_arg_decl_list, ql_to_java_type return_type, jast_body)
+    Jast.Func_decl(id, jast_arg_decl_list, ql_to_java_type return_type, jast_body)
   | _ -> Jast.Dummy_stmt("Really just terrible programming")
 
 and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: Environment.symbol_table) = 
   match body
-    with [head] -> jast_body@[(convert_statement head symbol_table)] 
+    with [head] -> List.rev (jast_body@[(convert_statement head symbol_table)]) 
     | head :: tl -> (build_list (jast_body@[(convert_statement head symbol_table)]) tl symbol_table)
     | _ -> []
 

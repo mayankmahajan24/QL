@@ -93,8 +93,11 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
     (new_prog_string, func_string)
   | Func_decl(id, arg_decl_list, return_type, body) ->
     let (prog, func) = handle_statements body "" "" in
-    let new_func_string = func_string ^ "public " ^ return_type ^ " " ^ id ^ "(" ^ comma_separate_arg_list arg_decl_list ^ ")" ^ "{\n" ^ prog ^ "}\n" in
+    let new_func_string = func_string ^ "public static " ^ return_type ^ " " ^ id ^ "(" ^ comma_separate_arg_list arg_decl_list ^ ")" ^ "{\n" ^ prog ^ "}\n" in
      (prog_string, new_func_string)
+  | Return(e1) -> 
+    let new_prog_string = prog_string ^ "return " ^ (handle_expression e1) ^ ";" in
+    (new_prog_string, func_string)
   | _ -> (prog_string, func_string)
 
 (* This won't work for functions, which we need to define externally. Maybe give a separate string for these? *)
