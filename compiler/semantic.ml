@@ -64,8 +64,10 @@ let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right
 			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
 			)
 		| Less | Leq | Greater | Geq -> (match (left_expr, right_expr)
-			with (Int, Int) -> Int
-			| (Float, Float) -> Float
+			with (Int, Int) -> Bool
+			| (Float, Float) -> Bool
+			| (AnyType, _) -> Bool
+			| (_, AnyType) -> Bool
 			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
 			)
 		| _ -> raise BadBinopType
@@ -102,6 +104,7 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 		let selector_ast_data_type = var_type id env in
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		check_bracket_select_type (selector_data_type) (selectors) (env) (id)
+	| Json_selector_list(i) -> AnyType
 
 let equate e1 e2 =
 	if (e1 != e2) && (e1 != AnyType) && (e2 != AnyType) then raise (Failure "data_type mismatch")
@@ -129,10 +132,6 @@ let handle_json (json_expr : Ast.expr) (env : Environment.symbol_table) = match 
 		| _ -> raise IncorrectWhereType)
 	| Json_from_file(json) -> Json
 	| _ -> raise IncorrectWhereType
-
-(* This ensures that where_expr is correctly typed and returns AnyType if that check passes *)
-let handle_where_expr (where_expr : Ast.where_expr) (env : Environment.symbol_table) =
-	AnyType
 
 let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_table) = match bool_expr
 	with Literal_bool(i) -> Bool
@@ -178,9 +177,9 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let is_boolean_expr = handle_bool_expr bool_expr env
 		and new_env = check_statements body env in
 			env
-	| Where(where_expr, id, stmt_list, json_object) ->
+	| Where(bool_expr, id, stmt_list, json_object) ->
 		let init_env = env in
-			let is_where_expr = handle_where_expr where_expr init_env
+			let is_bool_expr = handle_bool_expr bool_expr init_env
 			and update_env = declare_var id "json" init_env in
 				let is_json = handle_json json_object init_env
 				and body_env = check_statements stmt_list init_env in
@@ -208,6 +207,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		else
 			check_function_statements (List.rev stmt_list) func_env_vars return_type;
 			func_env
+	| Noop -> env
 	| _ -> raise (Failure "Unimplemented functionality")
 
 and check_statements stmts env = match stmts

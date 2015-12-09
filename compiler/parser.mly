@@ -80,11 +80,11 @@ array_literal:
   LSQUARE primitive_literal_list_opt RSQUARE    { $2 }
 
 primitive_literal_list_opt:
-                                                              { [] }
-  | primitive_literal_list                                  { List.rev $1 }
+                                                          { [] }
+  | primitive_literal_list                                { List.rev $1 }
 
 primitive_literal_list:
-  primitive_literal                                     { [$1] }
+  primitive_literal                                       { [$1] }
   | primitive_literal_list SEMICOLON primitive_literal    { $3 :: $1 }
 
 json_literal:
@@ -142,21 +142,16 @@ stmt:
     ENDLINE stmt_list RCURLY ENDLINE            { For($3, $5, $7, $11) }
   | WHILE LPAREN bool_expr RPAREN LCURLY
     ENDLINE stmt_list RCURLY ENDLINE            { While($3, $7) }
-  | where_stmt                                  { $1 }
+  | WHERE LPAREN bool_expr RPAREN AS ID
+    LCURLY stmt_list RCURLY
+    IN expr ENDLINE                             { Where($3, $6, $8, $11) }
   | if_else_stmt                                { $1 }
   | assignment_stmt ENDLINE                     { $1 }
   | FUNCTION ID LPAREN formals_opt RPAREN COLON
     return_type LCURLY ENDLINE stmt_list RCURLY
     ENDLINE                                     { Func_decl($2, $4, $7, $10) }
   | RETURN expr ENDLINE                         { Return($2) }
-
-where_stmt:
-  WHERE LPAREN where_expr RPAREN AS ID
-    LCURLY stmt_list RCURLY
-    IN expr ENDLINE                             { Where($3, $6, $8, $11) }
-  | WHERE LPAREN where_expr RPAREN AS ID
-    LCURLY ENDLINE stmt_list RCURLY
-    IN expr ENDLINE                             { Where($3, $6, $9, $12) }
+  | ENDLINE                                     { Noop }
 
 /* Different forms of if_else */
 if_else_stmt:
@@ -164,26 +159,15 @@ if_else_stmt:
     LCURLY stmt_list RCURLY
     ENDLINE %prec NOELSE                        { If($3, $6, []) }
   | IF LPAREN bool_expr RPAREN
-    LCURLY ENDLINE
-    stmt_list
-    RCURLY ENDLINE %prec NOELSE                 { If($3, $7, []) }
-  | IF LPAREN bool_expr RPAREN
     LCURLY stmt_list RCURLY
     ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
-  | IF LPAREN bool_expr RPAREN
-    LCURLY ENDLINE
-    stmt_list RCURLY
-    ELSE LCURLY ENDLINE
-    stmt_list RCURLY ENDLINE                    { If($3, $7, $12) }
 
 /* Assignment */
 assignment_stmt:
     ARRAY assignment_data_type ID ASSIGN array_literal  { Array_assign($2, $3, $5) }
-    | assignment_data_type ID ASSIGN expr  { Assign($1, $2, $4) }
-    | BOOL ID ASSIGN bool_expr             { Bool_assign("bool", $2, $4) }
-    | ID ASSIGN expr { Update_variable($1, $3) }
-
-/* I removed some where_expr_list rules. Look in the Git history. */
+    | assignment_data_type ID ASSIGN expr               { Assign($1, $2, $4) }
+    | BOOL ID ASSIGN bool_expr                          { Bool_assign("bool", $2, $4) }
+    | ID ASSIGN expr                                    { Update_variable($1, $3) }
 
 bracket_selector_list:
   bracket_selector { [$1] }
@@ -191,26 +175,12 @@ bracket_selector_list:
 
 bracket_selector: LSQUARE expr RSQUARE { $2 }
 
-where_expr:
-  where_arg EQ where_arg      { Where_eval($1, Equal, $3) }
-  | where_arg NEQ where_arg   { Where_eval($1, Neq, $3) }
-  | where_arg LT where_arg    { Where_eval($1, Less, $3) }
-  | where_arg LEQ where_arg   { Where_eval($1, Leq, $3) }
-  | where_arg GT where_arg    { Where_eval($1, Greater, $3) }
-  | where_arg GEQ where_arg   { Where_eval($1, Geq, $3) }
-  | NOT where_expr            { Not($2) }
-  | bool_expr                 { Bool_expr($1) }
-
-where_arg:
-  json_selector_list  { Json_selector_list(List.rev $1) }
-  | expr              { Expr($1) }
-
 /* Selectors for json expressions */
 json_selector_list:
   json_selector { [$1] }
   | json_selector_list json_selector { $2 :: $1 }
 
-json_selector: LSQUARE STRING_LITERAL RSQUARE { Json_string($2) }
+json_selector: LSQUARE STRING_LITERAL RSQUARE { $2 }
 
 actuals_opt:
     /* Nothing */ { [] }
@@ -231,16 +201,17 @@ expr:
   | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
   | LPAREN expr RPAREN            { $2 }
   | ID bracket_selector_list      { Bracket_select($1, $2) }
+  | json_selector_list            { Json_selector_list($1) }
 
 bool_expr:
-    BOOL_LITERAL            { Literal_bool($1) }
-  | ID                      { Id($1) }
-  | expr EQ expr            { Binop($1, Equal,   $3) }
-  | expr NEQ expr           { Binop($1, Neq,   $3) }
-  | expr LT expr            { Binop($1, Less,   $3) }
-  | expr LEQ expr           { Binop($1, Leq,   $3) }
-  | expr GT expr            { Binop($1, Greater,   $3) }
-  | expr GEQ expr           { Binop($1, Geq,   $3) }
-  | bool_expr AND bool_expr { Bool_binop($1, And,   $3) }
-  | bool_expr OR bool_expr  { Bool_binop($1, Or,   $3) }
-  | NOT bool_expr           { Not($2) }
+    BOOL_LITERAL                                { Literal_bool($1) }
+  | ID                                          { Id($1) }
+  | expr EQ expr                                { Binop($1, Equal,   $3) }
+  | expr NEQ expr                               { Binop($1, Neq,   $3) }
+  | expr LT expr                                { Binop($1, Less,   $3) }
+  | expr LEQ expr                               { Binop($1, Leq,   $3) }
+  | expr GT expr                                { Binop($1, Greater,   $3) }
+  | expr GEQ expr                               { Binop($1, Geq,   $3) }
+  | bool_expr AND bool_expr                     { Bool_binop($1, And,   $3) }
+  | bool_expr OR bool_expr                      { Bool_binop($1, Or,   $3) }
+  | NOT bool_expr                               { Not($2) }

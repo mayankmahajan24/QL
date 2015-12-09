@@ -20,7 +20,7 @@ let boolean = "True" | "False"
 rule token = parse
 (* Whitespace *)
 | [' ' '\t' '\r']  { token lexbuf }
-| '\n'             { ENDLINE }
+| '\n'+             { ENDLINE }
 
 (* Comments *)
 | "#~~"            { comment lexbuf }
@@ -47,7 +47,7 @@ rule token = parse
 
 (* Conditional Keywords *)
 | "if"        { IF }        | "else"      { ELSE }
-| "elseif"    { ELSEIF }     
+| "elseif"    { ELSEIF }
 
 (* Loop Keywords *)
 | "where"     { WHERE }     | "in"        { IN }

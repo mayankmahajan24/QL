@@ -13,6 +13,8 @@ globallog=run_tests.log
 rm -f $globallog
 error=0
 
+make all
+
 SignalError() {
   if [ $error -eq 0 ] ; then
     echo "FAILED"
@@ -111,6 +113,13 @@ do
 done
 
 echo "Tests passed: $PASS. Tests failed: $FAIL."
+
+if [ $FAIL -eq 0 ]
+then
+  say "coooooooool"
+else
+  say "tests failed! not cool"
+fi
 
 make clean >& /dev/null
 
