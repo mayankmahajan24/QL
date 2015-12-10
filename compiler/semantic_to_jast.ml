@@ -7,6 +7,7 @@ let ql_to_java_type (data_type : string) = match data_type
   | "float" -> "double"
   | "string" -> "String"
   | "json" -> "JSONObject"
+  | "bool" -> "Boolean"
   | _ -> "Invalid data type"
 
 let convert_math_op (op : Ast.math_op) = match op

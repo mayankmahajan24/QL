@@ -38,12 +38,11 @@ and handle_expression (expr : Jast.expr) = match expr
   | Array_select(id, interior) ->
     let select_index = handle_expression interior in
     id ^ "[" ^ select_index ^ "]"
-  | Literal_bool(i) -> "\"" ^ 
+  | Literal_bool(i) -> 
     (match i
       with "True" -> "true"
       | "False" -> "false"
       | _ -> "bad")
-    ^ "\""
   (* Think about printing literal with the lower case to match those printed with identifiers *)
   | Binop(left_expr, op, right_expr) -> handle_expression left_expr ^ " " ^ convert_operator op ^ " " ^ handle_expression right_expr
   | _ -> ""

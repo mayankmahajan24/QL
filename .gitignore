@@ -11,3 +11,4 @@ parser.mli
 qlc
 scanner.ml
 compiler/parser.conflicts
+.DS_Store
