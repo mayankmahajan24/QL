@@ -13,10 +13,13 @@ exception IncorrectFunctionParameterTypes;;
 exception MixedTypeArray;;
 exception ArrayInferTypeMismatch;;
 exception JsonSelectorTypeMismatch;;
+exception JsonSelectorAlreadyUsed;;
+exception IncorrectArrayAssignmentSize;;
+exception DatatypeDefaultValueMissing;;
 
 type func_info  = {
-  id : string; 
-  return : data_type; 
+  id : string;
+  return : data_type;
   args : data_type list;
   arg_names: string list;
 }
@@ -28,7 +31,7 @@ type symbol_table = {
   json_selector_map: data_type JsonSelectorMap.t;
 }
 
-let create = 
+let create =
   {
     func_map = FunctionMap.empty;
     var_map = VariableMap.empty;
@@ -54,9 +57,9 @@ let string_to_data_type (s : string) = match s
   | _ -> raise (Failure "unsupported data type 1")
 
 let declare_var (id : string) (data_type : string) (env : symbol_table) =
-  if VariableMap.mem id env.var_map then 
+  if VariableMap.mem id env.var_map then
     raise VarAlreadyDeclared
-  else 
+  else
     let update_var_map = VariableMap.add id (string_to_data_type(data_type)) env.var_map in
     update env.func_map update_var_map env.array_type_map env.json_selector_map
 
@@ -113,8 +116,8 @@ let verify_func_call (func_name: string) (args : data_type list) (env : symbol_t
   if FunctionMap.mem func_name env.func_map then
     let declared_func = FunctionMap.find func_name env.func_map in
     let type_pairs = List.combine args declared_func.args in
-    List.iter (fun (left, right) -> 
-      if left != right then 
+    List.iter (fun (left, right) ->
+      if left != right then
         if left != AnyType && right != AnyType then
           raise IncorrectFunctionParameterTypes
     ) type_pairs

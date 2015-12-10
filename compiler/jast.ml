@@ -43,6 +43,7 @@ type stmt =
     | Expr of expr
     | Dummy_stmt of string
     | Array_assign of string * string * expr list
+    | Fixed_length_array_assign of string * string * int
     | Update_variable of string * expr
     | Bool_assign of string * bool_expr
     | Return of expr

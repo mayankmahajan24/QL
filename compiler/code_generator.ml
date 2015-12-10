@@ -7,7 +7,7 @@ let convert_operator (op : math_op) = match op
   | Div -> "/"
 
 let convert_bool_operator (op : bool_op) = match op
-  with Equal -> "==" 
+  with Equal -> "=="
   | Neq -> "!="
   | Less -> "<"
   | Leq -> "<="
@@ -26,7 +26,7 @@ let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
     else
       (handle_expression head)
 
-and handle_expression (expr : Jast.expr) = match expr 
+and handle_expression (expr : Jast.expr) = match expr
   with Call(func_name, expr_list) -> (match func_name
     with "print" ->
       "System.out.println(" ^ (handle_expression (List.hd expr_list)) ^ ");\n"
@@ -38,7 +38,7 @@ and handle_expression (expr : Jast.expr) = match expr
   | Array_select(id, interior) ->
     let select_index = handle_expression interior in
     id ^ "[" ^ select_index ^ "]"
-  | Literal_bool(i) -> 
+  | Literal_bool(i) ->
     (match i
       with "True" -> "true"
       | "False" -> "false"
@@ -54,7 +54,7 @@ let rec handle_bool_expr (expr : Jast.bool_expr) = match expr
       | "False" -> "false"
       | _ -> "bad")
   | Binop(left_expr, op, right_expr) ->
-    (handle_expression left_expr) ^ " " ^ (convert_bool_operator op) ^ " " ^ (handle_expression right_expr) 
+    (handle_expression left_expr) ^ " " ^ (convert_bool_operator op) ^ " " ^ (handle_expression right_expr)
   | Bool_binop(left_expr, cond, right_expr) ->
     (handle_bool_expr left_expr) ^ " " ^ (convert_cond_op cond) ^ " " ^ (handle_bool_expr right_expr)
   | Not(expr) ->
@@ -71,19 +71,22 @@ let rec comma_separate_arg_list (arg_decl_list : Jast.arg_decl list) = match arg
 
 let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string : string) = match stmt
   with Expr(expr) ->
-    let expr_string = handle_expression expr in 
+    let expr_string = handle_expression expr in
     let new_prog_string = prog_string ^ expr_string ^ ";" in
     (new_prog_string, func_string)
   | Assign(data_type, id, expr) ->
     let expr_string = handle_expression expr in
     let assign_string = data_type ^ " " ^ id ^ " = " ^ expr_string ^ ";" in
-    let new_prog_string = prog_string ^ assign_string in 
+    let new_prog_string = prog_string ^ assign_string in
     (new_prog_string, func_string)
   | Array_assign(expected_data, id, e1) ->
     let new_prog_string = prog_string ^ expected_data ^ "[] " ^ id ^ " = {" ^ (comma_separate_list (e1)) ^ "};" in
     (new_prog_string, func_string)
-  | Jast.Update_variable(id, expr) -> 
-    let new_prog_string = prog_string ^ id ^ " = " ^ (handle_expression (expr)) ^ ";" in
+  | Fixed_length_array_assign(expected_data, id, length) ->
+    let new_prog_string = prog_string ^ expected_data ^ "[] " ^ id ^ " = new " ^ expected_data ^ "[" ^ string_of_int length ^ "];\n" in
+    (new_prog_string, func_string)
+  | Jast.Update_variable(id, expr) ->
+    let new_prog_string = prog_string ^ id ^ " = " ^ (handle_expression (expr)) ^ ";\n" in
     (new_prog_string, func_string)
   | Bool_assign(id, expr) ->
     (* Why can't we reassign to a boolean? Seems broken *)
@@ -93,7 +96,7 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
     let (prog, func) = handle_statements body "" "" in
     let new_func_string = func_string ^ "public static " ^ return_type ^ " " ^ id ^ "(" ^ comma_separate_arg_list arg_decl_list ^ ")" ^ "{\n" ^ prog ^ "}\n" in
      (prog_string, new_func_string)
-  | Return(e1) -> 
+  | Return(e1) ->
     let new_prog_string = prog_string ^ "return " ^ (handle_expression e1) ^ ";" in
     (new_prog_string, func_string)
   | _ -> (prog_string, func_string)
@@ -111,15 +114,15 @@ let print_to_file (prog_str : string) (file_name : string) =
     Printf.fprintf file "%s" prog_str;;
 
 let program_header (class_name : string) =
-  let prog_string  = "public class " ^ class_name ^ " { 
-    public static void main(String[] args) { 
+  let prog_string  = "public class " ^ class_name ^ " {
+    public static void main(String[] args) {
       try {
     " in
   prog_string
 
-let program_footer = " } catch (Exception e) {\nSystem.out.println(\"No\");\n}\n}" 
+let program_footer = " } catch (Exception e) {\nSystem.out.println(\"No\");\n}\n}"
 
-let generate_code (program : Jast.program) (file_name : string) = 
+let generate_code (program : Jast.program) (file_name : string) =
   let (prog, funcs) = handle_statements program "" "" in
   let final_program = (program_header file_name) ^ prog ^ program_footer ^ funcs ^ " \n}" in
   let java_program_name = file_name ^ ".java" in
