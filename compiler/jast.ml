@@ -49,5 +49,6 @@ type stmt =
     | Bool_assign of string * bool_expr
     | Return of expr
     | Func_decl of string * arg_decl list * string * stmt list
+    | If of bool_expr * stmt list * stmt list
 
 type program = stmt list
