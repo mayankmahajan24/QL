@@ -162,6 +162,9 @@ if_else_stmt:
   | IF LPAREN bool_expr RPAREN
     LCURLY stmt_list RCURLY
     ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $10) }
+  | IF LPAREN bool_expr RPAREN
+    LCURLY stmt_list RCURLY ENDLINE
+    ELSE LCURLY stmt_list RCURLY ENDLINE        { If($3, $6, $11) }
 
 /* Assignment */
 assignment_stmt:
