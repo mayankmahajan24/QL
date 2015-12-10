@@ -129,7 +129,10 @@ let func_return_type (func_name : string) (env : symbol_table) =
     let declared_func = FunctionMap.find func_name env.func_map in
     declared_func.return
   else
-    raise FunctionNotDeclared
+  match func_name with
+    "print" -> String
+    | "length" -> Int
+    | _ -> raise FunctionNotDeclared
 
 let json_selector_update (id : string) (data_type : string) (env : symbol_table) =
   if JsonSelectorMap.mem id env.json_selector_map then

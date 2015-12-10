@@ -30,7 +30,13 @@ and handle_expression (expr : Jast.expr) = match expr
   with Call(func_name, expr_list) -> (match func_name
     with "print" ->
       "System.out.println(" ^ (handle_expression (List.hd expr_list)) ^ ");\n"
-    | _ -> func_name ^ "(" ^ comma_separate_list expr_list ^ ")")
+    | "length" -> (match List.hd expr_list
+      with Id(i) ->
+        i ^ ".length\n"
+      | _ -> "oops"
+      )
+    | _ -> func_name ^ "(" ^ comma_separate_list expr_list ^ ")"
+  )
   | Literal_string(i) -> "\"" ^ i ^ "\""
   | Literal_int(i) -> string_of_int i
   | Literal_double(i) -> string_of_float i

@@ -198,13 +198,18 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| _ -> raise (Failure "we can't print this")
 
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
-	with Call(f_name, args) ->
-		if f_name = "print" then
+	with Call(f_name, args) -> match f_name with
+		"print" ->
 		 	if List.length args != 1 then
 				raise (Failure "Print only takes one argument")
 			else
 				env
-		else
+		| "length" ->
+		 	if List.length args != 1 then
+				raise (Failure "Length only takes one argument")
+			else
+				env
+		| _ ->
 			(* TODO: A bug could be here, cause we're ignoring the env variable we're getting *)
 			let arg_types = List.map (fun expr ->
 				let (expr_type, _) = (check_expr_type (expr) (env)) in
