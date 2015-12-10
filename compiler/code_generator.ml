@@ -18,7 +18,6 @@ let convert_cond_op (cond : conditional) = match cond
   with And -> "&&"
   | Or -> "||"
 
-
 let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
   with [] -> ""
   | head :: exprs ->
