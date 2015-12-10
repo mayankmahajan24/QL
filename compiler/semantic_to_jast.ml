@@ -7,6 +7,7 @@ let ql_to_java_type (data_type : string) = match data_type
   | "float" -> "double"
   | "string" -> "String"
   | "json" -> "JSONObject"
+  | "bool" -> "Boolean"
   | _ -> "Invalid data type"
 
 let convert_math_op (op : Ast.math_op) = match op
@@ -60,7 +61,13 @@ let rec convert_bool_expr (op : Ast.bool_expr) (symbol_table : Environment.symbo
   | Ast.Not(exp) -> Jast.Not((convert_bool_expr (exp) (symbol_table)))
   | Ast.Id(i) -> Jast.Id(i)
 
-let convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_table) = match stmt
+let convert_arg_decl (arg_decl : Ast.arg_decl) = 
+  {
+    var_type = ql_to_java_type arg_decl.var_type;
+    var_name = arg_decl.var_name;
+  }
+
+let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_table) = match stmt
   with Ast.Assign(data_type, id, e1) ->
     let corresponding_data_type = ql_to_java_type data_type in
     Jast.Assign(corresponding_data_type, id, (convert_expr (e1) (symbol_table)))
@@ -72,7 +79,18 @@ let convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_table
     let update_expr = convert_expr e1 symbol_table in
     Jast.Update_variable(id, update_expr)
   | Ast.Bool_assign(data_type, id, e1) -> Jast.Bool_assign(id, (convert_bool_expr (e1) (symbol_table)))
+  | Ast.Return(e1) -> Jast.Return(convert_expr e1 symbol_table)
+  | Ast.Func_decl(id, arg_decl_list, return_type, body) -> 
+    let jast_arg_decl_list = List.map convert_arg_decl arg_decl_list in
+    let jast_body = build_list [] body symbol_table in
+    Jast.Func_decl(id, jast_arg_decl_list, ql_to_java_type return_type, jast_body)
   | _ -> Jast.Dummy_stmt("Really just terrible programming")
+
+and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: Environment.symbol_table) = 
+  match body
+    with [head] -> List.rev (jast_body@[(convert_statement head symbol_table)]) 
+    | head :: tl -> (build_list (jast_body@[(convert_statement head symbol_table)]) tl symbol_table)
+    | _ -> []
 
 let convert_semantic (stmt_list : Ast.program) (symbol_table : Environment.symbol_table) = 
   List.map (fun stmt -> convert_statement (stmt) (symbol_table)) stmt_list 
