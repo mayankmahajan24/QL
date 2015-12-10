@@ -96,12 +96,18 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
   | Return(e1) -> 
     let new_prog_string = prog_string ^ "return " ^ (handle_expression e1) ^ ";" in
     (new_prog_string, func_string)
+  | If(condition, body, else_body) ->
+    let (prog, func) = handle_statements body "" "" in
+    let (else_prog, else_func) = handle_statements else_body "" "" in
+    let new_prog_string = prog_string ^ "if (" ^ handle_bool_expr condition ^ ") {\n" ^ prog ^ "} else {\n" ^ else_prog ^ "}" in
+    (new_prog_string, func_string)  
   | _ -> (prog_string, func_string)
 
-(* This won't work for functions, which we need to define externally. Maybe give a separate string for these? *)
 and handle_statements (stmt_list : Jast.program) (prog_string : string) (func_string : string) = match stmt_list
     with [] -> (prog_string, func_string)
-  | [stmt] -> handle_statement stmt prog_string func_string
+  | [stmt] -> 
+    let (prog, func) = (handle_statement stmt prog_string func_string) in
+    (prog ^ "\n", func)
   | stmt :: other_stmts ->
       let (new_prog_string, new_func_string) = (handle_statement stmt (prog_string ^ "\n") func_string) in
       handle_statements other_stmts new_prog_string new_func_string
