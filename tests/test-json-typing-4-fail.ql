@@ -4,4 +4,4 @@ function increment(int c) : int {
 }
 json a = json("dude.json")
 increment(a["dude"])
-int f = a["dude"]
+string f = a["dude"]
