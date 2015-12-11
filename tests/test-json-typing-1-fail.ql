@@ -1,2 +1,3 @@
 json a = json("my_file")
-int x = a["num1"] + a["num2"]
+int x = 1 + 2 + 3 + 4 + 5 + a["num1"]
+float c = a["num1"]

@@ -28,6 +28,17 @@ let ast_data_to_data (dt : Ast.data_type) = match dt
 	| Json -> Json
 	| _ -> AnyType
 
+let ast_data_to_string (dt : Ast.data_type) = match dt
+	with Int -> "int"
+	| Float -> "float"
+	| Bool -> "bool"
+	| String -> "string"
+	| Array(i) -> "array"
+	| Json -> "json"
+	| _ -> raise (Failure "cannot convert to string")
+
+
+
 let data_to_ast_data (dt : data_type) = match dt
 	with Int -> Ast.Int
 	| Float -> Ast.Float
@@ -115,6 +126,7 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 	| Id(i) -> ast_data_to_data((var_type i env))
 	| Call(func_name, arg_list) ->
 		let arg_types = List.map (fun expr -> (data_to_ast_data((check_expr_type (expr) (env))))) arg_list in
+		verify_func_call func_name arg_types env;
 		let func_return_type = func_return_type func_name env in
 		ast_data_to_data(func_return_type)
 	| Bracket_select(id, selectors) ->
@@ -168,14 +180,23 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| _ -> raise (Failure "we can't print this")
 
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
-	with Call(f_name, args) -> (match f_name
-		with "print" ->
-			if List.length args != 1 then
+	with Call(f_name, args) -> 
+		if f_name = "print" then
+		 	if List.length args != 1 then
 				raise (Failure "Print only takes one argument")
-		| _ ->
+			else
+				env
+		else
 			let arg_types = List.map (fun expr -> (data_to_ast_data((check_expr_type (expr) (env))))) args in
-			verify_func_call f_name arg_types env)
-	| _ -> ()
+			verify_func_call f_name arg_types env;
+			let func_args = FunctionMap.find f_name env.func_map in
+			let func_arg_types = func_args.args in
+			let new_json_mapping = List.fold_left2 (fun env expr expected_type -> (match expr 
+				with Bracket_select(id, selectors) -> json_selector_update (serialize (expr) (env)) (ast_data_to_string expected_type) (env)
+				| _ -> env
+				)) env args func_arg_types in
+			new_json_mapping
+	| _ -> env
 
 let handle_json (json_expr : Ast.expr) (env : Environment.symbol_table) = match json_expr
 	with Id(i) -> (match var_type i env
@@ -202,8 +223,8 @@ let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_t
 (* compile AST to java syntax *)
 let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
 	with Expr(e1) ->
-		handle_expr_statement (e1) (env);
-		env
+		let updated_expr = (handle_expr_statement (e1) (env)) in
+		updated_expr
 	| Update_variable (id, e1) ->
 		let ast_dt = var_type id env in
 			if ast_dt == Bool then
@@ -244,7 +265,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			json_selector_update (serialize e1 env) data_type updated_env;
 		else
 			let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
-			equate left right;
+			equate left right;	
 			let declared_var = declare_var id data_type env in
 			map_json_types e1 declared_var data_type
 	| Array_assign(expected_data_type, id, e1) ->
