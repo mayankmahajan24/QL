@@ -2,7 +2,7 @@ OCAMLC=ocamlc
 OCAMLDEP=ocamldep
 OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
-OBJS=ast.cmo parser.cmo scanner.cmo environment.cmo semantic.cmo jast.cmo semantic_to_jast.cmo code_generator.cmo compile.cmo qlc.cmo
+OBJS=ast.cmo parser.cmo scanner.cmo environment.cmo semantic.cmo jast.cmo semantic_to_jast.cmo code_generator.cmo qlc.cmo
 
 qlc: $(OBJS)
 	ocamlc -o qlc $(OBJS)
@@ -31,16 +31,14 @@ environment.cmo : ast.cmo
 environment.cmx : ast.cmx
 semantic.cmo : environment.cmo ast.cmo
 semantic.cmx : environment.cmx ast.cmx
-compile.cmo : ast.cmo
-compile.cmx : ast.cmx
 sast.cmo : ast.cmo
 sast.cmx : ast.cmx
 jast.cmo : ast.cmo
 jast.cmx : ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
-qlc.cmo : scanner.cmo parser.cmi ast.cmo semantic.cmo jast.cmo semantic_to_jast.cmo code_generator.cmo compile.cmo
-qlc.cmx : scanner.cmx parser.cmx ast.cmx semantic.cmx jast.cmx semantic_to_jast.cmx code_generator.cmx compile.cmx
+qlc.cmo : scanner.cmo parser.cmi ast.cmo semantic.cmo jast.cmo semantic_to_jast.cmo code_generator.cmo
+qlc.cmx : scanner.cmx parser.cmx ast.cmx semantic.cmx jast.cmx semantic_to_jast.cmx code_generator.cmx
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
 parser.cmi : ast.cmo
