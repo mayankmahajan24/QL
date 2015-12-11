@@ -57,7 +57,17 @@ let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : da
 	with (Int, _, Int) -> Int
 	| (Float, _, Float) -> Float
 	| (String, Add, String) -> String
-	| (_, _, _) -> raise (Failure "cannot perform binary operations with provided arguments")
+	| (AnyType, _, Int) -> Int
+	| (AnyType, _, Float) -> Float
+	| (AnyType, Add, String) -> String
+	| (Int, _, AnyType) -> Int
+	| (Float, _, AnyType) -> Float
+	| (String, Add, AnyType) -> String
+	| (AnyType, Add, AnyType) -> AnyType
+	| (AnyType, _, AnyType) -> Float
+		(* If we're doing math on two any types, just assume it's a float. *)
+	| (_, _, _) ->
+		raise (Failure "cannot perform binary operations with provided arguments")
 
 (*Possibly add int/float comparison*)
 let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right_expr : data_type) = match op
@@ -79,13 +89,19 @@ let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right
 			)
 		| _ -> raise BadBinopType
 
-let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) = match d_type
+let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) (serial : string) = match d_type
 	with Array ->
 		if List.length selectors != 1 then raise MultiDimensionalArraysNotAllowed;
 		if check_expr_type (List.hd selectors) (env) != Int then raise ImproperBraceSelectorType;
 		let ast_array_type = array_type (id) (env) in
 		ast_data_to_data ast_array_type
 	(* Return the type being stored for this particular array *)
+	| Json -> 
+		List.iter (fun expr ->
+				let expr_type = check_expr_type (expr) (env) in
+				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
+		) selectors;
+		ast_data_to_data (json_selector_type (serial) (env))
 	| _ -> raise ImproperBraceSelection
 
 and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match expr
@@ -104,10 +120,11 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 	| Bracket_select(id, selectors) ->
 		let selector_ast_data_type = var_type id env in
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
-		check_bracket_select_type (selector_data_type) (selectors) (env) (id)
-	| Json_selector_list(i) -> AnyType
+		check_bracket_select_type (selector_data_type) (selectors) (env) (id) (serialize (expr) (env))
+	| Json_selector_list(i) ->
+		AnyType
 
-let serialize (expr : Ast.expr) (env : symbol_table) = match expr
+and serialize (expr : Ast.expr) (env : symbol_table) = match expr
 	with Bracket_select(id, selectors) ->
 		let concat = List.fold_left (fun acc x ->
 			let expr_type = check_expr_type (x) (env) in
@@ -116,6 +133,15 @@ let serialize (expr : Ast.expr) (env : symbol_table) = match expr
 			) "" (List.rev selectors) in
 					id ^ concat; 
 	| _ -> raise (Failure "incorrect usage of bracket syntax")
+
+let rec map_json_types (expr : Ast.expr) (env : symbol_table) (data_type : string) = match expr
+	with Binop(left_expr, op, right_expr) ->
+		let left_env = (map_json_types (left_expr) (env) (data_type)) in
+		let right_env = (map_json_types (right_expr) (left_env) (data_type)) in
+		right_env
+	| Bracket_select(id, selectors) ->
+		json_selector_update (serialize (expr) (env)) (data_type) (env)
+	| _ -> env
 
 let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
 	with Bracket_select(id, selectors) ->
@@ -140,7 +166,6 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| Literal_bool(i) -> i
 	| Literal_string(i) -> i
 	| _ -> raise (Failure "we can't print this")
-
 
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
 	with Call(f_name, args) -> (match f_name
@@ -216,11 +241,12 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Assign(data_type, id, e1) ->
 		if (json_selector_found e1 env) == true then
 			let updated_env = declare_var id data_type env in
-				json_selector_update (serialize e1 env) data_type updated_env;
+			json_selector_update (serialize e1 env) data_type updated_env;
 		else
 			let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;
-			declare_var id data_type env;
+			let declared_var = declare_var id data_type env in
+			map_json_types e1 declared_var data_type
 	| Array_assign(expected_data_type, id, e1) ->
 		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
 			let inferred_type = List.map (fun expr -> data_to_ast_data (check_expr_type (expr) (env))) e1 in
@@ -230,7 +256,6 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let left = string_to_data_type(data_type) and right = handle_bool_expr (e1) (env) in
 			equate left right;
 			declare_var id data_type env;
-
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
 		let func_env = declare_func func_name return_type arg_list env in
 		let func_env_vars = define_func_vars arg_list func_env in
@@ -269,6 +294,7 @@ and check_return_statement (stmt : Ast.stmt) (env : Environment.symbol_table) (r
 		| _ -> raise (Failure "Function must end with return statement")
 	else
 		check_statement stmt env
+
 
 (* entry point into semantic checker *)
 let check_program (stmt_list : Ast.program) =

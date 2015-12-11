@@ -5,4 +5,4 @@ float d = a["avg"]
 string name = a["student"]
 if(b > 5) {
 	b = b - 5
-} 
+}

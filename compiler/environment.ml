@@ -12,7 +12,7 @@ exception FunctionNotDeclared;;
 exception IncorrectFunctionParameterTypes;;
 exception MixedTypeArray;;
 exception ArrayInferTypeMismatch;;
-exception JsonSelectorAlreadyUsed;;
+exception JsonSelectorTypeMismatch;;
 
 type func_info  = {
   id : string; 
@@ -124,10 +124,19 @@ let func_return_type (func_name : string) (env : symbol_table) =
   else
     raise FunctionNotDeclared
 
-let json_selector_update (id : string) (data_type : string)  (env : symbol_table) =
-  let serialized = id in
-    if JsonSelectorMap.mem serialized env.json_selector_map then
-      raise JsonSelectorAlreadyUsed
+let json_selector_update (id : string) (data_type : string) (env : symbol_table) =
+  if JsonSelectorMap.mem id env.json_selector_map then
+    let json_selector_type = JsonSelectorMap.find id env.json_selector_map in
+    if (string_to_data_type data_type) != json_selector_type then
+      raise JsonSelectorTypeMismatch
     else
-      let update_json_selector = JsonSelectorMap.add serialized (string_to_data_type data_type) env.json_selector_map in
-      update env.func_map env.var_map env.array_type_map update_json_selector
+      env
+  else
+    let update_json_selector = JsonSelectorMap.add id (string_to_data_type data_type) env.json_selector_map in
+    update env.func_map env.var_map env.array_type_map update_json_selector
+
+let json_selector_type (id : string) (env : symbol_table) =
+  if JsonSelectorMap.mem id env.json_selector_map then
+    JsonSelectorMap.find id env.json_selector_map
+  else
+    AnyType
