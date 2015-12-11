@@ -287,6 +287,12 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
     	let _ = check_statements (then_stmt) (new_env) in
     	let _ = check_statements (else_stmt) (new_env) in
     	new_env
+  | Update_array_element (id, e1, e2) ->
+  	let ast_array_data_type = array_type id env in
+  		let data_type = ast_data_to_data ast_array_data_type in
+  			let right = check_expr_type (e2) (env) in
+  				equate data_type right;
+  				env;
 	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
 		let init_env = check_statement init_stmt env in
 		let (_,new_env) = handle_bool_expr bool_expr init_env in

@@ -94,6 +94,9 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
   | Jast.Update_variable(id, expr) ->
     let new_prog_string = prog_string ^ id ^ " = " ^ (handle_expression (expr)) ^ ";\n" in
     (new_prog_string, func_string)
+  | Jast.Update_array_element(id, e1, e2) ->
+    let new_prog_string = prog_string ^ id ^ "[" ^ (handle_expression(e1)) ^ "] = " ^ (handle_expression(e2)) ^ ";\n" in
+    (new_prog_string, func_string)
   | Bool_assign(id, expr) ->
     (* Why can't we reassign to a boolean? Seems broken *)
     let new_prog_string = prog_string ^ "boolean " ^ id ^ " = " ^ (handle_bool_expr expr) ^ ";" in

@@ -80,6 +80,10 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
   | Ast.Update_variable (id, e1) ->
     let update_expr = convert_expr e1 symbol_table in
     Jast.Update_variable(id, update_expr)
+  | Ast.Update_array_element (id, e1, e2) ->
+    let index_expr = convert_expr e1 symbol_table in
+      let update_expr = convert_expr e2 symbol_table in
+        Jast.Update_array_element(id, index_expr, update_expr)
   | Ast.Bool_assign(data_type, id, e1) -> Jast.Bool_assign(id, (convert_bool_expr (e1) (symbol_table)))
   | Ast.Return(e1) -> Jast.Return(convert_expr e1 symbol_table)
   | Ast.Func_decl(id, arg_decl_list, return_type, body) ->

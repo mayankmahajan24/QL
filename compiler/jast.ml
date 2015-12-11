@@ -45,6 +45,7 @@ type stmt =
     | Array_assign of string * string * expr list
     | Fixed_length_array_assign of string * string * int
     | Update_variable of string * expr
+    | Update_array_element of string * expr * expr
     | Bool_assign of string * bool_expr
     | Return of expr
     | Func_decl of string * arg_decl list * string * stmt list
