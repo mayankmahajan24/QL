@@ -46,6 +46,13 @@ let string_to_data_type (s : string) = match s
 	| "json" -> Json
 	| _ -> raise (Failure "unsupported data type")
 
+let string_data_literal (expr : Ast.expr) = match expr
+		with Literal_int(i) -> string_of_int i
+	| Literal_float(i) -> string_of_float i
+	| Literal_bool(i) -> i
+	| Literal_string(i) -> i
+	| _ -> raise (Failure "we can't print this")
+
 let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : data_type) = match (left_expr, op, right_expr)
 	with (Int, _, Int) -> Int
 	| (Float, _, Float) -> Float
@@ -73,13 +80,7 @@ let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right
 		| _ -> raise BadBinopType
 
 let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) = match d_type
-	with Json ->
-		List.iter (fun expr ->
-			let expr_type = check_expr_type (expr) (env) in
-			if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
-		) selectors;
-		AnyType
-	| Array ->
+	with Array ->
 		if List.length selectors != 1 then raise MultiDimensionalArraysNotAllowed;
 		if check_expr_type (List.hd selectors) (env) != Int then raise ImproperBraceSelectorType;
 		let ast_array_type = array_type (id) (env) in
@@ -106,6 +107,30 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 		check_bracket_select_type (selector_data_type) (selectors) (env) (id)
 	| Json_selector_list(i) -> AnyType
 
+let serialize (expr : Ast.expr) (env : symbol_table) = match expr
+	with Bracket_select(id, selectors) ->
+		let concat = List.fold_left (fun acc x ->
+			let expr_type = check_expr_type (x) (env) in
+				if expr_type == String then (acc ^ "[\"" ^ (string_data_literal x) ^ "\"]")
+				else acc
+			) "" (List.rev selectors) in
+					id ^ concat; 
+	| _ -> raise (Failure "incorrect usage of bracket syntax")
+
+let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
+	with Bracket_select(id, selectors) ->
+		let selector_ast_data_type = var_type id env in
+		let selector_data_type = ast_data_to_data selector_ast_data_type in
+		if selector_data_type == Json then
+			(List.iter (fun expr ->
+				let expr_type = check_expr_type (expr) (env) in
+				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
+			) selectors;
+			true)
+		else
+			false
+	| _ -> false
+
 let equate e1 e2 =
 	if (e1 != e2) && (e1 != AnyType) && (e2 != AnyType) then raise (Failure "data_type mismatch")
 
@@ -115,6 +140,7 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| Literal_bool(i) -> i
 	| Literal_string(i) -> i
 	| _ -> raise (Failure "we can't print this")
+
 
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
 	with Call(f_name, args) -> (match f_name
@@ -159,9 +185,12 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				raise UpdatingBool
 			else	
 				let data_type = ast_data_to_data ast_dt in
-					let right = check_expr_type (e1) (env) in
-						equate data_type right;
-						env;
+					if data_type == Json then 
+						raise (Failure "json aliasing not supported")
+					else
+						let right = check_expr_type (e1) (env) in
+							equate data_type right;
+					env;
     | If(bool_expr, then_stmt, else_stmt) ->
     	let is_boolean_expr = handle_bool_expr bool_expr env
     	and then_clause = check_statements then_stmt env
@@ -185,7 +214,11 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				and body_env = check_statements stmt_list init_env in
 					env
 	| Assign(data_type, id, e1) ->
-		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
+		if (json_selector_found e1 env) == true then
+			let updated_env = declare_var id data_type env in
+				json_selector_update (serialize e1 env) data_type updated_env;
+		else
+			let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;
 			declare_var id data_type env;
 	| Array_assign(expected_data_type, id, e1) ->

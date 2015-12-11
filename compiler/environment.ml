@@ -3,6 +3,7 @@ open Ast;;
 module FunctionMap = Map.Make(String);;
 module VariableMap = Map.Make(String);;
 module ArrayTypeMap = Map.Make(String);;
+module JsonSelectorMap = Map.Make(String);;
 
 exception VarAlreadyDeclared;;
 exception VarNotDeclared;;
@@ -11,6 +12,7 @@ exception FunctionNotDeclared;;
 exception IncorrectFunctionParameterTypes;;
 exception MixedTypeArray;;
 exception ArrayInferTypeMismatch;;
+exception JsonSelectorAlreadyUsed;;
 
 type func_info  = {
   id : string; 
@@ -23,6 +25,7 @@ type symbol_table = {
   func_map: func_info FunctionMap.t;
   var_map: data_type VariableMap.t;
   array_type_map: data_type ArrayTypeMap.t;
+  json_selector_map: data_type JsonSelectorMap.t;
 }
 
 let create = 
@@ -30,13 +33,15 @@ let create =
     func_map = FunctionMap.empty;
     var_map = VariableMap.empty;
     array_type_map = ArrayTypeMap.empty;
+    json_selector_map = JsonSelectorMap.empty;
   }
 
-let update f_map v_map a_type_map =
+let update f_map v_map a_type_map js_map =
   {
     func_map = f_map;
     var_map = v_map;
     array_type_map = a_type_map;
+    json_selector_map = js_map;
   }
 
 let string_to_data_type (s : string) = match s
@@ -53,7 +58,7 @@ let declare_var (id : string) (data_type : string) (env : symbol_table) =
     raise VarAlreadyDeclared
   else 
     let update_var_map = VariableMap.add id (string_to_data_type(data_type)) env.var_map in
-    update env.func_map update_var_map env.array_type_map
+    update env.func_map update_var_map env.array_type_map env.json_selector_map
 
 let var_type (id : string) (env : symbol_table) =
   if VariableMap.mem id env.var_map then
@@ -77,13 +82,13 @@ let define_array_type (expected_type: data_type)
     List.iter (fun (data_type) -> if first_type != data_type then raise MixedTypeArray) inferred_type;
     (if first_type == expected_type then
       let update_array_type_map = ArrayTypeMap.add id first_type env.array_type_map in
-      update env.func_map env.var_map update_array_type_map
+      update env.func_map env.var_map update_array_type_map env.json_selector_map
     else
       raise ArrayInferTypeMismatch)
   else
     (* Empty array created *)
     let update_array_type_map = ArrayTypeMap.add id expected_type env.array_type_map in
-    update env.func_map env.var_map update_array_type_map
+    update env.func_map env.var_map update_array_type_map env.json_selector_map
 
 let array_type (id : string) (env : symbol_table) =
   if ArrayTypeMap.mem id env.array_type_map then
@@ -102,7 +107,7 @@ let declare_func (func_name : string) (ret_type : string) (args : arg_decl list)
     raise FunctionAlreadyDeclared
   else
     let update_func_map = FunctionMap.add func_name (create_func func_name ret_type args) env.func_map in
-    update update_func_map env.var_map env.array_type_map
+    update update_func_map env.var_map env.array_type_map env.json_selector_map
 
 let verify_func_call (func_name: string) (args : data_type list) (env : symbol_table) =
   if FunctionMap.mem func_name env.func_map then
@@ -119,3 +124,10 @@ let func_return_type (func_name : string) (env : symbol_table) =
   else
     raise FunctionNotDeclared
 
+let json_selector_update (id : string) (data_type : string)  (env : symbol_table) =
+  let serialized = id in
+    if JsonSelectorMap.mem serialized env.json_selector_map then
+      raise JsonSelectorAlreadyUsed
+    else
+      let update_json_selector = JsonSelectorMap.add serialized (string_to_data_type data_type) env.json_selector_map in
+      update env.func_map env.var_map env.array_type_map update_json_selector
