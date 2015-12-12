@@ -100,7 +100,11 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
     let (prog, func) = handle_statements body "" "" in
     let (else_prog, else_func) = handle_statements else_body "" "" in
     let new_prog_string = prog_string ^ "if (" ^ handle_bool_expr condition ^ ") {" ^ prog ^ "} else {\n" ^ else_prog ^ "}" in
-    (new_prog_string, func_string)  
+    (new_prog_string, func_string)
+  | While(condition, body) ->
+    let (prog, func) = handle_statements body "" "" in
+    let new_prog_string = prog_string ^ "while (" ^ handle_bool_expr condition ^ ") {" ^ prog ^ "}\n" in
+    (new_prog_string, func_string)
   | _ -> (prog_string, func_string)
 
 and handle_statements (stmt_list : Jast.program) (prog_string : string) (func_string : string) = match stmt_list
