@@ -5,7 +5,7 @@ OCAMLYACC=ocamlyacc
 OBJS=ast.cmo parser.cmo scanner.cmo environment.cmo semantic.cmo jast.cmo semantic_to_jast.cmo code_generator.cmo qlc.cmo
 
 qlc: $(OBJS)
-	ocamlc -o qlc $(OBJS)
+	ocamlc -o qlc str.cma $(OBJS)
 
 scanner.ml: scanner.mll
 	$(OCAMLLEX) scanner.mll

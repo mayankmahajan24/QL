@@ -1,4 +1,5 @@
 open Jast;;
+open Str;;
 
 let convert_operator (op : math_op) = match op
   with Add -> "+"
@@ -75,6 +76,9 @@ let rec comma_separate_arg_list (arg_decl_list : Jast.arg_decl list) = match arg
     else
       head.var_type ^ " " ^ head.var_name
 
+let remove_semicolon (str : string) =
+  Str.global_replace (Str.regexp_string ";") "" str
+
 let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string : string) = match stmt
   with Expr(expr) ->
     let expr_string = handle_expression expr in
@@ -116,6 +120,15 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (func_string 
   | While(condition, body) ->
     let (prog, func) = handle_statements body "" "" in
     let new_prog_string = prog_string ^ "while (" ^ handle_bool_expr condition ^ ") {" ^ prog ^ "}\n" in
+    (new_prog_string, func_string)
+  | For(init, condition, update, body)  ->
+    let (init_stmt, init_func) = handle_statement init "" "" in
+    let condition_stmt = handle_bool_expr condition in
+    let (update_stmt, update_func) = handle_statement update "" "" in
+    let (body_stmt, body_func) = handle_statements body "" "" in
+    let new_prog_string = prog_string ^
+      "for (" ^ init_stmt ^ condition_stmt ^ ";" ^ remove_semicolon(update_stmt) ^ ") {\n"
+         ^ body_stmt ^ "}\n" in
     (new_prog_string, func_string)
   | _ -> (prog_string, func_string)
 
