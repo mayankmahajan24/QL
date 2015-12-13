@@ -1,2 +1,5 @@
 json a = json("hello.json")
-array int x = [1;2;3;4;5]
+if (a["matt"] > 5) {
+  print("hello")
+}
+string f = a["matt"]

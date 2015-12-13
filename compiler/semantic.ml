@@ -103,17 +103,25 @@ let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right
 let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) (serial : string) = match d_type
 	with Array ->
 		if List.length selectors != 1 then raise MultiDimensionalArraysNotAllowed;
+		(* We can ignore the env because we're explicitly updating later. *)
 		let (expr_type, _) = check_expr_type (List.hd selectors) (env) in
-		if expr_type != Int then raise ImproperBraceSelectorType;
+		if expr_type != Int && expr_type != AnyType then raise ImproperBraceSelectorType;
 		let ast_array_type = array_type (id) (env) in
-		ast_data_to_data ast_array_type
+		let data_type = ast_data_to_data ast_array_type in
+		if expr_type == AnyType then
+			let expr_head = List.hd selectors in
+			let json_update_map = json_selector_update (serialize (expr_head) (env)) "int" (env) in
+			(data_type, json_update_map)
+		else
+			(data_type, env)
 	(* Return the type being stored for this particular array *)
 	| Json -> 
 		List.iter (fun expr ->
 				let (expr_type, _) = check_expr_type (expr) (env) in
+				(* Might need to infer the type if we JSON select, as it could be a string or int. *)
 				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
 		) selectors;
-		ast_data_to_data (json_selector_type (serial) (env))
+		(ast_data_to_data (json_selector_type (serial) (env)), env)
 	| _ -> raise ImproperBraceSelection
 
 and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match expr
@@ -144,7 +152,7 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 	| Bracket_select(id, selectors) ->
 		let selector_ast_data_type = var_type id env in
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
-		(check_bracket_select_type (selector_data_type) (selectors) (env) (id) (serialize (expr) (env)), env)
+		(check_bracket_select_type (selector_data_type) (selectors) (env) (id) (serialize (expr) (env)))
 	| Json_selector_list(i) ->
 		(AnyType,env)
 
@@ -164,7 +172,6 @@ let rec map_json_types (expr : Ast.expr) (env : symbol_table) (data_type : strin
 		let right_env = (map_json_types (right_expr) (left_env) (data_type)) in
 		right_env
 	| Bracket_select(id, selectors) ->
-		print_endline "Mapping!";
 		json_selector_update (serialize (expr) (env)) (data_type) (env)
 	| _ -> env
 
@@ -174,6 +181,7 @@ let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		if selector_data_type == Json then
 			(List.iter (fun expr ->
+				(* TODO: If we use a non-declared JSON value, we'll have an error. Think about how to infer this. *)
 				let (expr_type,_) = check_expr_type (expr) (env) in
 				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
 			) selectors;
@@ -200,6 +208,7 @@ let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = ma
 			else
 				env
 		else
+			(* TODO: A bug could be here, cause we're ignoring the env variable we're getting *)
 			let arg_types = List.map (fun expr ->
 				let (expr_type, _) = (check_expr_type (expr) (env)) in
 				(data_to_ast_data(expr_type))) args in
@@ -251,11 +260,11 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 					if data_type == Json then 
 						raise (Failure "json aliasing not supported")
 					else
-						let (right,_) = check_expr_type (e1) (env) in
+						let (right,new_env) = check_expr_type (e1) (env) in
 							equate data_type right;
 							(match right
-								with AnyType -> json_selector_update (serialize (e1) (env)) (ast_data_to_string ast_dt) (env)
-								| _ -> env
+								with AnyType -> json_selector_update (serialize (e1) (new_env)) (ast_data_to_string ast_dt) (new_env)
+								| _ -> new_env
 							)
     | If(bool_expr, then_stmt, else_stmt) ->
     	let is_boolean_expr = handle_bool_expr bool_expr env
@@ -287,11 +296,11 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			let left = string_to_data_type(data_type) and (right,new_env) = check_expr_type (e1) (env) in
 			equate left right;	
 			let declared_var = declare_var id data_type new_env in
-			print_endline "We're here!";
 			map_json_types e1 declared_var data_type
 	| Array_assign(expected_data_type, id, e1) ->
 		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
 			let inferred_type = List.map (fun expr ->
+				(* Don't need to use new env because we won't have JSON in the array *)
 				let (data_type,_) = (check_expr_type (expr) (env)) in 
 				data_to_ast_data (data_type)) e1 in
 				let declare_var_env = declare_var id "array" env in
@@ -332,6 +341,7 @@ and check_function_statements stmts env return_type = match stmts
 and check_return_statement (stmt : Ast.stmt) (env : Environment.symbol_table) (return_type : string) =
 	if return_type != "void" then match stmt
 		with Return(expr) ->
+			(* Since we're returning, we don't need to declare the returned JSON type as a type *)
 			let left = string_to_data_type(return_type) and (right,_) = check_expr_type (expr) (env) in
 				equate left right;
 				env
@@ -344,4 +354,5 @@ and check_return_statement (stmt : Ast.stmt) (env : Environment.symbol_table) (r
 let check_program (stmt_list : Ast.program) =
 	let env = Environment.create in
 	check_statements stmt_list env;
+
 
