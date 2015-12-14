@@ -37,8 +37,6 @@ let ast_data_to_string (dt : Ast.data_type) = match dt
 	| Json -> "json"
 	| _ -> raise (Failure "cannot convert to string")
 
-
-
 let data_to_ast_data (dt : data_type) = match dt
 	with Int -> Ast.Int
 	| Float -> Ast.Float
@@ -98,7 +96,6 @@ let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right
 			| (_, AnyType) -> Bool
 			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
 			)
-		| _ -> raise BadBinopType
 
 let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) (serial : string) = match d_type
 	with Array ->
@@ -230,21 +227,35 @@ let handle_json (json_expr : Ast.expr) (env : Environment.symbol_table) = match 
 	| _ -> raise IncorrectWhereType
 
 let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_table) = match bool_expr
-	with Literal_bool(i) -> Bool
-	| Binop(e1, op, e2) -> (let exists =
-			let (left_type, left_env) = (check_expr_type e1 env) in
-			let (right_type, right_env) = (check_expr_type e1 left_env) in 
-		check_bool_expr_binop_type left_type op right_type in
-			Bool)
-	| Bool_binop(e1, conditional, e2) -> (let isBool1 = handle_bool_expr e1 env and
-		isBool2 = handle_bool_expr e2 env in
-			Bool)
-	| Not(e1) -> (let isBool1 = handle_bool_expr e1 in
-					Bool)
-	| Id(i) -> (match var_type i env
-				with Bool ->
-					Bool
-				| _ -> raise NotBoolExpr )
+	with Literal_bool(i) -> (Bool,env)
+	| Binop(e1, op, e2) -> 
+			let (l_type, left_env) = (check_expr_type e1 env) in
+			let (r_type, right_env) = (check_expr_type e2 left_env) in 
+			let _ = check_bool_expr_binop_type (l_type) (op) (r_type) in
+			(match (l_type, r_type) 
+				with (AnyType, AnyType) ->
+					(* NOTE: We're defining things that are compared as floats, so we can define them as something. *)
+					let new_left_env = json_selector_update (serialize (e1) (env)) "float" (right_env) in
+					let new_right_env = json_selector_update (serialize (e2) (env)) "float" (new_left_env) in
+					(Bool, new_right_env)
+				| (AnyType, _) ->
+					let new_env = json_selector_update (serialize (e1) (right_env)) (ast_data_to_string (data_to_ast_data (r_type))) (right_env) in
+					(Bool, new_env)
+				| (_, AnyType) -> 
+					let new_env = json_selector_update (serialize (e2) (right_env)) (ast_data_to_string (data_to_ast_data (l_type))) (right_env) in
+					(Bool, new_env)
+				| (_, _) -> (Bool, right_env)
+			)
+	| Bool_binop(e1, conditional, e2) -> 
+		let (_, left_env) = handle_bool_expr (e1) (env) in
+		let (_, right_env) = handle_bool_expr (e2) (left_env) in
+ 		(Bool, right_env)
+	| Not(e1) -> 
+		let (_,new_env) = handle_bool_expr (e1) (env) in
+		(Bool, new_env)
+	| Id(i) -> match var_type i env
+		with Bool -> (Bool,env)
+		| _ -> raise NotBoolExpr
 
 (* compile AST to java syntax *)
 let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
@@ -267,27 +278,29 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 								| _ -> new_env
 							)
     | If(bool_expr, then_stmt, else_stmt) ->
-    	let is_boolean_expr = handle_bool_expr bool_expr env
-    	and then_clause = check_statements then_stmt env
-    	and else_clause = check_statements else_stmt env in
-    		env
+    	let (_,new_env) = handle_bool_expr bool_expr env in
+    	let _ = check_statements (then_stmt) (new_env) in
+    	let _ = check_statements (else_stmt) (new_env) in
+    	new_env
 	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
 		let init_env = check_statement init_stmt env in
-			let is_boolean = handle_bool_expr bool_expr init_env
-			and update_env = check_statement update_stmt init_env in
-				let body_env = check_statements stmt_list init_env in
-					env
+		let (_,new_env) = handle_bool_expr bool_expr init_env in
+		let update_env = check_statement update_stmt new_env in
+		let _ = check_statements (stmt_list) (update_env) in
+			(* We need to worry about scoping here. I think we want all the things in bool expr to count. *)
+		new_env
 	| While(bool_expr, body) ->
-		let is_boolean_expr = handle_bool_expr bool_expr env
-		and new_env = check_statements body env in
-			env
+		let (_,while_env) = handle_bool_expr bool_expr env in
+		let _ = check_statements (body) (while_env) in
+		(* Same thing here. We might want to be returning while_env *)
+		while_env
 	| Where(bool_expr, id, stmt_list, json_object) ->
-		let init_env = env in
-			let is_bool_expr = handle_bool_expr bool_expr init_env
-			and update_env = declare_var id "json" init_env in
-				let is_json = handle_json json_object init_env
-				and body_env = check_statements stmt_list init_env in
-					env
+		let update_env = declare_var id "json" env in
+		let (_,where_env) = handle_bool_expr bool_expr update_env in
+		let _ = handle_json json_object update_env in
+		let _ = (check_statements (stmt_list) (update_env)) in
+		(* Also here. *)
+		where_env
 	| Assign(data_type, id, e1) ->
 		if (json_selector_found e1 env) == true then
 			let updated_env = declare_var id data_type env in
@@ -306,22 +319,20 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				let declare_var_env = declare_var id "array" env in
 					define_array_type (left) (inferred_type) (declare_var_env) (id)
 	| Bool_assign(data_type, id, e1) ->
-		let left = string_to_data_type(data_type) and right = handle_bool_expr (e1) (env) in
+		let left = string_to_data_type(data_type) and (right,new_env) = handle_bool_expr (e1) (env) in
 			equate left right;
-			declare_var id data_type env;
+			declare_var id data_type new_env;
 	| Func_decl(func_name, arg_list, return_type, stmt_list) ->
 		let func_env = declare_func func_name return_type arg_list env in
 		let func_env_vars = define_func_vars arg_list func_env in
 		(* TODO: Implement void functions *)
-		if return_type != "void" && List.length arg_list == 0 then
-			raise ReturnStatementMissing
-		else
-			check_function_statements (List.rev stmt_list) func_env_vars return_type;
-			func_env
+		if (return_type != "void" && (List.length arg_list) == 0) then raise ReturnStatementMissing;
+		let _ = check_function_statements (List.rev stmt_list) func_env_vars return_type in
+		func_env
 	| Noop -> env
 	| _ -> raise (Failure "Unimplemented functionality")
 
-and check_statements stmts env = match stmts
+and check_statements (stmts : Ast.stmt list) (env : Environment.symbol_table) = match stmts
     with [] -> env
   | [stmt] -> check_statement stmt env
   | stmt :: other_stmts ->
@@ -353,6 +364,6 @@ and check_return_statement (stmt : Ast.stmt) (env : Environment.symbol_table) (r
 (* entry point into semantic checker *)
 let check_program (stmt_list : Ast.program) =
 	let env = Environment.create in
-	check_statements stmt_list env;
+	check_statements (stmt_list) (env);
 
 
