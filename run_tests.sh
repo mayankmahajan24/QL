@@ -13,7 +13,7 @@ globallog=run_tests.log
 rm -f $globallog
 error=0
 
-make all
+make all &> /dev/null
 
 SignalError() {
   if [ $error -eq 0 ] ; then

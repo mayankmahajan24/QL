@@ -12,7 +12,7 @@ exception FunctionNotDeclared;;
 exception IncorrectFunctionParameterTypes;;
 exception MixedTypeArray;;
 exception ArrayInferTypeMismatch;;
-exception JsonSelectorAlreadyUsed;;
+exception JsonSelectorTypeMismatch;;
 
 type func_info  = {
   id : string; 
@@ -51,7 +51,7 @@ let string_to_data_type (s : string) = match s
   | "string" -> String
   | "array" -> Array(Int)
   | "json" -> Json
-  | _ -> raise (Failure "unsupported data type")
+  | _ -> raise (Failure "unsupported data type 1")
 
 let declare_var (id : string) (data_type : string) (env : symbol_table) =
   if VariableMap.mem id env.var_map then 
@@ -113,7 +113,11 @@ let verify_func_call (func_name: string) (args : data_type list) (env : symbol_t
   if FunctionMap.mem func_name env.func_map then
     let declared_func = FunctionMap.find func_name env.func_map in
     let type_pairs = List.combine args declared_func.args in
-    List.iter (fun (left, right) -> if left != right then raise IncorrectFunctionParameterTypes) type_pairs;
+    List.iter (fun (left, right) -> 
+      if left != right then 
+        if left != AnyType && right != AnyType then
+          raise IncorrectFunctionParameterTypes
+    ) type_pairs
   else
     raise FunctionNotDeclared
 
@@ -124,10 +128,19 @@ let func_return_type (func_name : string) (env : symbol_table) =
   else
     raise FunctionNotDeclared
 
-let json_selector_update (id : string) (data_type : string)  (env : symbol_table) =
-  let serialized = id in
-    if JsonSelectorMap.mem serialized env.json_selector_map then
-      raise JsonSelectorAlreadyUsed
+let json_selector_update (id : string) (data_type : string) (env : symbol_table) =
+  if JsonSelectorMap.mem id env.json_selector_map then
+    let json_selector_type = JsonSelectorMap.find id env.json_selector_map in
+    if (string_to_data_type data_type) != json_selector_type then
+      raise JsonSelectorTypeMismatch
     else
-      let update_json_selector = JsonSelectorMap.add serialized (string_to_data_type data_type) env.json_selector_map in
-      update env.func_map env.var_map env.array_type_map update_json_selector
+      env
+  else
+    let update_json_selector = JsonSelectorMap.add id (string_to_data_type data_type) env.json_selector_map in
+    update env.func_map env.var_map env.array_type_map update_json_selector
+
+let json_selector_type (id : string) (env : symbol_table) =
+  if JsonSelectorMap.mem id env.json_selector_map then
+    JsonSelectorMap.find id env.json_selector_map
+  else
+    AnyType
