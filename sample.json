@@ -1,5 +1,6 @@
 {
   "count" : 5,
+  "int_index" : 0,
   "owner" : "Matt",
   "number" : 5.4,
   "friends" : [

@@ -112,10 +112,11 @@ let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (
 			(data_type, env)
 	(* Return the type being stored for this particular array *)
 	| Json ->
-		List.iter (fun expr ->
+		List.iteri (fun index expr ->
 				let (expr_type, _) = check_expr_type (expr) (env) in
 				(* Might need to infer the type if we JSON select, as it could be a string or int. *)
-				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
+				if expr_type != String && index == 0 then (raise ImproperBraceSelectorType);
+				if expr_type != String && expr_type != Int then (raise ImproperBraceSelectorType);
 		) selectors;
 		(ast_data_to_data (json_selector_type (serial) (env)), env)
 	| _ -> raise ImproperBraceSelection
@@ -157,13 +158,27 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 
 and serialize (expr : Ast.expr) (env : symbol_table) = match expr
 	with Bracket_select(id, selectors) ->
-		let concat = List.fold_left (fun acc x ->
+		let serialized = List.fold_left (fun acc x ->
 			let (expr_type,_) = check_expr_type (x) (env) in
-				if expr_type == String then (acc ^ "[\"" ^ (string_data_literal x) ^ "\"]")
-				else acc
-			) "" (List.rev selectors) in
-					id ^ concat;
+			(match expr_type
+				with String -> acc ^ "[\"" ^ (serialize_literal x) ^ "\"]"
+				| Int -> acc ^ (serialize_literal x)
+				| _ -> acc
+			)
+			) id (List.rev selectors) in
+		serialized
+		(* This is going to cause errors. Watch out for it. *)
 	| _ -> raise (Failure "incorrect usage of bracket syntax")
+
+and serialize_literal (literal : expr) = match literal
+		with Literal_int(i) -> string_of_int i
+	| Literal_float(i) -> string_of_float i
+	| Literal_bool(i) -> i
+	| Literal_string(i) -> i
+	| Id(i) -> i
+	| Bracket_select(id, selectors) -> (List.fold_left (
+		fun str expr -> str ^ (serialize_literal (expr)))) id selectors
+	| _ -> raise (Failure "we can't print this") 
 
 let rec map_json_types (expr : Ast.expr) (env : symbol_table) (data_type : string) = match expr
 	with Binop(left_expr, op, right_expr) ->
@@ -179,10 +194,11 @@ let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
 		let selector_ast_data_type = var_type id env in
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		if selector_data_type == Json then
-			(List.iter (fun expr ->
+			(List.iteri (fun index expr ->
 				(* TODO: If we use a non-declared JSON value, we'll have an error. Think about how to infer this. *)
 				let (expr_type,_) = check_expr_type (expr) (env) in
-				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType
+				if expr_type != String && index = 0 then raise ImproperBraceSelectorType;
+				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType;
 			) selectors;
 			true)
 		else

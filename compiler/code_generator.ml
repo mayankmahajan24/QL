@@ -1,6 +1,8 @@
 open Jast;;
 open Str;;
 
+let rec range i j = if i > j then [] else i :: (range (i+1) j)
+
 let convert_operator (op : math_op) = match op
   with Add -> "+"
   | Sub -> "-"
@@ -18,6 +20,14 @@ let convert_bool_operator (op : bool_op) = match op
 let convert_cond_op (cond : conditional) = match cond
   with And -> "&&"
   | Or -> "||"
+
+let cast_json_access (prog_str : string) (data_type : string) = match data_type
+  with "int" -> "((Long) " ^ prog_str ^ ").intValue()"
+  | "double" -> "((Number) " ^ prog_str ^ ").doubleValue()"
+  | "JSONObject" -> ""
+  | "boolean" -> ""
+  | "String" ->  "(String)" ^ prog_str
+  | _ -> raise (Failure "What could this be?")
 
 let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
   with [] -> ""
@@ -55,15 +65,38 @@ and handle_expression (expr : Jast.expr) = match expr
   | Json_object(file_name) -> "(JSONObject) (new JSONParser()).parse(new FileReader(\""^ file_name ^ "\"))"
   | Array_initializer(expr_list) -> "{" ^ comma_separate_list (expr_list) ^ "}"
   | Bracket_select(id, data_type, expr_list, expr_types) ->
-    (* Work on multiple depth expressions *)
-    (match data_type
-      with "int" -> "((Long) " ^ id ^ ".get(" ^ handle_expression (List.hd expr_list) ^ ")).intValue()"
-      | "double" -> "((Number) " ^ id ^ ".get(" ^ handle_expression (List.hd expr_list) ^ ")).doubleValue()"
-      | "JSONObject" -> "" 
-      | "boolean" -> ""
-      | "String" -> "(" ^ data_type ^ ") " ^ id ^ ".get(" ^ handle_expression (List.hd expr_list) ^ ")"
-      | _ -> raise (Failure "What could this be?")
-    )
+    (* This is wonky logic, but it should work *)
+    if List.length expr_list == 1 then (
+      cast_json_access (id ^ ".get(" ^ handle_expression (List.hd expr_list) ^ ")") data_type
+      )
+    else
+      let expr_type_pairs = List.combine expr_list expr_types in
+      let expr_num_range = range 0 ((List.length expr_list) - 1) in
+      let prog_str = List.fold_left2 (fun prog_str expr_pair index ->
+        let (expr, expr_type) = expr_pair in
+        if index != ((List.length expr_list) - 1) then (
+          if index = 0 then (
+            (match (List.nth expr_types (index + 1))
+              with Int -> "((JSONArray) " ^ id ^ ".get(" ^ handle_expression (expr) ^ "))"
+              | String -> "((JSONObject) " ^ id ^ ".get(" ^ handle_expression(expr) ^ "))"
+              | _ -> raise (Failure "Fuck this.")
+            )
+          )
+          else (
+            (match (List.nth expr_types (index + 1))
+              with Int -> "((JSONArray) " ^ prog_str ^ ".get(" ^ handle_expression (expr) ^ "))"
+              | String -> "((JSONObject) " ^ prog_str ^ ".get(" ^ handle_expression(expr) ^ "))"
+              | _ -> raise (Failure "Fuck this.")
+            )
+          (* Probably need to do something else if it's the last one *)
+          (*"((" ^ expr_type ^ ")" ^ prog_str ^ ".get(" ^ handle_expression (expr) ^ "))"*)
+          )
+        )
+        else (
+          cast_json_access (prog_str ^ ".get(" ^ handle_expression (expr) ^ ")") data_type
+        )
+      ) "" expr_type_pairs expr_num_range in
+      prog_str
   | _ -> ""
 
 let rec handle_bool_expr (expr : Jast.bool_expr) = match expr
