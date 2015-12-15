@@ -1,14 +1,7 @@
 {
   "count" : 5,
   "owner" : "Matt",
-<<<<<<< a522d94b22f2461bcb38ae39c24d484bbe31a1a0
-<<<<<<< a4fd224a777e3a687a1828861c45468ad4850e83
   "number" : 5.4,
-=======
->>>>>>> Getting the JSON build workflow working
-=======
-  "number" : 5.4,
->>>>>>> Getting JSON test to fail, got reading from file working
   "friends" : [
     {
       "name" : "Anshul",
@@ -26,12 +19,8 @@
       "name" : "Mayank",
       "age" : 32
     }
-<<<<<<< a4fd224a777e3a687a1828861c45468ad4850e83
   ],
   "inner" : {
     "name" : "Hello!"
   }
-=======
-  ]
->>>>>>> Getting the JSON build workflow working
 }
