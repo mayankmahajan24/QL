@@ -204,7 +204,7 @@ expr:
   | expr DIVIDE expr              { Binop($1, Div,   $3) }
   | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
   | LPAREN expr RPAREN            { $2 }
-  | ID bracket_selector_list      { Bracket_select($1, $2) }
+  | ID bracket_selector_list      { Bracket_select($1, List.rev $2) }
   | json_selector_list            { Json_selector_list($1) }
 
 bool_expr:
