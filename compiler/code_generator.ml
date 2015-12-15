@@ -97,6 +97,7 @@ and handle_expression (expr : Jast.expr) = match expr
         )
       ) "" expr_type_pairs expr_num_range in
       prog_str
+  | Array_initializer(expr_list) -> "{" ^ comma_separate_list (expr_list) ^ "}" 
   | _ -> ""
 
 let rec handle_bool_expr (expr : Jast.bool_expr) = match expr
