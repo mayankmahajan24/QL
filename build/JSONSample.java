@@ -13,6 +13,8 @@ public class JSONSample {
       int count = ((Long) obj.get("count")).intValue();
       JSONArray arr = (JSONArray) obj.get("friends");
       Iterator arrIterator = arr.iterator();
+      // a["matt"][0]["pic"]
+      ((JSONObject) ((JSONArray) obj.get("matt")).get("pic"))
       String innerName = (String) ((JSONObject) obj.get("inner")).get("name");
       while (arrIterator.hasNext()) {
         JSONObject each = (JSONObject) arrIterator.next();
@@ -20,6 +22,10 @@ public class JSONSample {
       }
       System.out.println(name);
       System.out.println(count);
+
+      JSONArray myArr = ((JSONArray) obj.get("friends"));
+      // Add ((TYPE)......get(___))
+      String myName = (String) ((JSONObject)((JSONArray) obj.get("friends")).get(0)).get("name");
     } catch (Exception e) {
       System.out.println(e);
       System.out.println("No");

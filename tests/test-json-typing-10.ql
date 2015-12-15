@@ -1,5 +1,5 @@
-json a = json("hello.json")
-while (a["matt"] > 5) {
+json a = json("sample.json")
+if (a["count"] > 4) {
   print("hello")
 }
-int f = a["matt"]
+int f = a["count"]
