@@ -285,13 +285,13 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 								with AnyType -> json_selector_update (serialize (e1) (new_env)) (ast_data_to_string ast_dt) (new_env)
 								| _ -> new_env
 							)
-  | If(bool_expr, then_stmt, else_stmt) ->
-  	let (_,new_env) = handle_bool_expr bool_expr env in
-  	let _ = check_statements (then_stmt) (new_env) in
-  	let _ = check_statements (else_stmt) (new_env) in
-  		new_env
-  | Update_array_element (id, e1, e2) ->
-  	let ast_array_data_type = array_type id env in
+ 	| If(bool_expr, then_stmt, else_stmt) ->
+		let (_,new_env) = handle_bool_expr bool_expr env in
+		let _ = check_statements (List.rev then_stmt) (new_env) in
+		let _ = check_statements (List.rev else_stmt) (new_env) in
+			new_env
+  	| Update_array_element (id, e1, e2) ->
+  		let ast_array_data_type = array_type id env in
 		let data_type = ast_data_to_data ast_array_data_type in
 		let (right, new_env) = check_expr_type (e2) (env) in
 			equate data_type right;

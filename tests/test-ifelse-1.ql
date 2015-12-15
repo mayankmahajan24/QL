@@ -1,5 +1,7 @@
 if (5 > 4) {
   int a = 5
+  a = 2
 } else {
-  int a = 2
+  int b = 2
+  b = 1 
 }
