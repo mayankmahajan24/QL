@@ -27,7 +27,7 @@ type expr =
     | Binop of expr * math_op * expr
     | Call of string * expr list
     | Json_object of string
-    | Bracket_select of string * expr list
+    | Bracket_select of string * string * expr list * data_type list
     | Array_select of string * expr
     | Dummy_expr of string
 
