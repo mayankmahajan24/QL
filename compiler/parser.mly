@@ -166,9 +166,12 @@ if_else_stmt:
 /* Assignment */
 assignment_stmt:
     ARRAY assignment_data_type ID ASSIGN array_literal  { Array_assign($2, $3, $5) }
+    | ARRAY assignment_data_type ID ASSIGN ARRAY
+      LPAREN INT_LITERAL RPAREN                         { Fixed_length_array_assign($2, $3, $7) }
     | assignment_data_type ID ASSIGN expr               { Assign($1, $2, $4) }
     | BOOL ID ASSIGN bool_expr                          { Bool_assign("bool", $2, $4) }
     | ID ASSIGN expr                                    { Update_variable($1, $3) }
+    | ID bracket_selector ASSIGN expr                   { Update_array_element($1, $2, $4) }
 
 bracket_selector_list:
   bracket_selector { [$1] }

@@ -112,7 +112,7 @@ let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (
 		else
 			(data_type, env)
 	(* Return the type being stored for this particular array *)
-	| Json -> 
+	| Json ->
 		List.iter (fun expr ->
 				let (expr_type, _) = check_expr_type (expr) (env) in
 				(* Might need to infer the type if we JSON select, as it could be a string or int. *)
@@ -138,14 +138,17 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 			let (expr_type, _) = (check_expr_type (expr) (env)) in
 			(data_to_ast_data(expr_type))) arg_list in
 		verify_func_call func_name arg_types env;
-		let func_return_type = func_return_type func_name env in
-		let func_args = FunctionMap.find func_name env.func_map in
-		let func_arg_types = func_args.args in
-		let new_json_mapping = List.fold_left2 (fun env expr expected_type -> (match expr 
-			with Bracket_select(id, selectors) -> json_selector_update (serialize (expr) (env)) (ast_data_to_string expected_type) (env)
-			| _ -> env
-		)) env arg_list func_arg_types in
-		(ast_data_to_data(func_return_type), new_json_mapping)
+		let func_return_type = func_return_type func_name env in (match func_name
+			with "print" ->	(ast_data_to_data(func_return_type), env)
+			| "length" -> (ast_data_to_data(func_return_type), env)
+			| _ -> let func_args = (FunctionMap.find func_name env.func_map) in
+				let func_arg_types = func_args.args in
+				let new_json_mapping = List.fold_left2 (fun env expr expected_type -> (match expr
+					with Bracket_select(id, selectors) -> json_selector_update (serialize (expr) (env)) (ast_data_to_string expected_type) (env)
+					| _ -> env
+				)) env arg_list func_arg_types in
+				(ast_data_to_data(func_return_type), new_json_mapping)
+		)
 	| Bracket_select(id, selectors) ->
 		let selector_ast_data_type = var_type id env in
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
@@ -160,7 +163,7 @@ and serialize (expr : Ast.expr) (env : symbol_table) = match expr
 				if expr_type == String then (acc ^ "[\"" ^ (string_data_literal x) ^ "\"]")
 				else acc
 			) "" (List.rev selectors) in
-					id ^ concat; 
+					id ^ concat;
 	| _ -> raise (Failure "incorrect usage of bracket syntax")
 
 let rec map_json_types (expr : Ast.expr) (env : symbol_table) (data_type : string) = match expr
@@ -198,13 +201,18 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| _ -> raise (Failure "we can't print this")
 
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
-	with Call(f_name, args) -> 
-		if f_name = "print" then
+	with Call(f_name, args) -> (match f_name with
+		"print" ->
 		 	if List.length args != 1 then
 				raise (Failure "Print only takes one argument")
 			else
 				env
-		else
+		| "length" ->
+		 	if List.length args != 1 then
+				raise (Failure "Length only takes one argument")
+			else
+				env
+		| _ ->
 			(* TODO: A bug could be here, cause we're ignoring the env variable we're getting *)
 			let arg_types = List.map (fun expr ->
 				let (expr_type, _) = (check_expr_type (expr) (env)) in
@@ -212,11 +220,12 @@ let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = ma
 			verify_func_call f_name arg_types env;
 			let func_args = FunctionMap.find f_name env.func_map in
 			let func_arg_types = func_args.args in
-			let new_json_mapping = List.fold_left2 (fun env expr expected_type -> (match expr 
+			let new_json_mapping = List.fold_left2 (fun env expr expected_type -> (match expr
 				with Bracket_select(id, selectors) -> json_selector_update (serialize (expr) (env)) (ast_data_to_string expected_type) (env)
 				| _ -> env
 				)) env args func_arg_types in
 			new_json_mapping
+		)
 	| _ -> env
 
 let handle_json (json_expr : Ast.expr) (env : Environment.symbol_table) = match json_expr
@@ -228,11 +237,11 @@ let handle_json (json_expr : Ast.expr) (env : Environment.symbol_table) = match 
 
 let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_table) = match bool_expr
 	with Literal_bool(i) -> (Bool,env)
-	| Binop(e1, op, e2) -> 
+	| Binop(e1, op, e2) ->
 			let (l_type, left_env) = (check_expr_type e1 env) in
-			let (r_type, right_env) = (check_expr_type e2 left_env) in 
+			let (r_type, right_env) = (check_expr_type e2 left_env) in
 			let _ = check_bool_expr_binop_type (l_type) (op) (r_type) in
-			(match (l_type, r_type) 
+			(match (l_type, r_type)
 				with (AnyType, AnyType) ->
 					(* NOTE: We're defining things that are compared as floats, so we can define them as something. *)
 					let new_left_env = json_selector_update (serialize (e1) (env)) "float" (right_env) in
@@ -241,16 +250,16 @@ let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_t
 				| (AnyType, _) ->
 					let new_env = json_selector_update (serialize (e1) (right_env)) (ast_data_to_string (data_to_ast_data (r_type))) (right_env) in
 					(Bool, new_env)
-				| (_, AnyType) -> 
+				| (_, AnyType) ->
 					let new_env = json_selector_update (serialize (e2) (right_env)) (ast_data_to_string (data_to_ast_data (l_type))) (right_env) in
 					(Bool, new_env)
 				| (_, _) -> (Bool, right_env)
 			)
-	| Bool_binop(e1, conditional, e2) -> 
+	| Bool_binop(e1, conditional, e2) ->
 		let (_, left_env) = handle_bool_expr (e1) (env) in
 		let (_, right_env) = handle_bool_expr (e2) (left_env) in
  		(Bool, right_env)
-	| Not(e1) -> 
+	| Not(e1) ->
 		let (_,new_env) = handle_bool_expr (e1) (env) in
 		(Bool, new_env)
 	| Id(i) -> match var_type i env
@@ -266,9 +275,9 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let ast_dt = var_type id env in
 			if ast_dt == Bool then
 				raise UpdatingBool
-			else	
+			else
 				let data_type = ast_data_to_data ast_dt in
-					if data_type == Json then 
+					if data_type == Json then
 						raise (Failure "json aliasing not supported")
 					else
 						let (right,new_env) = check_expr_type (e1) (env) in
@@ -277,11 +286,17 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 								with AnyType -> json_selector_update (serialize (e1) (new_env)) (ast_data_to_string ast_dt) (new_env)
 								| _ -> new_env
 							)
-    | If(bool_expr, then_stmt, else_stmt) ->
-    	let (_,new_env) = handle_bool_expr bool_expr env in
-    	let _ = check_statements (then_stmt) (new_env) in
-    	let _ = check_statements (else_stmt) (new_env) in
-    	new_env
+  | If(bool_expr, then_stmt, else_stmt) ->
+  	let (_,new_env) = handle_bool_expr bool_expr env in
+  	let _ = check_statements (then_stmt) (new_env) in
+  	let _ = check_statements (else_stmt) (new_env) in
+  		new_env
+  | Update_array_element (id, e1, e2) ->
+  	let ast_array_data_type = array_type id env in
+		let data_type = ast_data_to_data ast_array_data_type in
+		let (right, new_env) = check_expr_type (e2) (env) in
+			equate data_type right;
+			env;
 	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
 		let init_env = check_statement init_stmt env in
 		let (_,new_env) = handle_bool_expr bool_expr init_env in
@@ -307,17 +322,21 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			json_selector_update (serialize e1 env) data_type updated_env;
 		else
 			let left = string_to_data_type(data_type) and (right,new_env) = check_expr_type (e1) (env) in
-			equate left right;	
+			equate left right;
 			let declared_var = declare_var id data_type new_env in
 			map_json_types e1 declared_var data_type
 	| Array_assign(expected_data_type, id, e1) ->
 		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
 			let inferred_type = List.map (fun expr ->
 				(* Don't need to use new env because we won't have JSON in the array *)
-				let (data_type,_) = (check_expr_type (expr) (env)) in 
+				let (data_type,_) = (check_expr_type (expr) (env)) in
 				data_to_ast_data (data_type)) e1 in
 				let declare_var_env = declare_var id "array" env in
 					define_array_type (left) (inferred_type) (declare_var_env) (id)
+	| Fixed_length_array_assign(expected_data_type, id, length) ->
+		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
+			let declare_var_env = declare_var id "array" env in
+				define_array_type left [] declare_var_env id
 	| Bool_assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and (right,new_env) = handle_bool_expr (e1) (env) in
 			equate left right;
