@@ -163,8 +163,8 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 						env;
     | If(bool_expr, then_stmt, else_stmt) ->
     	let is_boolean_expr = handle_bool_expr bool_expr env
-    	and then_clause = check_statements then_stmt env
-    	and else_clause = check_statements else_stmt env in
+    	and then_clause = check_statements (List.rev then_stmt) env
+    	and else_clause = check_statements (List.rev else_stmt) env in
     		env
 	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
 		let init_env = check_statement init_stmt env in
