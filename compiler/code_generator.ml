@@ -29,7 +29,7 @@ let cast_json_access (prog_str : string) (data_type : string) = match data_type
   | "JSONObject" -> ""
   | "boolean" -> ""
   | "String" ->  "(String)" ^ prog_str
-  | _ -> raise (Failure "What could this be?")
+  | _ -> raise (Failure "cast_json_access failure")
 
 let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
   with [] -> ""
@@ -90,8 +90,6 @@ and handle_expression (expr : Jast.expr) = match expr
               | String -> "((JSONObject) " ^ prog_str ^ ".get(" ^ handle_expression(expr) ^ "))"
               | _ -> raise (Failure "Fuck this.")
             )
-          (* Probably need to do something else if it's the last one *)
-          (*"((" ^ expr_type ^ ")" ^ prog_str ^ ".get(" ^ handle_expression (expr) ^ "))"*)
           )
         )
         else (
