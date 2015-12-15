@@ -4,7 +4,7 @@ import java.util.Iterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-public class Matt { 
+public class JSONSample { 
   public static void main(String[] args) {
     JSONParser parser = new JSONParser();
     try {
@@ -13,6 +13,7 @@ public class Matt {
       int count = ((Long) obj.get("count")).intValue();
       JSONArray arr = (JSONArray) obj.get("friends");
       Iterator arrIterator = arr.iterator();
+      String innerName = (String) ((JSONObject) obj.get("inner")).get("name");
       while (arrIterator.hasNext()) {
         JSONObject each = (JSONObject) arrIterator.next();
         System.out.println("Item: " + each.get("name") + " " + each.get("age"));
