@@ -1,13 +1,14 @@
 open Ast;;
 open Environment;;
 open Jast;;
+open Semantic;;
 
 let ql_to_java_type (data_type : string) = match data_type
   with "int" -> "int"
   | "float" -> "double"
   | "string" -> "String"
   | "json" -> "JSONObject"
-  | "bool" -> "Boolean"
+  | "bool" -> "boolean"
   | _ -> "Invalid data type"
 
 let convert_math_op (op : Ast.math_op) = match op
@@ -27,6 +28,15 @@ let convert_bool_op (op : Ast.bool_op) = match op
 let convert_cond (cond : Ast.conditional) = match cond
   with And -> Jast.And
   | Or -> Jast.Or
+
+let rec convert_data_type (data_type : Semantic.data_type) = match data_type
+  with Semantic.Int -> Jast.Int
+  | Semantic.Float -> Jast.Double
+  | Semantic.Bool -> Jast.Bool
+  | Semantic.String -> Jast.String
+  | Semantic.Json -> Jast.Json
+  | Semantic.Array -> Jast.Array(convert_data_type (data_type))
+  | Semantic.AnyType -> raise (Failure "We should not have an AnyType here.")
 
 let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table) = match expr
   with Ast.Literal_int(i) -> Jast.Literal_int(i)
@@ -50,9 +60,20 @@ let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table)
         Jast.Array_select(id, head_expr)
       | _ ->
         let selector_exprs = List.map (fun select -> (convert_expr (select) (symbol_table))) selectors in
-        Jast.Bracket_select(id, selector_exprs)
+        let serialize_id = serialize (expr) (symbol_table) in
+        let json_type = json_selector_type (serialize_id) (symbol_table) in
+        let java_type = ql_to_java_type (ast_data_to_string (json_type)) in
+        let selector_types = List.map (fun expr -> 
+          let (expr_type,_) = check_expr_type (expr) (symbol_table) in
+          convert_data_type (expr_type)
+        ) selectors in
+        Jast.Bracket_select(id, java_type, selector_exprs, selector_types)
     )
-  | _ -> Jast.Dummy_expr("This is horrendous")
+  | Ast.Json_from_file(i) -> Jast.Json_object(i)
+  | Ast.Literal_array(expr_list) ->
+    let sast_exprs = List.map (fun expr -> (convert_expr (expr) (symbol_table))) expr_list in
+    Jast.Array_initializer(sast_exprs)
+  | _ -> Jast.Dummy_expr("We gotta get rid of this")
 
 let rec convert_bool_expr (op : Ast.bool_expr) (symbol_table : Environment.symbol_table) = match op
   with Ast.Literal_bool(i) -> Jast.Literal_bool(i)

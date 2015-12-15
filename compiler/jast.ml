@@ -22,12 +22,12 @@ type expr =
     | Literal_double of float
     | Literal_string of string
     | Literal_bool of string
-    | Literal_array of expr list
+    | Array_initializer of expr list
     | Id of string
     | Binop of expr * math_op * expr
     | Call of string * expr list
     | Json_object of string
-    | Bracket_select of string * expr list
+    | Bracket_select of string * string * expr list * data_type list
     | Array_select of string * expr
     | Dummy_expr of string
 

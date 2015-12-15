@@ -1,0 +1,27 @@
+{
+  "count" : 5,
+  "int_index" : 0,
+  "owner" : "Matt",
+  "number" : 5.4,
+  "friends" : [
+    {
+      "name" : "Anshul",
+      "age" : 12
+    },
+    {
+      "name" : "Evan",
+      "age" : 54
+    },
+    {
+      "name" : "Gary",
+      "age" : 21
+    },
+    {
+      "name" : "Mayank",
+      "age" : 32
+    }
+  ],
+  "inner" : {
+    "name" : "Hello!"
+  }
+}

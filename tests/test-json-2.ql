@@ -1,4 +1,5 @@
-json a = json("my_file")
-int b = a["test"][2]
-json c = json("my_other_file")
-int d = c[1][2]
+json a = json("sample.json")
+int b = a["friends"][1]["age"]
+print(b)
+string c = a["friends"][2]["name"]
+print(c)
