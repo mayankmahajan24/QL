@@ -170,7 +170,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let init_env = check_statement init_stmt env in
 			let is_boolean = handle_bool_expr bool_expr init_env
 			and update_env = check_statement update_stmt init_env in
-				let body_env = check_statements stmt_list init_env in
+				let body_env = check_statements (List.rev stmt_list) init_env in
 					env
 	| While(bool_expr, body) ->
  		let is_boolean_expr = handle_bool_expr bool_expr env
@@ -181,7 +181,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			let is_bool_expr = handle_bool_expr bool_expr init_env
 			and update_env = declare_var id "json" init_env in
 				let is_json = handle_json json_object init_env
-				and body_env = check_statements stmt_list init_env in
+				and body_env = check_statements (List.rev stmt_list) init_env in
 					env
 	| Assign(data_type, id, e1) ->
  		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
