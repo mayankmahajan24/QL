@@ -1,6 +1,7 @@
 {
   "count" : 5,
   "owner" : "Matt",
+  "number" : 5.4,
   "friends" : [
     {
       "name" : "Anshul",

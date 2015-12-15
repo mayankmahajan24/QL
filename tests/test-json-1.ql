@@ -1,8 +1,7 @@
-json a = json("file.json")
-int b = a["number"]
-int c = a["sum"]
-float d = a["avg"]
-string name = a["student"]
-if(b > 5) {
-	b = b - 5
-}
+json a = json("sample.json")
+int b = a["count"]
+print(b)
+float d = a["number"]
+print(d)
+string name = a["owner"]
+print(name)
