@@ -1,4 +1,3 @@
-(* Compile the program to Java. Does no compile time check for now*)
 open Ast;;
 open Environment;;
 
@@ -286,13 +285,13 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 								with AnyType -> json_selector_update (serialize (e1) (new_env)) (ast_data_to_string ast_dt) (new_env)
 								| _ -> new_env
 							)
-  | If(bool_expr, then_stmt, else_stmt) ->
-  	let (_,new_env) = handle_bool_expr bool_expr env in
-  	let _ = check_statements (then_stmt) (new_env) in
-  	let _ = check_statements (else_stmt) (new_env) in
-  		new_env
-  | Update_array_element (id, e1, e2) ->
-  	let ast_array_data_type = array_type id env in
+ 	| If(bool_expr, then_stmt, else_stmt) ->
+		let (_,new_env) = handle_bool_expr bool_expr env in
+		let _ = check_statements (List.rev then_stmt) (new_env) in
+		let _ = check_statements (List.rev else_stmt) (new_env) in
+			new_env
+  	| Update_array_element (id, e1, e2) ->
+  		let ast_array_data_type = array_type id env in
 		let data_type = ast_data_to_data ast_array_data_type in
 		let (right, new_env) = check_expr_type (e2) (env) in
 			equate data_type right;
@@ -301,19 +300,19 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let init_env = check_statement init_stmt env in
 		let (_,new_env) = handle_bool_expr bool_expr init_env in
 		let update_env = check_statement update_stmt new_env in
-		let _ = check_statements (stmt_list) (update_env) in
+		let _ = check_statements (List.rev stmt_list) (update_env) in
 			(* We need to worry about scoping here. I think we want all the things in bool expr to count. *)
 		new_env
 	| While(bool_expr, body) ->
 		let (_,while_env) = handle_bool_expr bool_expr env in
-		let _ = check_statements (body) (while_env) in
+		let _ = check_statements (List.rev body) (while_env) in
 		(* Same thing here. We might want to be returning while_env *)
 		while_env
 	| Where(bool_expr, id, stmt_list, json_object) ->
 		let update_env = declare_var id "json" env in
 		let (_,where_env) = handle_bool_expr bool_expr update_env in
 		let _ = handle_json json_object update_env in
-		let _ = (check_statements (stmt_list) (update_env)) in
+		let _ = (check_statements (List.rev stmt_list) (update_env)) in
 		(* Also here. *)
 		where_env
 	| Assign(data_type, id, e1) ->
@@ -355,8 +354,8 @@ and check_statements (stmts : Ast.stmt list) (env : Environment.symbol_table) = 
     with [] -> env
   | [stmt] -> check_statement stmt env
   | stmt :: other_stmts ->
-  		let env = check_statement stmt env in
-  		check_statements other_stmts env
+   		let new_env = check_statement stmt env in
+  		check_statements other_stmts new_env
 
 and check_function_statements stmts env return_type = match stmts
     with [] ->
