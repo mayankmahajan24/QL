@@ -52,7 +52,11 @@ let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table)
         let selector_exprs = List.map (fun select -> (convert_expr (select) (symbol_table))) selectors in
         Jast.Bracket_select(id, selector_exprs)
     )
-  | _ -> Jast.Dummy_expr("This is horrendous")
+  | Ast.Json_from_file(i) -> Jast.Json_object(i)
+  | Ast.Literal_array(expr_list) ->
+    let sast_exprs = List.map (fun expr -> (convert_expr (expr) (symbol_table))) expr_list in
+    Jast.Array_initializer(sast_exprs)
+  | _ -> Jast.Dummy_expr("We gotta get rid of this")
 
 let rec convert_bool_expr (op : Ast.bool_expr) (symbol_table : Environment.symbol_table) = match op
   with Ast.Literal_bool(i) -> Jast.Literal_bool(i)

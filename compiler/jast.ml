@@ -22,7 +22,7 @@ type expr =
     | Literal_double of float
     | Literal_string of string
     | Literal_bool of string
-    | Literal_array of expr list
+    | Array_initializer of expr list
     | Id of string
     | Binop of expr * math_op * expr
     | Call of string * expr list
