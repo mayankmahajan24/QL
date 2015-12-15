@@ -1,4 +1,3 @@
-(* Compile the program to Java. Does no compile time check for now*)
 open Ast;;
 open Environment;;
 
@@ -306,7 +305,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		new_env
 	| While(bool_expr, body) ->
 		let (_,while_env) = handle_bool_expr bool_expr env in
-		let _ = check_statements (body) (while_env) in
+		let _ = check_statements (List.rev body) (while_env) in
 		(* Same thing here. We might want to be returning while_env *)
 		while_env
 	| Where(bool_expr, id, stmt_list, json_object) ->
@@ -355,8 +354,8 @@ and check_statements (stmts : Ast.stmt list) (env : Environment.symbol_table) = 
     with [] -> env
   | [stmt] -> check_statement stmt env
   | stmt :: other_stmts ->
-  		let env = check_statement stmt env in
-  		check_statements other_stmts env
+   		let new_env = check_statement stmt env in
+  		check_statements other_stmts new_env
 
 and check_function_statements stmts env return_type = match stmts
     with [] ->
