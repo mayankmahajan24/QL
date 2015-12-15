@@ -124,6 +124,11 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let jast_update = convert_statement update symbol_table in
     let jast_body = build_list [] body symbol_table in
     Jast.For(jast_init, jast_condition, jast_update, jast_body)
+  | Ast.Where(condition, id, body, json) ->
+    let jast_condition = convert_bool_expr condition symbol_table in
+    let jast_body = build_list [] body symbol_table in
+    let jast_json = convert_expr json symbol_table in
+    Jast.Where(jast_condition, jast_body, jast_json)
   | _ -> Jast.Dummy_stmt("Really just terrible programming")
 
 and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: Environment.symbol_table) =

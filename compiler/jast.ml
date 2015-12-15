@@ -52,5 +52,6 @@ type stmt =
     | If of bool_expr * stmt list * stmt list
     | While of bool_expr * stmt list
     | For of stmt * bool_expr * stmt * stmt list
+    | Where of bool_expr * string * stmt list * expr
 
 type program = stmt list
