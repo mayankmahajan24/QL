@@ -300,7 +300,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let init_env = check_statement init_stmt env in
 		let (_,new_env) = handle_bool_expr bool_expr init_env in
 		let update_env = check_statement update_stmt new_env in
-		let _ = check_statements (stmt_list) (update_env) in
+		let _ = check_statements (List.rev stmt_list) (update_env) in
 			(* We need to worry about scoping here. I think we want all the things in bool expr to count. *)
 		new_env
 	| While(bool_expr, body) ->
@@ -312,7 +312,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let update_env = declare_var id "json" env in
 		let (_,where_env) = handle_bool_expr bool_expr update_env in
 		let _ = handle_json json_object update_env in
-		let _ = (check_statements (stmt_list) (update_env)) in
+		let _ = (check_statements (List.rev stmt_list) (update_env)) in
 		(* Also here. *)
 		where_env
 	| Assign(data_type, id, e1) ->
