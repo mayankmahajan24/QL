@@ -75,7 +75,7 @@ Check() {
   else
     RunPass $QL "Test" "<" $1 &&
     touch ${basename}-gen.out &&
-    javac Test.java &&
+    javac -classpath build/json-simple-1.1.1.jar Test.java &&
     java Test > ${basename}-gen.out &&
     generatedfiles="$generatedfiles ${basename}-gen.out"
     Compare ${basename}-gen.out ${basename}-exp.out ${basename}.i.diff
