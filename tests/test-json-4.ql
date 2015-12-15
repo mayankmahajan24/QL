@@ -1,4 +1,5 @@
-json a = json("file.json")
-int b = a["number"]
-int c = a["sum"]
-int d = a["sum"]
+json a = json("sample.json")
+int b = a["count"]
+print(b)
+int c = a["int_index"]
+print(c)
