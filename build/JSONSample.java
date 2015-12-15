@@ -14,7 +14,6 @@ public class JSONSample {
       int count = ((Long) obj.get("count")).intValue();
       JSONArray arr = (JSONArray) obj.get("friends");
       Iterator arrIterator = arr.iterator();
-
       // a["matt"][0]["pic"]
       ((JSONObject) ((JSONArray) obj.get("matt")).get("pic"))
       String innerName = (String) ((JSONObject) obj.get("inner")).get("name");
