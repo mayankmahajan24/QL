@@ -123,8 +123,15 @@ let print_to_file (prog_str : string) (file_name : string) =
     Printf.fprintf file "%s" prog_str;;
 
 let program_header (class_name : string) =
-  let prog_string  = "public class " ^ class_name ^ " {
-    public static void main(String[] args) {
+  let header_string = "
+  import java.io.FileReader;\n
+  import java.util.Iterator;\n
+ 
+  import org.json.simple.JSONArray;\n
+  import org.json.simple.JSONObject;\n
+  import org.json.simple.parser.JSONParser;\n" in
+  let prog_string  = header_string ^ "public class " ^ class_name ^ " { 
+    public static void main(String[] args) { 
       try {
     " in
   prog_string
