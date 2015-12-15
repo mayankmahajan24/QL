@@ -45,6 +45,8 @@ and handle_expression (expr : Jast.expr) = match expr
       | _ -> "bad")
   (* Think about printing literal with the lower case to match those printed with identifiers *)
   | Binop(left_expr, op, right_expr) -> handle_expression left_expr ^ " " ^ convert_operator op ^ " " ^ handle_expression right_expr
+  | Json_object(file_name) -> "(JSONObject) (new JSONParser()).parse(new FileReader(\""^ file_name ^ "\"))"
+  | Array_initializer(expr_list) -> "{" ^ comma_separate_list (expr_list) ^ "}" 
   | _ -> ""
 
 let rec handle_bool_expr (expr : Jast.bool_expr) = match expr
