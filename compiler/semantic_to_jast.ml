@@ -88,6 +88,15 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let jast_body = build_list [] body symbol_table in
     let jast_else_body = build_list [] else_body symbol_table in
     Jast.If(convert_bool_expr condition symbol_table, jast_body, jast_else_body)
+  | Ast.While(condition, body) ->
+    let jast_body = build_list [] body symbol_table in
+    Jast.While(convert_bool_expr condition symbol_table, jast_body)
+  | Ast.For(init, condition, update, body) ->
+    let jast_init = convert_statement init symbol_table in
+    let jast_condition = convert_bool_expr condition symbol_table in
+    let jast_update = convert_statement update symbol_table in
+    let jast_body = build_list [] body symbol_table in
+    Jast.For(jast_init, jast_condition, jast_update, jast_body)
   | _ -> Jast.Dummy_stmt("Really just terrible programming")
 
 and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: Environment.symbol_table) = 

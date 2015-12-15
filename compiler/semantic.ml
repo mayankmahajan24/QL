@@ -1,4 +1,3 @@
-(* Compile the program to Java. Does no compile time check for now*)
 open Ast;;
 open Environment;;
 
@@ -164,28 +163,28 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 						env;
     | If(bool_expr, then_stmt, else_stmt) ->
     	let is_boolean_expr = handle_bool_expr bool_expr env
-    	and then_clause = check_statements then_stmt env
-    	and else_clause = check_statements else_stmt env in
+    	and then_clause = check_statements (List.rev then_stmt) env
+    	and else_clause = check_statements (List.rev else_stmt) env in
     		env
 	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
 		let init_env = check_statement init_stmt env in
 			let is_boolean = handle_bool_expr bool_expr init_env
 			and update_env = check_statement update_stmt init_env in
-				let body_env = check_statements stmt_list init_env in
+				let body_env = check_statements (List.rev stmt_list) init_env in
 					env
 	| While(bool_expr, body) ->
-		let is_boolean_expr = handle_bool_expr bool_expr env
-		and new_env = check_statements body env in
+ 		let is_boolean_expr = handle_bool_expr bool_expr env
+		and new_env = check_statements (List.rev body) env in
 			env
 	| Where(bool_expr, id, stmt_list, json_object) ->
 		let init_env = env in
 			let is_bool_expr = handle_bool_expr bool_expr init_env
 			and update_env = declare_var id "json" init_env in
 				let is_json = handle_json json_object init_env
-				and body_env = check_statements stmt_list init_env in
+				and body_env = check_statements (List.rev stmt_list) init_env in
 					env
 	| Assign(data_type, id, e1) ->
-		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
+ 		let left = string_to_data_type(data_type) and right = check_expr_type (e1) (env) in
 			equate left right;
 			declare_var id data_type env;
 	| Array_assign(expected_data_type, id, e1) ->
@@ -214,8 +213,8 @@ and check_statements stmts env = match stmts
     with [] -> env
   | [stmt] -> check_statement stmt env
   | stmt :: other_stmts ->
-  		let env = check_statement stmt env in
-  		check_statements other_stmts env
+   		let new_env = check_statement stmt env in
+  		check_statements other_stmts new_env
 
 and check_function_statements stmts env return_type = match stmts
     with [] ->

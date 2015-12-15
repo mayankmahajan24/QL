@@ -1,5 +1,15 @@
-array int arr = [1; 2; 3]
-int sum = 0
-for(int k = 0 , k < 3 , k = k + 1){ 
-	sum = sum + arr[k]
+array string arr = ["The"; "quick"; "brown"; "fox"; "jumped"; "the"; "lazy"; "dog"]
+string sentence = ""
+
+for(int k = 0 , k < 8 , k = k + 1){
+	#~~ Because why not ~~#
+	int temp = k
+
+	if(temp == 7) {
+		sentence = sentence + arr[temp] + "."
+	} else {
+		sentence = sentence + arr[temp] +  " "
+	}
 }
+
+print(sentence)
