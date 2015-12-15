@@ -52,9 +52,18 @@ let string_to_data_type (s : string) = match s
   | "float" -> Float
   | "bool" -> Bool
   | "string" -> String
-  | "array" -> Array(Int)
+  | "array" -> Array(AnyType)
   | "json" -> Json
   | _ -> raise (Failure "unsupported data type 1")
+
+let rec data_type_to_string (dt : data_type) = match dt
+  with Int -> "int"
+  | Float -> "float"
+  | Bool -> "bool"
+  | String -> "string"
+  | Array(t) -> "array of " ^ (data_type_to_string t)
+  | Json -> "json"
+  | _ -> raise (Failure "unsupported data type 2")
 
 let declare_var (id : string) (data_type : string) (env : symbol_table) =
   if VariableMap.mem id env.var_map then
@@ -113,26 +122,30 @@ let declare_func (func_name : string) (ret_type : string) (args : arg_decl list)
     update update_func_map env.var_map env.array_type_map env.json_selector_map
 
 let verify_func_call (func_name: string) (args : data_type list) (env : symbol_table) =
-  if FunctionMap.mem func_name env.func_map then
-    let declared_func = FunctionMap.find func_name env.func_map in
-    let type_pairs = List.combine args declared_func.args in
-    List.iter (fun (left, right) ->
-      if left != right then
-        if left != AnyType && right != AnyType then
-          raise IncorrectFunctionParameterTypes
-    ) type_pairs
-  else
-    raise FunctionNotDeclared
+  match func_name with
+    "print" | "length" -> ()
+    | _ ->
+    if FunctionMap.mem func_name env.func_map then
+      let declared_func = FunctionMap.find func_name env.func_map in
+      let type_pairs = List.combine args declared_func.args in
+      List.iter (fun (left, right) ->
+        if left != right then
+          if left != AnyType && right != AnyType then
+            raise IncorrectFunctionParameterTypes
+      ) type_pairs
+    else
+      raise FunctionNotDeclared
 
 let func_return_type (func_name : string) (env : symbol_table) =
-  if FunctionMap.mem func_name env.func_map then
-    let declared_func = FunctionMap.find func_name env.func_map in
-    declared_func.return
-  else
   match func_name with
     "print" -> String
     | "length" -> Int
-    | _ -> raise FunctionNotDeclared
+    | _ ->
+      if FunctionMap.mem func_name env.func_map then
+        let declared_func = FunctionMap.find func_name env.func_map in
+        declared_func.return
+      else
+        raise FunctionNotDeclared
 
 let json_selector_update (id : string) (data_type : string) (env : symbol_table) =
   if JsonSelectorMap.mem id env.json_selector_map then

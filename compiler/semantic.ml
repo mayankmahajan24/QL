@@ -138,14 +138,17 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 			let (expr_type, _) = (check_expr_type (expr) (env)) in
 			(data_to_ast_data(expr_type))) arg_list in
 		verify_func_call func_name arg_types env;
-		let func_return_type = func_return_type func_name env in
-		let func_args = FunctionMap.find func_name env.func_map in
-		let func_arg_types = func_args.args in
-		let new_json_mapping = List.fold_left2 (fun env expr expected_type -> (match expr
-			with Bracket_select(id, selectors) -> json_selector_update (serialize (expr) (env)) (ast_data_to_string expected_type) (env)
-			| _ -> env
-		)) env arg_list func_arg_types in
-		(ast_data_to_data(func_return_type), new_json_mapping)
+		let func_return_type = func_return_type func_name env in (match func_name
+			with "print" ->	(ast_data_to_data(func_return_type), env)
+			| "length" -> (ast_data_to_data(func_return_type), env)
+			| _ -> let func_args = (FunctionMap.find func_name env.func_map) in
+				let func_arg_types = func_args.args in
+				let new_json_mapping = List.fold_left2 (fun env expr expected_type -> (match expr
+					with Bracket_select(id, selectors) -> json_selector_update (serialize (expr) (env)) (ast_data_to_string expected_type) (env)
+					| _ -> env
+				)) env arg_list func_arg_types in
+				(ast_data_to_data(func_return_type), new_json_mapping)
+		)
 	| Bracket_select(id, selectors) ->
 		let selector_ast_data_type = var_type id env in
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
@@ -198,7 +201,7 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| _ -> raise (Failure "we can't print this")
 
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
-	with Call(f_name, args) -> match f_name with
+	with Call(f_name, args) -> (match f_name with
 		"print" ->
 		 	if List.length args != 1 then
 				raise (Failure "Print only takes one argument")
@@ -222,6 +225,7 @@ let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = ma
 				| _ -> env
 				)) env args func_arg_types in
 			new_json_mapping
+		)
 	| _ -> env
 
 let handle_json (json_expr : Ast.expr) (env : Environment.symbol_table) = match json_expr
@@ -282,17 +286,17 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 								with AnyType -> json_selector_update (serialize (e1) (new_env)) (ast_data_to_string ast_dt) (new_env)
 								| _ -> new_env
 							)
-    | If(bool_expr, then_stmt, else_stmt) ->
-    	let (_,new_env) = handle_bool_expr bool_expr env in
-    	let _ = check_statements (then_stmt) (new_env) in
-    	let _ = check_statements (else_stmt) (new_env) in
-    	new_env
+  | If(bool_expr, then_stmt, else_stmt) ->
+  	let (_,new_env) = handle_bool_expr bool_expr env in
+  	let _ = check_statements (then_stmt) (new_env) in
+  	let _ = check_statements (else_stmt) (new_env) in
+  		new_env
   | Update_array_element (id, e1, e2) ->
   	let ast_array_data_type = array_type id env in
-  		let data_type = ast_data_to_data ast_array_data_type in
-  			let right = check_expr_type (e2) (env) in
-  				equate data_type right;
-  				env;
+		let data_type = ast_data_to_data ast_array_data_type in
+		let (right, new_env) = check_expr_type (e2) (env) in
+			equate data_type right;
+			env;
 	| For(init_stmt, bool_expr, update_stmt, stmt_list) ->
 		let init_env = check_statement init_stmt env in
 		let (_,new_env) = handle_bool_expr bool_expr init_env in
