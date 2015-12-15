@@ -1,4 +1,4 @@
-json test = json("test.json")
+json test = json("sample.json")
 
 where (True) as dummyVar {
 

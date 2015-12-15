@@ -1,4 +1,4 @@
-json m = json("hello.json")
+json m = json("sample.json")
 for(int a = 3 , m["count"] < 5 , a = a + 1){ 
   int b = 1
 }
