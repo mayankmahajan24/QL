@@ -357,13 +357,14 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				define_array_type left [] declare_var_env id
 	| Array_select_assign(expected_data_type, new_var_id, array_id, e1 ) ->
 		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
-			let data_checking = match ast_data_to_data(var_type array_id env)
-			with  Ast.Json ->
-			| Ast.Array -> equate expected_data_type (array_type id env);
-			| _ -> raise IncorrectSelectorId;;		
-			let declare_var_env = declare_var id "array" env in 
-				define_array_type left []
-					declare_var_env new_var_id
+			let _ = (match ast_data_to_data(var_type array_id env)
+			with Json -> true
+			| Array -> equate (ast_data_to_data left) (ast_data_to_data (array_type array_id env));
+						true
+			| _ -> raise IncorrectSelectorId;
+			)	in
+			let declare_var_env = declare_var new_var_id "array" env in 
+				define_array_type left [] declare_var_env new_var_id
 	| Bool_assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and (right,new_env) = handle_bool_expr (e1) (env) in
 			equate left right;
