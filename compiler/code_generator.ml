@@ -134,7 +134,7 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (var_string: 
   | Assign(data_type, id, expr) ->
     let expr_string = handle_expression expr in
     if not in_block then (
-      let declare_string = "static " ^ data_type ^ " " ^ id ^ ";" in
+      let declare_string = "static " ^ data_type ^ " " ^ id ^ ";\n" in
       let assign_string = id ^ " = " ^ expr_string ^ ";" in
       (prog_string ^ assign_string, var_string ^ declare_string, func_string)
     )
