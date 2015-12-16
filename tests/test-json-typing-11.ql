@@ -1,6 +1,7 @@
 json m = json("sample.json")
-for(int a = 3 , m["count"] < 5 , a = a + 1){ 
+for(int a = 3 , m["count"] < 5 , a = a + 1) { 
   int b = 1
 }
 
 int x = m["count"]
+print(x)

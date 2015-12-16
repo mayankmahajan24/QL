@@ -3,6 +3,7 @@ int b = a + 7
 function increment(int c, int amount) : int {
   int x = c + amount + 1
   int y = x + c + 20
-  return x
+  return y
 }
-float c = 5.6 + 2.1
+int x = increment(a, b)
+print(x)
