@@ -171,7 +171,7 @@ assignment_stmt:
     ARRAY assignment_data_type ID ASSIGN array_literal  { Array_assign($2, $3, $5) }
     | ARRAY assignment_data_type ID ASSIGN ARRAY
       LPAREN INT_LITERAL RPAREN                         { Fixed_length_array_assign($2, $3, $7) }
-    | ARRAY assignment_data_type ID ASSIGN ID bracket_selector { Array_select_assign($2, $3, $5, $6)}
+    | ARRAY assignment_data_type ID ASSIGN ID bracket_selector_list { Array_select_assign($2, $3, $5, List.rev $6)}
     | assignment_data_type ID ASSIGN expr               { Assign($1, $2, $4) }
     | BOOL ID ASSIGN bool_expr                          { Bool_assign("bool", $2, $4) }
     | ID ASSIGN expr                                    { Update_variable($1, $3) }
@@ -183,12 +183,6 @@ bracket_selector_list:
 
 bracket_selector: LSQUARE expr RSQUARE { $2 }
 
-/* Selectors for json expressions */
-json_selector_list:
-  json_selector { [$1] }
-  | json_selector_list json_selector { $2 :: $1 }
-
-json_selector: LSQUARE STRING_LITERAL RSQUARE { $2 }
 
 actuals_opt:
     /* Nothing */ { [] }
@@ -209,7 +203,6 @@ expr:
   | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
   | LPAREN expr RPAREN            { $2 }
   | ID bracket_selector_list      { Bracket_select($1, List.rev $2) }
-  | json_selector_list            { Json_selector_list($1) }
 
 bool_expr:
     BOOL_LITERAL                                { Literal_bool($1) }

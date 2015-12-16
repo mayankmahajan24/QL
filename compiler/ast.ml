@@ -62,7 +62,7 @@ type stmt =
     | Update_array_element of string * expr * expr
     | Array_assign of string * string * expr list
     | Fixed_length_array_assign of string * string * int
-    | Array_select_assign of string * string * string * expr
+    | Array_select_assign of string * string * string * expr list
     | Bool_assign of string * string * bool_expr
     | Func_decl of string * arg_decl list * string * stmt list
     | Noop

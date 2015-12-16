@@ -17,7 +17,7 @@ exception JsonSelectorAlreadyUsed;;
 exception IncorrectArrayAssignmentSize;;
 exception DatatypeDefaultValueMissing;;
 
-type func_info  = {
+type func_info = {
   id : string;
   return : data_type;
   args : data_type list;

@@ -111,6 +111,7 @@ let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (
 			(data_type, json_update_map)
 		else
 			(data_type, env)
+
 	(* Return the type being stored for this particular array *)
 	| Json ->
 		List.iteri (fun index expr ->
@@ -356,14 +357,16 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			let declare_var_env = declare_var id "array" env in
 				define_array_type left [] declare_var_env id
 	| Array_select_assign(expected_data_type, new_var_id, array_id, e1 ) ->
-		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
-			let _ = (match ast_data_to_data(var_type array_id env)
-			with Json -> ()
-			| Array -> equate (ast_data_to_data left) (ast_data_to_data (array_type array_id env));
-			| _ -> raise IncorrectSelectorId;
-			)	in
-			let declare_var_env = declare_var new_var_id "array" env in 
-				define_array_type left [] declare_var_env new_var_id
+		let left = data_to_ast_data (string_to_data_type expected_data_type) in (match var_type array_id env with Json -> 
+				let json_type = json_selector_type array_id env in  (match json_type with
+				Ast.AnyType -> 
+				let declare_var_env = declare_var new_var_id "array" env in define_array_type left [] declare_var_env new_var_id;
+					json_selector_update (serialize Ast.Bracket_select(array_id, e1) env) expected_data_type env
+				| other_type -> equate (string_to_data_type expected_data_type) (ast_data_to_data other_type);
+					let declare_var_env = declare_var new_var_id "array" env in define_array_type left [] declare_var_env new_var_id
+				)
+			| _ -> raise IncorrectSelectorId; )
+
 	| Bool_assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and (right,new_env) = handle_bool_expr (e1) (env) in
 			equate left right;
