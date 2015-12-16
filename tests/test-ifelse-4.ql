@@ -4,3 +4,4 @@ if (b > 8) {
 } else {
   b = 10
 }
+print(b)

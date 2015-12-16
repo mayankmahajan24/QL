@@ -4,3 +4,4 @@ if (5 > 4) {
 } else {
   a = 3
 }
+print(a)
