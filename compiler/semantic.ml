@@ -358,9 +358,8 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Array_select_assign(expected_data_type, new_var_id, array_id, e1 ) ->
 		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
 			let _ = (match ast_data_to_data(var_type array_id env)
-			with Json -> true
+			with Json -> ()
 			| Array -> equate (ast_data_to_data left) (ast_data_to_data (array_type array_id env));
-						true
 			| _ -> raise IncorrectSelectorId;
 			)	in
 			let declare_var_env = declare_var new_var_id "array" env in 
