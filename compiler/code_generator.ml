@@ -134,8 +134,19 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (var_string: 
   | Assign(data_type, id, expr) ->
     let expr_string = handle_expression expr in
     if not in_block then (
-      let assign_string = "static " ^ data_type ^ " " ^ id ^ " = " ^ expr_string ^ ";\n" in
-      (prog_string, var_string ^ assign_string, func_string)
+      (match expr 
+        with Bracket_select(_, _, _, _) ->
+          let declare_string = "static " ^ data_type ^ " " ^ id ^ ";" in
+          let assign_string = id ^ " = " ^ expr_string ^ ";" in
+          (prog_string ^ assign_string, var_string ^ declare_string, func_string)
+        | Json_object(_) ->
+          let declare_string = "static " ^ data_type ^ " " ^ id ^ ";" in
+          let assign_string = id ^ " = " ^ expr_string ^ ";" in
+          (prog_string ^ assign_string, var_string ^ declare_string, func_string)
+        | _ -> 
+          let assign_string = "static " ^ data_type ^ " " ^ id ^ " = " ^ expr_string ^ ";\n" in
+          (prog_string, var_string ^ assign_string, func_string)
+      )
     )
     else (
       let assign_string = data_type ^ " " ^ id ^ " = " ^ expr_string ^ ";\n" in
@@ -192,7 +203,8 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (var_string: 
       "for (" ^ init_stmt ^ condition_stmt ^ ";" ^ remove_semicolon(update_stmt) ^ ") {\n"
          ^ body_stmt ^ "}\n" in
     (new_prog_string, var_string, func_string)
-  | _ -> (prog_string, var_string, func_string)
+  | _ -> 
+    (prog_string, var_string, func_string)
 
 and handle_statements (stmt_list : Jast.program) (prog_string : string) (var_string: string) (func_string : string) (in_block : bool)  = match stmt_list
     with [] -> (prog_string, var_string, func_string)
