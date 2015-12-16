@@ -134,19 +134,9 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (var_string: 
   | Assign(data_type, id, expr) ->
     let expr_string = handle_expression expr in
     if not in_block then (
-      (match expr 
-        with Bracket_select(_, _, _, _) ->
-          let declare_string = "static " ^ data_type ^ " " ^ id ^ ";" in
-          let assign_string = id ^ " = " ^ expr_string ^ ";" in
-          (prog_string ^ assign_string, var_string ^ declare_string, func_string)
-        | Json_object(_) ->
-          let declare_string = "static " ^ data_type ^ " " ^ id ^ ";" in
-          let assign_string = id ^ " = " ^ expr_string ^ ";" in
-          (prog_string ^ assign_string, var_string ^ declare_string, func_string)
-        | _ -> 
-          let assign_string = "static " ^ data_type ^ " " ^ id ^ " = " ^ expr_string ^ ";\n" in
-          (prog_string, var_string ^ assign_string, func_string)
-      )
+      let declare_string = "static " ^ data_type ^ " " ^ id ^ ";" in
+      let assign_string = id ^ " = " ^ expr_string ^ ";" in
+      (prog_string ^ assign_string, var_string ^ declare_string, func_string)
     )
     else (
       let assign_string = data_type ^ " " ^ id ^ " = " ^ expr_string ^ ";\n" in
@@ -198,7 +188,7 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (var_string: 
     let (init_stmt, init_var, init_func) = handle_statement init "" "" "" true in
     let condition_stmt = handle_bool_expr condition in
     let (update_stmt, update_var, update_func) = handle_statement update "" "" "" false in
-    let (body_stmt, update_var, body_func) = handle_statements body "" "" "" false in
+    let (body_stmt, update_var, body_func) = handle_statements body "" "" "" true in
     let new_prog_string = prog_string ^
       "for (" ^ init_stmt ^ condition_stmt ^ ";" ^ remove_semicolon(update_stmt) ^ ") {\n"
          ^ body_stmt ^ "}\n" in
