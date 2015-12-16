@@ -73,7 +73,6 @@ let declare_var (id : string) (data_type : string) (env : symbol_table) =
     update env.func_map update_var_map env.array_type_map env.json_selector_map
 
 let var_type (id : string) (env : symbol_table) =
-  print_endline id;
   if VariableMap.mem id env.var_map then
     VariableMap.find id env.var_map
   else
@@ -125,7 +124,6 @@ let declare_func (func_name : string) (ret_type : string) (args : arg_decl list)
 let verify_func_call (func_name: string) (args : data_type list) (env : symbol_table) =
   match func_name with
     "print" | "length" -> ()
-      (* We might need to do more here. *)
     | _ ->
     if FunctionMap.mem func_name env.func_map then
       let declared_func = FunctionMap.find func_name env.func_map in

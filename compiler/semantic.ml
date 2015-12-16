@@ -221,11 +221,13 @@ let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = ma
 		 	if List.length args != 1 then
 				raise (Failure "Print only takes one argument")
 			else
+				let (_, _) = (check_expr_type (List.hd args) (env)) in
 				env
 		| "length" ->
 		 	if List.length args != 1 then
 				raise (Failure "Length only takes one argument")
 			else
+				let (_, _) = (check_expr_type (List.hd args) (env)) in
 				env
 		| _ ->
 			(* TODO: A bug could be here, cause we're ignoring the env variable we're getting *)
