@@ -44,6 +44,7 @@ type stmt =
     | Dummy_stmt of string
     | Array_assign of string * string * expr list
     | Fixed_length_array_assign of string * string * int
+    | Array_select_assign of string * string * string * expr list
     | Update_variable of string * expr
     | Update_array_element of string * expr * expr
     | Bool_assign of string * bool_expr
@@ -52,5 +53,6 @@ type stmt =
     | If of bool_expr * stmt list * stmt list
     | While of bool_expr * stmt list
     | For of stmt * bool_expr * stmt * stmt list
+    | Where of bool_expr * string * stmt list * expr
 
 type program = stmt list

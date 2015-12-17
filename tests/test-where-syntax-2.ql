@@ -1,4 +1,8 @@
-where (totalViews["data"]["views"]["total"] > 10) as totalViews {
-  int a = 1
-  a = 5
-} in json("test.json")
+json test = json("sample.json")
+
+#~~ Prints all names whose ages are greater than 20 ~~#
+
+where (elem["age"] > 20) as elem {
+  string s = elem["name"]
+  print(s)
+} in test["friends"]

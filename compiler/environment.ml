@@ -17,7 +17,7 @@ exception JsonSelectorAlreadyUsed;;
 exception IncorrectArrayAssignmentSize;;
 exception DatatypeDefaultValueMissing;;
 
-type func_info  = {
+type func_info = {
   id : string;
   return : data_type;
   args : data_type list;
@@ -163,3 +163,9 @@ let json_selector_type (id : string) (env : symbol_table) =
     JsonSelectorMap.find id env.json_selector_map
   else
     AnyType
+
+(* VERY IMPORTANT fix for the termination of the loops where we need the js_map to persist across the env *)
+let overwrite_js_map env new_env = 
+  update env.func_map env.var_map env.array_type_map new_env.json_selector_map
+
+

@@ -9,7 +9,8 @@ let ql_to_java_type (data_type : string) = match data_type
   | "string" -> "String"
   | "json" -> "JSONObject"
   | "bool" -> "boolean"
-  | _ -> "Invalid data type"
+  | "array" -> "JSONArray"
+  | _ -> ("Invalid data type "^data_type)
 
 let convert_math_op (op : Ast.math_op) = match op
   with Add -> Jast.Add
@@ -60,8 +61,8 @@ let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table)
         Jast.Array_select(id, head_expr)
       | _ ->
         let selector_exprs = List.map (fun select -> (convert_expr (select) (symbol_table))) selectors in
-        let serialize_id = serialize (expr) (symbol_table) in
-        let json_type = json_selector_type (serialize_id) (symbol_table) in
+        let serialized = serialize (expr) (symbol_table) in
+        let json_type = json_selector_type (serialized) (symbol_table) in
         let java_type = ql_to_java_type (ast_data_to_string (json_type)) in
         let selector_types = List.map (fun expr -> 
           let (expr_type,_) = check_expr_type (expr) (symbol_table) in
@@ -87,6 +88,12 @@ let convert_arg_decl (arg_decl : Ast.arg_decl) =
     var_type = ql_to_java_type arg_decl.var_type;
     var_name = arg_decl.var_name;
   }
+
+let rec build_expr_list (jast_exprs: Jast.expr list) (exprs: Ast.expr list) (symbol_table: Environment.symbol_table) = 
+  match exprs
+    with [head] -> List.rev (jast_exprs@[(convert_expr head symbol_table)])
+    | head :: tl -> (build_expr_list (jast_exprs@[(convert_expr head symbol_table)]) tl symbol_table)
+    | _ -> []
 
 let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_table) = match stmt
   with Ast.Assign(data_type, id, e1) ->
@@ -124,6 +131,13 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let jast_update = convert_statement update symbol_table in
     let jast_body = build_list [] body symbol_table in
     Jast.For(jast_init, jast_condition, jast_update, jast_body)
+  | Ast.Array_select_assign(expected_data_type, new_var_id, array_id, selectors) ->
+    Jast.Array_select_assign((ql_to_java_type expected_data_type), new_var_id, array_id, (build_expr_list [] selectors symbol_table))
+  | Ast.Where(condition, id, body, json_array) ->
+    let jast_condition = convert_bool_expr condition symbol_table in
+    let jast_body = build_list [] body symbol_table in
+    let jast_json_array = convert_expr json_array symbol_table in
+    Jast.Where(jast_condition, id, jast_body, jast_json_array)
   | _ -> Jast.Dummy_stmt("Really just terrible programming")
 
 and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: Environment.symbol_table) =
