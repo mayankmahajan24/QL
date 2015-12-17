@@ -12,6 +12,7 @@ exception BadBinopType;;
 exception IncorrectWhereType;;
 exception UpdatingBool;;
 exception IncorrectSelectorId;; (*When you use selectors with IDs that aren't jsons or arrays*)
+exception UniterableType;;
 
 (* write program to .java file *)
 let write_to_file prog_str =
@@ -35,6 +36,7 @@ let ast_data_to_string (dt : Ast.data_type) = match dt
 	| String -> "string"
 	| Array(i) -> "array"
 	| Json -> "json"
+	| AnyType -> "anytype"
 	| _ -> raise (Failure "cannot convert to string")
 
 let data_to_ast_data (dt : data_type) = match dt
@@ -152,7 +154,8 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 				(ast_data_to_data(func_return_type), new_json_mapping)
 		)
 	| Bracket_select(id, selectors) ->
-		let selector_ast_data_type = var_type id env in
+		let _ = print_endline ("checking type of " ^ id) in 
+		let selector_ast_data_type = var_type id env in 
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		(check_bracket_select_type (selector_data_type) (selectors) (env) (id) (serialize (expr) (env)))
 	| Json_selector_list(i) ->
@@ -267,8 +270,10 @@ let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_t
 					let new_right_env = json_selector_update (serialize (e2) (env)) "float" (new_left_env) in
 					(Bool, new_right_env)
 				| (AnyType, _) ->
+					print_endline (ast_data_to_string (data_to_ast_data (r_type)));
 					let new_env = json_selector_update (serialize (e1) (right_env)) (ast_data_to_string (data_to_ast_data (r_type))) (right_env) in
-					(Bool, new_env)
+						print_endline ("type of " ^ (serialize (e1) (new_env)) ^ "is " ^ ast_data_to_string (json_selector_type (serialize (e1) (new_env)) env));
+						(Bool, new_env)
 				| (_, AnyType) ->
 					let new_env = json_selector_update (serialize (e2) (right_env)) (ast_data_to_string (data_to_ast_data (l_type))) (right_env) in
 					(Bool, new_env)
@@ -331,11 +336,15 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Where(bool_expr, id, stmt_list, json_object) ->
 		let update_env = declare_var id "json" env in
 		let (_,where_env) = handle_bool_expr bool_expr update_env in
-		let _ = handle_json json_object update_env in
+		let serialized = serialize json_object env in
+		let serial_env = (match (json_selector_type serialized env) with
+			Ast.Array(_) -> env
+			| Ast.AnyType -> (json_selector_update serialized (ast_data_to_string (Ast.Array(Ast.AnyType))) env)
+			| _ -> raise UniterableType;) in 
 		let _ = (check_statements (List.rev stmt_list) (update_env)) in
 		(* Also here. *)
-		where_env
-	| Assign(data_type, id, e1) ->
+		serial_env
+		| Assign(data_type, id, e1) ->
 		if (json_selector_found e1 env) == true then
 			let updated_env = declare_var id data_type env in
 			json_selector_update (serialize e1 env) data_type updated_env;
@@ -358,7 +367,9 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				define_array_type left [] declare_var_env id 
 	| Array_select_assign(expected_data_type, new_var_id, array_id, selectors ) -> 
 		let left = data_to_ast_data (string_to_data_type expected_data_type) in (match var_type array_id env with Json -> 
-				let json_type = json_selector_type array_id env in  (match json_type with
+				let json_type = json_selector_type 
+				(*THIS PART DOESNT WORK BC WE ONLY PASS THE ID NOT THE SERIALIZED THING WITH THE SELECTORS*)
+				array_id env in  (match json_type with
 				Ast.AnyType -> 
 				let declare_var_env = declare_var new_var_id "array" env in define_array_type left [] declare_var_env new_var_id;
 					json_selector_update (serialize (Ast.Bracket_select(array_id, selectors)) env) expected_data_type env
