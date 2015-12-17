@@ -336,14 +336,14 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Where(bool_expr, id, stmt_list, json_object) ->
 		let update_env = declare_var id "json" env in
 		let (_,where_env) = handle_bool_expr bool_expr update_env in
-		let serialized = serialize json_object update_env in let _ = print_endline (serialized^" is the list we're iterating through") in
-		let serial_env = (match (json_selector_type serialized update_env) with
-			Ast.Array(_) -> update_env
-			| Ast.AnyType -> let array_set_env = (json_selector_update serialized (ast_data_to_string (Ast.Array(Ast.AnyType))) update_env) in
+		let serialized = serialize json_object where_env in let _ = print_endline (serialized^" is the list we're iterating through") in
+		let serial_env = (match (json_selector_type serialized where_env) with
+			Ast.Array(_) -> where_env
+			| Ast.AnyType -> let array_set_env = (json_selector_update serialized (ast_data_to_string (Ast.Array(Ast.AnyType))) where_env) in
 				let _ = print_endline ("Type of "^serialized^ " is " ^ (ast_data_to_string (json_selector_type serialized array_set_env))) in
 				array_set_env
 			| _ -> raise UniterableType;) in 
-		let _ = (check_statements (List.rev stmt_list) (update_env)) in
+		let _ = (check_statements (List.rev stmt_list) (where_env)) in
 		(* Also here. *)
 		serial_env
 	| Assign(data_type, id, e1) ->

@@ -31,6 +31,7 @@ let cast_json_access (prog_str : string) (data_type : string) = match data_type
   | "JSONObject" -> ""
   | "boolean" -> ""
   | "String" ->  "(String)" ^ prog_str
+  | "JSONArray" -> "(JSONArray)" ^ prog_str
   | _ -> raise (Failure "cast_json_access failure")
 
 let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
@@ -71,6 +72,7 @@ and handle_expression (expr : Jast.expr) = match expr
   | Bracket_select(id, data_type, expr_list, expr_types) ->
     (* This is wonky logic, but it should work *)
     if List.length expr_list == 1 then (
+      let _ = print_endline ("data type is... "^data_type ) in
       cast_json_access (id ^ ".get(" ^ handle_expression (List.hd expr_list) ^ ")") data_type
       )
     else
@@ -192,6 +194,18 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (var_string: 
     let new_prog_string = prog_string ^
       "for (" ^ init_stmt ^ condition_stmt ^ ";" ^ remove_semicolon(update_stmt) ^ ") {\n"
          ^ body_stmt ^ "}\n" in
+    (new_prog_string, var_string, func_string)
+  | Where(condition, id, body, json_array) -> 
+    let json_var_string = handle_expression json_array in
+    let json_array_declaration = "\nstaticArrr = (JSONArray)" ^ json_var_string ^ ";\n" in
+    let it_declaration = "staticItt = staticArrr.iterator();\n" in
+    let while_declaration = "while(staticItt.hasNext()){ \n" in
+    let elem_declaration = "JSONObject " ^ id ^ " = (JSONObject) staticItt.next(); \n" in
+    let if_declaration = "if(" ^ (handle_bool_expr condition) ^ ") { \n" in
+    let (body_declaration, update_var, body_func) = handle_statements body "" "" "" true in
+    let closing_braces_declaration = "} \n }" in
+
+    let new_prog_string = (prog_string ^ json_array_declaration ^ it_declaration ^ while_declaration ^ elem_declaration ^ if_declaration ^ body_declaration ^ closing_braces_declaration) in
     (new_prog_string, var_string, func_string)
   | _ -> 
     (prog_string, var_string, func_string)
