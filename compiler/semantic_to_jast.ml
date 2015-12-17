@@ -88,14 +88,11 @@ let convert_arg_decl (arg_decl : Ast.arg_decl) =
     var_name = arg_decl.var_name;
   }
 
-
 let rec build_expr_list (jast_exprs: Jast.expr list) (exprs: Ast.expr list) (symbol_table: Environment.symbol_table) = 
   match exprs
     with [head] -> List.rev (jast_exprs@[(convert_expr head symbol_table)])
     | head :: tl -> (build_expr_list (jast_exprs@[(convert_expr head symbol_table)]) tl symbol_table)
     | _ -> []
-
-
 
 let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_table) = match stmt
   with Ast.Assign(data_type, id, e1) ->
@@ -147,7 +144,6 @@ and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: 
     with [head] -> List.rev (jast_body@[(convert_statement head symbol_table)])
     | head :: tl -> (build_list (jast_body@[(convert_statement head symbol_table)]) tl symbol_table)
     | _ -> []
-
 
 let convert_semantic (stmt_list : Ast.program) (symbol_table : Environment.symbol_table) =
   List.map (fun stmt -> convert_statement (stmt) (symbol_table)) stmt_list

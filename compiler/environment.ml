@@ -76,6 +76,7 @@ let var_type (id : string) (env : symbol_table) =
   if VariableMap.mem id env.var_map then
     VariableMap.find id env.var_map
   else
+    let _ = print_endline (id ^ " is what we're checking doe") in
     raise VarNotDeclared
 
 let create_func (func_name: string) (ret_type : string) (args : arg_decl list) =

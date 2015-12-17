@@ -1,3 +1,4 @@
+
 open Ast;;
 open Environment;;
 
@@ -154,7 +155,6 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 				(ast_data_to_data(func_return_type), new_json_mapping)
 		)
 	| Bracket_select(id, selectors) ->
-		let _ = print_endline ("checking type of " ^ id) in 
 		let selector_ast_data_type = var_type id env in 
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		(check_bracket_select_type (selector_data_type) (selectors) (env) (id) (serialize (expr) (env)))
@@ -270,9 +270,9 @@ let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_t
 					let new_right_env = json_selector_update (serialize (e2) (env)) "float" (new_left_env) in
 					(Bool, new_right_env)
 				| (AnyType, _) ->
-					print_endline (ast_data_to_string (data_to_ast_data (r_type)));
-					let new_env = json_selector_update (serialize (e1) (right_env)) (ast_data_to_string (data_to_ast_data (r_type))) (right_env) in
-						print_endline ("type of " ^ (serialize (e1) (new_env)) ^ "is " ^ ast_data_to_string (json_selector_type (serialize (e1) (new_env)) env));
+					let serialized = serialize e1 right_env in
+					let new_env = json_selector_update serialized (ast_data_to_string (data_to_ast_data (r_type))) (right_env) in
+						print_endline ("type of " ^ serialized ^ "is " ^ ast_data_to_string (json_selector_type serialized new_env));
 						(Bool, new_env)
 				| (_, AnyType) ->
 					let new_env = json_selector_update (serialize (e2) (right_env)) (ast_data_to_string (data_to_ast_data (l_type))) (right_env) in
@@ -336,23 +336,25 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Where(bool_expr, id, stmt_list, json_object) ->
 		let update_env = declare_var id "json" env in
 		let (_,where_env) = handle_bool_expr bool_expr update_env in
-		let serialized = serialize json_object env in
-		let serial_env = (match (json_selector_type serialized env) with
-			Ast.Array(_) -> env
-			| Ast.AnyType -> (json_selector_update serialized (ast_data_to_string (Ast.Array(Ast.AnyType))) env)
+		let serialized = serialize json_object update_env in let _ = print_endline (serialized^" is the list we're iterating through") in
+		let serial_env = (match (json_selector_type serialized update_env) with
+			Ast.Array(_) -> update_env
+			| Ast.AnyType -> let array_set_env = (json_selector_update serialized (ast_data_to_string (Ast.Array(Ast.AnyType))) update_env) in
+				let _ = print_endline ("Type of "^serialized^ " is " ^ (ast_data_to_string (json_selector_type serialized array_set_env))) in
+				array_set_env
 			| _ -> raise UniterableType;) in 
 		let _ = (check_statements (List.rev stmt_list) (update_env)) in
 		(* Also here. *)
 		serial_env
-		| Assign(data_type, id, e1) ->
-		if (json_selector_found e1 env) == true then
-			let updated_env = declare_var id data_type env in
-			json_selector_update (serialize e1 env) data_type updated_env;
-		else
-			let left = string_to_data_type(data_type) and (right,new_env) = check_expr_type (e1) (env) in
-			equate left right;
-			let declared_var = declare_var id data_type new_env in
-			map_json_types e1 declared_var data_type
+	| Assign(data_type, id, e1) ->
+	if (json_selector_found e1 env) == true then
+		let updated_env = declare_var id data_type env in
+		json_selector_update (serialize e1 env) data_type updated_env;
+	else
+		let left = string_to_data_type(data_type) and (right,new_env) = check_expr_type (e1) (env) in
+		equate left right;
+		let declared_var = declare_var id data_type new_env in
+		map_json_types e1 declared_var data_type
 	| Array_assign(expected_data_type, id, e1) ->
 		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
 			let inferred_type = List.map (fun expr ->
