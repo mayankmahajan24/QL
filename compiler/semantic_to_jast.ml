@@ -62,9 +62,7 @@ let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table)
       | _ ->
         let selector_exprs = List.map (fun select -> (convert_expr (select) (symbol_table))) selectors in
         let serialized = serialize (expr) (symbol_table) in
-        let _ = print_endline ("JAST serialization is "^ serialized) in
         let json_type = json_selector_type (serialized) (symbol_table) in
-        let _ = print_endline ("Inferred type for " ^ serialized ^ " is " ^ (ast_data_to_string json_type)) in
         let java_type = ql_to_java_type (ast_data_to_string (json_type)) in
         let selector_types = List.map (fun expr -> 
           let (expr_type,_) = check_expr_type (expr) (symbol_table) in

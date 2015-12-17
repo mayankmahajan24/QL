@@ -72,7 +72,6 @@ and handle_expression (expr : Jast.expr) = match expr
   | Bracket_select(id, data_type, expr_list, expr_types) ->
     (* This is wonky logic, but it should work *)
     if List.length expr_list == 1 then (
-      let _ = print_endline ("data type is... "^data_type ) in
       cast_json_access (id ^ ".get(" ^ handle_expression (List.hd expr_list) ^ ")") data_type
       )
     else

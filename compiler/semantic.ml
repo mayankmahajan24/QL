@@ -205,7 +205,6 @@ let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
 				if expr_type != String && index = 0 then raise ImproperBraceSelectorType;
 				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType;
 			) selectors;
-			print_endline ("Valid JSON selector "^(serialize expr env));
 			true)
 		else
 			false
@@ -273,7 +272,6 @@ let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_t
 				| (AnyType, _) ->
 					let serialized = serialize e1 right_env in
 					let new_env = json_selector_update serialized (ast_data_to_string (data_to_ast_data (r_type))) (right_env) in
-						print_endline ("type of " ^ serialized ^ "is " ^ ast_data_to_string (json_selector_type serialized new_env));
 						(Bool, new_env)
 				| (_, AnyType) ->
 					let new_env = json_selector_update (serialize (e2) (right_env)) (ast_data_to_string (data_to_ast_data (l_type))) (right_env) in
@@ -337,11 +335,10 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Where(bool_expr, id, stmt_list, json_object) ->
 		let update_env = declare_var id "json" env in
 		let (_,where_env) = handle_bool_expr bool_expr update_env in
-		let serialized = serialize json_object where_env in let _ = print_endline (serialized^" is the list we're iterating through") in
+		let serialized = serialize json_object where_env in
 		let serial_env = (match (json_selector_type serialized where_env) with
 			Ast.Array(_) -> where_env
 			| Ast.AnyType -> let array_set_env = (json_selector_update serialized (ast_data_to_string (Ast.Array(Ast.AnyType))) where_env) in
-				let _ = print_endline ("Type of "^serialized^ " is " ^ (ast_data_to_string (json_selector_type serialized array_set_env))) in
 				array_set_env
 			| _ -> raise UniterableType;) in 
 		let post_loop_env = (check_statements (List.rev stmt_list) (serial_env)) in
@@ -352,7 +349,6 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let updated_env = declare_var id data_type env in
 		json_selector_update (serialize e1 env) data_type updated_env;
 	else
-		let _ = print_endline "Regular assignment" in
 		let left = string_to_data_type(data_type) and (right,new_env) = check_expr_type (e1) (env) in
 		equate left right;
 		let declared_var = declare_var id data_type new_env in
