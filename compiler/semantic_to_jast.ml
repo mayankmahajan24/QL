@@ -88,6 +88,15 @@ let convert_arg_decl (arg_decl : Ast.arg_decl) =
     var_name = arg_decl.var_name;
   }
 
+
+let rec build_expr_list (jast_exprs: Jast.expr list) (exprs: Ast.expr list) (symbol_table: Environment.symbol_table) = 
+  match exprs
+    with [head] -> List.rev (jast_exprs@[(convert_expr head symbol_table)])
+    | head :: tl -> (build_expr_list (jast_exprs@[(convert_expr head symbol_table)]) tl symbol_table)
+    | _ -> []
+
+
+
 let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_table) = match stmt
   with Ast.Assign(data_type, id, e1) ->
     let corresponding_data_type = ql_to_java_type data_type in
@@ -124,7 +133,8 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let jast_update = convert_statement update symbol_table in
     let jast_body = build_list [] body symbol_table in
     Jast.For(jast_init, jast_condition, jast_update, jast_body)
-  | Ast.Array_select_assign
+  | Ast.Array_select_assign(expected_data_type, new_var_id, array_id, selectors) ->
+    Jast.Array_select_assign((ql_to_java_type expected_data_type), new_var_id, array_id, (build_expr_list [] selectors symbol_table))
   | Ast.Where(condition, id, body, json) ->
     let jast_condition = convert_bool_expr condition symbol_table in
     let jast_body = build_list [] body symbol_table in
@@ -137,6 +147,7 @@ and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: 
     with [head] -> List.rev (jast_body@[(convert_statement head symbol_table)])
     | head :: tl -> (build_list (jast_body@[(convert_statement head symbol_table)]) tl symbol_table)
     | _ -> []
+
 
 let convert_semantic (stmt_list : Ast.program) (symbol_table : Environment.symbol_table) =
   List.map (fun stmt -> convert_statement (stmt) (symbol_table)) stmt_list
