@@ -1,6 +1,8 @@
 json test = json("sample.json")
 
-where (totalViews["hello"] > 10) as totalViews {
-  int a = 1
-  a = 5
-} in test["not_much_diff"]
+#~~ Prints all names whose ages are greater than 20 ~~#
+
+where (elem["age"] > 20) as elem {
+  string s = elem["name"]
+  print(s)
+} in test["friends"]

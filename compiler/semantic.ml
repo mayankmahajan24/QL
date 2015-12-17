@@ -205,6 +205,7 @@ let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
 				if expr_type != String && index = 0 then raise ImproperBraceSelectorType;
 				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType;
 			) selectors;
+			print_endline ("Valid JSON selector "^(serialize expr env));
 			true)
 		else
 			false
@@ -312,9 +313,9 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 							)
  	| If(bool_expr, then_stmt, else_stmt) ->
 		let (_,new_env) = handle_bool_expr bool_expr env in
-		let _ = check_statements (List.rev then_stmt) (new_env) in
-		let _ = check_statements (List.rev else_stmt) (new_env) in
-			new_env
+		let post_if_env = check_statements (List.rev then_stmt) (new_env) in
+		let post_else_env = check_statements (List.rev else_stmt) (new_env) in
+			overwrite_js_map (overwrite_js_map new_env post_if_env) post_else_env 
   	| Update_array_element (id, e1, e2) ->
   		let ast_array_data_type = array_type id env in
 		let data_type = ast_data_to_data ast_array_data_type in
@@ -325,14 +326,14 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let init_env = check_statement init_stmt env in
 		let (_,new_env) = handle_bool_expr bool_expr init_env in
 		let update_env = check_statement update_stmt new_env in
-		let _ = check_statements (List.rev stmt_list) (update_env) in
+		let post_loop_env = check_statements (List.rev stmt_list) (update_env) in
 			(* We need to worry about scoping here. I think we want all the things in bool expr to count. *)
-		new_env
+		overwrite_js_map new_env post_loop_env
 	| While(bool_expr, body) ->
 		let (_,while_env) = handle_bool_expr bool_expr env in
-		let _ = check_statements (List.rev body) (while_env) in
+		let post_loop_env = check_statements (List.rev body) (while_env) in
 		(* Same thing here. We might want to be returning while_env *)
-		while_env
+		overwrite_js_map while_env post_loop_env
 	| Where(bool_expr, id, stmt_list, json_object) ->
 		let update_env = declare_var id "json" env in
 		let (_,where_env) = handle_bool_expr bool_expr update_env in
@@ -343,14 +344,15 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				let _ = print_endline ("Type of "^serialized^ " is " ^ (ast_data_to_string (json_selector_type serialized array_set_env))) in
 				array_set_env
 			| _ -> raise UniterableType;) in 
-		let _ = (check_statements (List.rev stmt_list) (where_env)) in
+		let post_loop_env = (check_statements (List.rev stmt_list) (serial_env)) in
 		(* Also here. *)
-		serial_env
+		overwrite_js_map serial_env post_loop_env
 	| Assign(data_type, id, e1) ->
 	if (json_selector_found e1 env) == true then
 		let updated_env = declare_var id data_type env in
 		json_selector_update (serialize e1 env) data_type updated_env;
 	else
+		let _ = print_endline "Regular assignment" in
 		let left = string_to_data_type(data_type) and (right,new_env) = check_expr_type (e1) (env) in
 		equate left right;
 		let declared_var = declare_var id data_type new_env in
@@ -389,8 +391,8 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let func_env_vars = define_func_vars arg_list func_env in
 		(* TODO: Implement void functions *)
 		if (return_type != "void" && (List.length arg_list) == 0) then raise ReturnStatementMissing;
-		let _ = check_function_statements (List.rev stmt_list) func_env_vars return_type in
-		func_env
+		let post_func_env = check_function_statements (List.rev stmt_list) func_env_vars return_type in
+		overwrite_js_map func_env post_func_env 
 	| Noop -> env
 	| _ -> raise (Failure "Unimplemented functionality")
 
