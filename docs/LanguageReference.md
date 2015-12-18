@@ -2,16 +2,23 @@
 
 ### Anshul Gupta (akg2155), Evan Tarrh (ert2123), Gary Lin (gml2153), Matt Piccolella (mjp2220), Mayank Mahajan (mm4399)
 
-\pagebreak
-
 ##Table of Contents
 ### 1.0 Introduction
 ### 2.0 Lexical Conventions
+#### 2.1 Identifiers
+#### 2.2 Keywords
+#### 2.3 Comments
+#### 2.4 Literals
 ### 3.0 Data Types
+#### 3.1 Primitive Types
+#### 3.2 Non-Primitive Types
 ### 4.0 Syntax
-### 5.0 Standard Library Functions 
+#### 4.1 Punctuation
+#### 4.2 Operators
+#### 4.3 Expressions
+#### 4.4 Statements
+### 5.0 Standard Library Functions
 
-\pagebreak
 
 ## 1.0 Introduction
 JavaScript Object Notation (JSON) is an open-standard format that uses human-readable format to capture attribute-value pairs. JSON has gained prominence replacing XML encoded-data in browser-server communication, particularly with the explosion of RESTful APIs and AJAX requests that often make use of JSON.
@@ -270,6 +277,44 @@ If the types are anything other than these specified combinations, we throw an e
 
 ### 4.3 Expressions
 
+#### 4.3.1 Data Type Literal
+
+#### 4.3.2 Identifier
+
+#### 4.3.3 Bracket Selector
+
+#### 4.3.4 Binary Operations
+
+#### 4.3.5 Conditional Statements --> needs to be Boolean Expression
+Our conditional statements behave as conditional statements in other languages do. They check the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required. We can provide an arbitrary number of `elseif` statements following the `if`, though there can also be none. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
+
+An example conditional statement is as follows:
+
+```
+if (__boolean condition__) {
+    #~~ List of statements ~~#
+}
+elseif (__boolean condition__) {
+    #~~ List of statements ~~#
+} else {
+    #~~ List of statements ~~#
+}
+```
+
+#### 4.3.6 Function Calls
+A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
+
+```
+<function_identifier>(<arg1>,<arg2>,...)
+```
+
+This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation. Some examples of possible function calls are:
+
+```
+sort(a)
+array a = append(a, int(2))
+```
+
 ### 4.4 Statements
 There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, mathematical operations, and function calls. Statements are separated by the newline character `\n`, as follows:
 
@@ -279,7 +324,7 @@ expression \n
 
 The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
 
-#### 4.4.1 Declaration of Variables
+#### 4.4.1 Declaring Variables
 To declare a variable, a data type must be specified followed by the variable name and an equals sign.  After the equal sign, the user has to specify the datatype with the corresponding parameters to be passed into the constructor in parentheses.
 
 ```
@@ -297,34 +342,9 @@ bool b = bool(true)
 string s = string("foo")
 ```
 
-#### 4.4.2 Function Calls
-A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
+#### 4.4.2 Updating Variables
 
-```
-<function_identifier>(<arg1>,<arg2>,...)
-```
-
-This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation. Some examples of possible function calls are:
-
-```
-sort(a)
-array a = append(a, int(2))
-```
-#### 4.4.3 Conditional Statements
-Our conditional statements behave as conditional statements in other languages do. They check the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required. We can provide an arbitrary number of `elseif` statements following the `if`, though there can also be none. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
-
-An example conditional statement is as follows:
-
-```
-if (__boolean condition__) {
-    #~~ List of statements ~~#
-}
-elseif (__boolean condition__) {
-    #~~ List of statements ~~#
-} else {
-    #~~ List of statements ~~#
-}
-```
+#### 4.4.3 Function Declaration
 
 #### 4.4.4 Return statements
 A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
