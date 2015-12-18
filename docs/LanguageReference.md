@@ -2,7 +2,7 @@
 
 ### Anshul Gupta (akg2155), Evan Tarrh (ert2123), Gary Lin (gml2153), Matt Piccolella (mjp2220), Mayank Mahajan (mm4399)
 
-------
+\pagebreak
 
 ##Table of Contents
 ### 1.0 Introduction
@@ -11,7 +11,7 @@
 ### 4.0 Syntax
 ### 5.0 Standard Library Functions 
 
-------
+\pagebreak
 
 ## 1.0 Introduction
 JavaScript Object Notation (JSON) is an open-standard format that uses human-readable format to capture attribute-value pairs. JSON has gained prominence replacing XML encoded-data in browser-server communication, particularly with the explosion of RESTful APIs and AJAX requests that often make use of JSON.
