@@ -3,6 +3,11 @@
 ### Anshul Gupta (akg2155), Evan Tarrh (ert2123), Gary Lin (gml2153), Matt Piccolella (mjp2220), Mayank Mahajan (mm4399)
 
 ##Table of Contents
+### 1.0 Introduction
+### 2.0 Lexical Conventions
+### 3.0 Data Types
+### 4.0 Syntax
+### 5.0 Standard Library Functions 
 
 ## 1.0 Introduction
 JavaScript Object Notation (JSON) is an open-standard format that uses human-readable format to capture attribute-value pairs. JSON has gained prominence replacing XML encoded-data in browser-server communication, particularly with the explosion of RESTful APIs and AJAX requests that often make use of JSON.
@@ -350,7 +355,7 @@ while (__boolean condition__) {
 }
 ```
 
-## 5 Standard Library Functions
+## 5.0 Standard Library Functions
 
 Standard library functions are included with the language for convenience for the user. The first few of these functions will give users the ability to perform basic modifying operations with arrays.
 
