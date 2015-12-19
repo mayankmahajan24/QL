@@ -1,3 +1,13 @@
+(*
+ * QL
+ *
+ * Manager: Matthew Piccolella
+ * Systems Architect: Anshul Gupta
+ * Tester: Evan Tarrh
+ * Language Guru: Gary Lin
+ * Systems Integrator: Mayank Mahajan
+ *)
+
 open Ast;;
 
 module FunctionMap = Map.Make(String);;
@@ -54,7 +64,7 @@ let string_to_data_type (s : string) = match s
   | "string" -> String
   | "array" -> Array(AnyType)
   | "json" -> Json
-  | _ -> raise (Failure "unsupported data type 1")
+  | _ -> raise (Failure "String does not match a particular data type. Something went wrong.")
 
 let rec data_type_to_string (dt : data_type) = match dt
   with Int -> "int"
@@ -63,7 +73,7 @@ let rec data_type_to_string (dt : data_type) = match dt
   | String -> "string"
   | Array(t) -> "array of " ^ (data_type_to_string t)
   | Json -> "json"
-  | _ -> raise (Failure "unsupported data type 2")
+  | _ -> raise (Failure "Data Type doesn't have a corresponding string.")
 
 let declare_var (id : string) (data_type : string) (env : symbol_table) =
   if VariableMap.mem id env.var_map then
@@ -164,8 +174,6 @@ let json_selector_type (id : string) (env : symbol_table) =
   else
     AnyType
 
-(* VERY IMPORTANT fix for the termination of the loops where we need the js_map to persist across the env *)
+(* Important: when loops terminate, we need just the JSON map to persist to the new env. *)
 let overwrite_js_map env new_env = 
   update env.func_map env.var_map env.array_type_map new_env.json_selector_map
-
-

@@ -24,9 +24,7 @@ type expr =
     | Binop of expr * math_op * expr
     | Call of string * expr list
     | Json_from_file of string
-    | Json_selector_list of string list
     | Bracket_select of string * expr list
-    (* Need to include array accessor here. -- Matt*)
 
 type arg_decl = {
     var_type   : string;
@@ -56,7 +54,6 @@ type stmt =
     | Where of bool_expr * string * stmt list * expr
     | If of bool_expr * stmt list * stmt list
     | Return of expr
-    | Not of expr
     | Assign of string * string * expr
     | Update_variable of string * expr
     | Update_array_element of string * expr * expr
@@ -66,6 +63,5 @@ type stmt =
     | Bool_assign of string * string * bool_expr
     | Func_decl of string * arg_decl list * string * stmt list
     | Noop
-    (* Look into making return type limited to certain set *)
 
 type program = stmt list

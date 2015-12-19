@@ -1,3 +1,12 @@
+(*
+ * QL
+ *
+ * Manager: Matthew Piccolella
+ * Systems Architect: Anshul Gupta
+ * Tester: Evan Tarrh
+ * Language Guru: Gary Lin
+ * Systems Integrator: Mayank Mahajan
+ *)
 
 open Ast;;
 open Environment;;
@@ -15,12 +24,6 @@ exception UpdatingBool;;
 exception IncorrectSelectorId;; (*When you use selectors with IDs that aren't jsons or arrays*)
 exception UniterableType;;
 
-(* write program to .java file *)
-let write_to_file prog_str =
-    let file = open_out "Test.java" in
-        Printf.fprintf file "%s" prog_str
-
-(* TODO: Try to get rid of this. Weird to have two different representations. *)
 let ast_data_to_data (dt : Ast.data_type) = match dt
 	with Int -> Int
 	| Float -> Float
@@ -38,7 +41,6 @@ let ast_data_to_string (dt : Ast.data_type) = match dt
 	| Array(i) -> "array"
 	| Json -> "json"
 	| AnyType -> "anytype"
-	| _ -> raise (Failure "cannot convert to string")
 
 let data_to_ast_data (dt : data_type) = match dt
 	with Int -> Ast.Int
@@ -56,14 +58,14 @@ let string_to_data_type (s : string) = match s
 	| "string" -> String
 	| "array" -> Array
 	| "json" -> Json
-	| _ -> raise (Failure "unsupported data type")
+	| _ -> raise (Failure "Unsupported Data Type.")
 
 let string_data_literal (expr : Ast.expr) = match expr
 		with Literal_int(i) -> string_of_int i
 	| Literal_float(i) -> string_of_float i
 	| Literal_bool(i) -> i
 	| Literal_string(i) -> i
-	| _ -> raise (Failure "we can't print this")
+	| _ -> raise (Failure "There is no defined way to print this expression.")
 
 let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : data_type) = match (left_expr, op, right_expr)
 	with (Int, _, Int) -> Int
@@ -77,9 +79,8 @@ let check_binop_type (left_expr : data_type) (op : Ast.math_op) (right_expr : da
 	| (String, Add, AnyType) -> String
 	| (AnyType, Add, AnyType) -> AnyType
 	| (AnyType, _, AnyType) -> Float
-		(* If we're doing math on two any types, just assume it's a float. *)
 	| (_, _, _) ->
-		raise (Failure "cannot perform binary operations with provided arguments")
+		raise (Failure "Cannot perform binary operations with provided arguments.")
 
 (*Possibly add int/float comparison*)
 let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right_expr : data_type) = match op
@@ -90,14 +91,14 @@ let check_bool_expr_binop_type (left_expr : data_type) (op : Ast.bool_op) (right
 			| (Bool, Bool) -> Bool
 			| (AnyType, _) -> Bool
 			| (_, AnyType) -> Bool
-			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
+			| _ -> raise (Failure "Cannot perform boolean binary operations with provided arguments.")
 			)
 		| Less | Leq | Greater | Geq -> (match (left_expr, right_expr)
 			with (Int, Int) -> Bool
 			| (Float, Float) -> Bool
 			| (AnyType, _) -> Bool
 			| (_, AnyType) -> Bool
-			| _ -> raise (Failure "cannot perform binary operations with provided arguments")
+			| _ -> raise (Failure "Cannot perform comparison binary operations with provided arguments.")
 			)
 
 let rec check_bracket_select_type (d_type : data_type) (selectors : expr list) (env : symbol_table) (id : string) (serial : string) = match d_type
@@ -158,8 +159,6 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 		let selector_ast_data_type = var_type id env in 
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		(check_bracket_select_type (selector_data_type) (selectors) (env) (id) (serialize (expr) (env)))
-	| Json_selector_list(i) ->
-		(AnyType,env)
 
 and serialize (expr : Ast.expr) (env : symbol_table) = match expr
 	with Bracket_select(id, selectors) ->
@@ -172,8 +171,8 @@ and serialize (expr : Ast.expr) (env : symbol_table) = match expr
 			)
 			) id (List.rev selectors) in
 		serialized
-		(* This is going to cause errors. Watch out for it. *)
-	| _ -> raise (Failure "incorrect usage of bracket syntax")
+		(* This function is hard to write - hard to serialize an arbitrary expression. *)
+	| _ -> raise (Failure "Cannot serialize a non-Bracket Select type.")
 
 and serialize_literal (literal : expr) = match literal
 		with Literal_int(i) -> string_of_int i
@@ -183,7 +182,7 @@ and serialize_literal (literal : expr) = match literal
 	| Id(i) -> i
 	| Bracket_select(id, selectors) -> (List.fold_left (
 		fun str expr -> str ^ (serialize_literal (expr)))) id selectors
-	| _ -> raise (Failure "we can't print this") 
+	| _ -> raise (Failure "Printing this is undefined.") 
 
 let rec map_json_types (expr : Ast.expr) (env : symbol_table) (data_type : string) = match expr
 	with Binop(left_expr, op, right_expr) ->
@@ -200,7 +199,7 @@ let json_selector_found (expr : Ast.expr) (env : symbol_table) = match expr
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		if selector_data_type == Json then
 			(List.iteri (fun index expr ->
-				(* TODO: If we use a non-declared JSON value, we'll have an error. Think about how to infer this. *)
+				(* If we use a non-declared JSON value, we'll have an error. Think about how to infer this. *)
 				let (expr_type,_) = check_expr_type (expr) (env) in
 				if expr_type != String && index = 0 then raise ImproperBraceSelectorType;
 				if expr_type != String && expr_type != Int then raise ImproperBraceSelectorType;
@@ -218,24 +217,23 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| Literal_float(i) -> string_of_float i
 	| Literal_bool(i) -> i
 	| Literal_string(i) -> i
-	| _ -> raise (Failure "we can't print this")
+	| _ -> raise (Failure "Printing this is undefined.")
 
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
 	with Call(f_name, args) -> (match f_name with
 		"print" ->
 		 	if List.length args != 1 then
-				raise (Failure "Print only takes one argument")
+				raise (Failure "Print only takes one argument.")
 			else
 				let (_, _) = (check_expr_type (List.hd args) (env)) in
 				env
 		| "length" ->
 		 	if List.length args != 1 then
-				raise (Failure "Length only takes one argument")
+				raise (Failure "Length only takes one argument.")
 			else
 				let (_, _) = (check_expr_type (List.hd args) (env)) in
 				env
 		| _ ->
-			(* TODO: A bug could be here, cause we're ignoring the env variable we're getting *)
 			let arg_types = List.map (fun expr ->
 				let (expr_type, _) = (check_expr_type (expr) (env)) in
 				(data_to_ast_data(expr_type))) args in
@@ -289,7 +287,6 @@ let rec handle_bool_expr (bool_expr : Ast.bool_expr) (env : Environment.symbol_t
 		with Bool -> (Bool,env)
 		| _ -> raise NotBoolExpr
 
-(* compile AST to java syntax *)
 let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = match stmt
 	with Expr(e1) ->
 		let updated_expr = (handle_expr_statement (e1) (env)) in
@@ -301,7 +298,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			else
 				let data_type = ast_data_to_data ast_dt in
 					if data_type == Json then
-						raise (Failure "json aliasing not supported")
+						raise (Failure "JSON aliasing is not supported in QL.")
 					else
 						let (right,new_env) = check_expr_type (e1) (env) in
 							equate data_type right;
@@ -371,7 +368,8 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 				(*THIS PART DOESNT WORK BC WE ONLY PASS THE ID NOT THE SERIALIZED THING WITH THE SELECTORS*)
 				array_id env in  (match json_type with
 				Ast.AnyType -> 
-				let declare_var_env = declare_var new_var_id "array" env in define_array_type left [] declare_var_env new_var_id;
+				let declare_var_env = declare_var new_var_id "array" env in 
+					let _ = define_array_type left [] declare_var_env new_var_id in
 					json_selector_update (serialize (Ast.Bracket_select(array_id, selectors)) env) expected_data_type env
 				| other_type -> equate (string_to_data_type expected_data_type) (ast_data_to_data other_type);
 					let declare_var_env = declare_var new_var_id "array" env in define_array_type left [] declare_var_env new_var_id
@@ -390,7 +388,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let post_func_env = check_function_statements (List.rev stmt_list) func_env_vars return_type in
 		overwrite_js_map func_env post_func_env 
 	| Noop -> env
-	| _ -> raise (Failure "Unimplemented functionality")
+	| _ -> raise (Failure "Unimplemented functionality.")
 
 and check_statements (stmts : Ast.stmt list) (env : Environment.symbol_table) = match stmts
     with [] -> env
@@ -416,14 +414,11 @@ and check_return_statement (stmt : Ast.stmt) (env : Environment.symbol_table) (r
 			let left = string_to_data_type(return_type) and (right,_) = check_expr_type (expr) (env) in
 				equate left right;
 				env
-		| _ -> raise (Failure "Function must end with return statement")
+		| _ -> raise (Failure "Function must end with return statement.")
 	else
 		check_statement stmt env
-
 
 (* entry point into semantic checker *)
 let check_program (stmt_list : Ast.program) =
 	let env = Environment.create in
 	check_statements (stmt_list) (env);
-
-

@@ -1,9 +1,15 @@
+(*
+ * QL
+ *
+ * Manager: Matthew Piccolella
+ * Systems Architect: Anshul Gupta
+ * Tester: Evan Tarrh
+ * Language Guru: Gary Lin
+ * Systems Integrator: Mayank Mahajan
+ *)
+
 open Jast;;
 open Str;;
-
-let rec range i j = if i > j then [] else i :: (range (i+1) j)
-
-let rec range i j = if i > j then [] else i :: (range (i+1) j)
 
 let rec range i j = if i > j then [] else i :: (range (i+1) j)
 
@@ -32,7 +38,7 @@ let cast_json_access (prog_str : string) (data_type : string) = match data_type
   | "boolean" -> ""
   | "String" ->  "(String)" ^ prog_str
   | "JSONArray" -> "(JSONArray)" ^ prog_str
-  | _ -> raise (Failure "cast_json_access failure")
+  | _ -> raise (Failure "Failure in Java casting a JSON access.")
 
 let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
   with [] -> ""
@@ -49,7 +55,7 @@ and handle_expression (expr : Jast.expr) = match expr
     | "length" -> (match List.hd expr_list
       with Id(i) ->
         i ^ ".length\n"
-      | _ -> "oops"
+      | _ -> raise (Failure "Cannot find the length of a non-variable.")
       )
     | _ -> func_name ^ "(" ^ comma_separate_list expr_list ^ ")"
   )
@@ -65,12 +71,10 @@ and handle_expression (expr : Jast.expr) = match expr
       with "True" -> "true"
       | "False" -> "false"
       | _ -> "bad")
-  (* Think about printing literal with the lower case to match those printed with identifiers *)
   | Binop(left_expr, op, right_expr) -> handle_expression left_expr ^ " " ^ convert_operator op ^ " " ^ handle_expression right_expr
   | Json_object(file_name) -> "(JSONObject) (new JSONParser()).parse(new FileReader(\""^ file_name ^ "\"))"
   | Array_initializer(expr_list) -> "{" ^ comma_separate_list (expr_list) ^ "}"
   | Bracket_select(id, data_type, expr_list, expr_types) ->
-    (* This is wonky logic, but it should work *)
     if List.length expr_list == 1 then (
       cast_json_access (id ^ ".get(" ^ handle_expression (List.hd expr_list) ^ ")") data_type
       )
@@ -84,14 +88,14 @@ and handle_expression (expr : Jast.expr) = match expr
             (match (List.nth expr_types (index + 1))
               with Int -> "((JSONArray) " ^ id ^ ".get(" ^ handle_expression (expr) ^ "))"
               | String -> "((JSONObject) " ^ id ^ ".get(" ^ handle_expression(expr) ^ "))"
-              | _ -> raise (Failure "Fuck this.")
+              | _ -> raise (Failure "Should not have a non-Int or String JSON selector. Check semantic.")
             )
           )
           else (
             (match (List.nth expr_types (index + 1))
               with Int -> "((JSONArray) " ^ prog_str ^ ".get(" ^ handle_expression (expr) ^ "))"
               | String -> "((JSONObject) " ^ prog_str ^ ".get(" ^ handle_expression(expr) ^ "))"
-              | _ -> raise (Failure "Fuck this.")
+              | _ -> raise (Failure "Should not have a non-Int or String JSON selector. Check semantic.")
             )
           )
         )
@@ -100,7 +104,6 @@ and handle_expression (expr : Jast.expr) = match expr
         )
       ) "" expr_type_pairs expr_num_range in
       prog_str
-  | _ -> ""
 
 let rec handle_bool_expr (expr : Jast.bool_expr) = match expr
   with Literal_bool(i) ->
@@ -215,7 +218,6 @@ and handle_statements (stmt_list : Jast.program) (prog_string : string) (var_str
     let (prog, var, func) = (handle_statement stmt prog_string var_string func_string in_block) in
     (prog ^ "\n", var, func)
   | stmt :: other_stmts ->
-      (* We add a blank line for each statement. Don't need to do this in the case of assing *)
       let (new_prog_string, new_var_string, new_func_string) = (handle_statement stmt (prog_string ^ "\n") var_string func_string in_block) in
       handle_statements other_stmts new_prog_string new_var_string new_func_string in_block
 

@@ -47,7 +47,6 @@
 %token <string> ID
 
 /* Precedence */
-/* TODO: Establish the precedence definitions for our operators. */
 
 %nonassoc NOELSE
 

@@ -1,3 +1,13 @@
+(*
+ * QL
+ *
+ * Manager: Matthew Piccolella
+ * Systems Architect: Anshul Gupta
+ * Tester: Evan Tarrh
+ * Language Guru: Gary Lin
+ * Systems Integrator: Mayank Mahajan
+ *)
+
 open Ast
 
 type math_op = Add | Sub | Mult | Div
@@ -29,7 +39,6 @@ type expr =
     | Json_object of string
     | Bracket_select of string * string * expr list * data_type list
     | Array_select of string * expr
-    | Dummy_expr of string
 
 type bool_expr =
     | Literal_bool of string
@@ -41,7 +50,6 @@ type bool_expr =
 type stmt =
     | Assign of string * string * expr
     | Expr of expr
-    | Dummy_stmt of string
     | Array_assign of string * string * expr list
     | Fixed_length_array_assign of string * string * int
     | Array_select_assign of string * string * string * expr list
@@ -54,5 +62,6 @@ type stmt =
     | While of bool_expr * stmt list
     | For of stmt * bool_expr * stmt * stmt list
     | Where of bool_expr * string * stmt list * expr
+    | Noop
 
 type program = stmt list
