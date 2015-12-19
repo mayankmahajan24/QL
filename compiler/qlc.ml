@@ -1,3 +1,13 @@
+(*
+ * QL
+ *
+ * Manager: Matthew Piccolella
+ * Systems Architect: Anshul Gupta
+ * Tester: Evan Tarrh
+ * Language Guru: Gary Lin
+ * Systems Integrator: Mayank Mahajan
+ *)
+
 type action = Raw | Ast | Semantic | Semantic_to_jast | Code_generator
 
 let _ =

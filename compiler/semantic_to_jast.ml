@@ -1,3 +1,13 @@
+(*
+ * QL
+ *
+ * Manager: Matthew Piccolella
+ * Systems Architect: Anshul Gupta
+ * Tester: Evan Tarrh
+ * Language Guru: Gary Lin
+ * Systems Integrator: Mayank Mahajan
+ *)
+
 open Ast;;
 open Environment;;
 open Jast;;
@@ -75,6 +85,7 @@ let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table)
     let sast_exprs = List.map (fun expr -> (convert_expr (expr) (symbol_table))) expr_list in
     Jast.Array_initializer(sast_exprs)
 
+
 let rec convert_bool_expr (op : Ast.bool_expr) (symbol_table : Environment.symbol_table) = match op
   with Ast.Literal_bool(i) -> Jast.Literal_bool(i)
   | Ast.Binop(left_exp, op, right_expr) -> Jast.Binop((convert_expr (left_exp) (symbol_table)), (convert_bool_op (op)), (convert_expr (right_expr) (symbol_table)))
@@ -137,6 +148,7 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let jast_body = build_list [] body symbol_table in
     let jast_json_array = convert_expr json_array symbol_table in
     Jast.Where(jast_condition, id, jast_body, jast_json_array)
+  | Ast.Noop -> Jast.Noop
 
 and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: Environment.symbol_table) =
   match body

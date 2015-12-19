@@ -1,3 +1,12 @@
+(*
+ * QL
+ *
+ * Manager: Matthew Piccolella
+ * Systems Architect: Anshul Gupta
+ * Tester: Evan Tarrh
+ * Language Guru: Gary Lin
+ * Systems Integrator: Mayank Mahajan
+ *)
 
 open Ast;;
 open Environment;;
@@ -150,8 +159,6 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 		let selector_ast_data_type = var_type id env in 
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
 		(check_bracket_select_type (selector_data_type) (selectors) (env) (id) (serialize (expr) (env)))
-	| Json_selector_list(i) ->
-		(AnyType,env)
 
 and serialize (expr : Ast.expr) (env : symbol_table) = match expr
 	with Bracket_select(id, selectors) ->
