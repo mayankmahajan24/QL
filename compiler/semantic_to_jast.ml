@@ -10,7 +10,7 @@ let ql_to_java_type (data_type : string) = match data_type
   | "json" -> "JSONObject"
   | "bool" -> "boolean"
   | "array" -> "JSONArray"
-  | _ -> ("Invalid data type "^data_type)
+  | _ -> ("Invalid data type " ^ data_type ^ ".")
 
 let convert_math_op (op : Ast.math_op) = match op
   with Add -> Jast.Add
@@ -74,7 +74,6 @@ let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table)
   | Ast.Literal_array(expr_list) ->
     let sast_exprs = List.map (fun expr -> (convert_expr (expr) (symbol_table))) expr_list in
     Jast.Array_initializer(sast_exprs)
-  | _ -> Jast.Dummy_expr("We gotta get rid of this")
 
 let rec convert_bool_expr (op : Ast.bool_expr) (symbol_table : Environment.symbol_table) = match op
   with Ast.Literal_bool(i) -> Jast.Literal_bool(i)
@@ -138,7 +137,6 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let jast_body = build_list [] body symbol_table in
     let jast_json_array = convert_expr json_array symbol_table in
     Jast.Where(jast_condition, id, jast_body, jast_json_array)
-  | _ -> Jast.Dummy_stmt("Really just terrible programming")
 
 and build_list (jast_body: Jast.stmt list) (body: Ast.stmt list) (symbol_table: Environment.symbol_table) =
   match body
