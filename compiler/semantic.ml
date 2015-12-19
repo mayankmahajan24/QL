@@ -182,7 +182,7 @@ and serialize_literal (literal : expr) = match literal
 	| Id(i) -> i
 	| Bracket_select(id, selectors) -> (List.fold_left (
 		fun str expr -> str ^ (serialize_literal (expr)))) id selectors
-	| _ -> raise (Failure "We do not know how to print this.") 
+	| _ -> raise (Failure "Printing this is undefined.") 
 
 let rec map_json_types (expr : Ast.expr) (env : symbol_table) (data_type : string) = match expr
 	with Binop(left_expr, op, right_expr) ->
@@ -217,7 +217,7 @@ let string_data_literal (expr : Ast.expr) = match expr
 	| Literal_float(i) -> string_of_float i
 	| Literal_bool(i) -> i
 	| Literal_string(i) -> i
-	| _ -> raise (Failure "We do not know how to print this.")
+	| _ -> raise (Failure "Printing this is undefined.")
 
 let handle_expr_statement (expr : Ast.expr) (env: Environment.symbol_table) = match expr
 	with Call(f_name, args) -> (match f_name with

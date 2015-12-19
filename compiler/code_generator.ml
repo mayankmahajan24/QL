@@ -55,7 +55,7 @@ and handle_expression (expr : Jast.expr) = match expr
     | "length" -> (match List.hd expr_list
       with Id(i) ->
         i ^ ".length\n"
-      | _ -> raise (Failure "We cannot find the length of a non-variable.")
+      | _ -> raise (Failure "Cannot find the length of a non-variable.")
       )
     | _ -> func_name ^ "(" ^ comma_separate_list expr_list ^ ")"
   )
@@ -88,14 +88,14 @@ and handle_expression (expr : Jast.expr) = match expr
             (match (List.nth expr_types (index + 1))
               with Int -> "((JSONArray) " ^ id ^ ".get(" ^ handle_expression (expr) ^ "))"
               | String -> "((JSONObject) " ^ id ^ ".get(" ^ handle_expression(expr) ^ "))"
-              | _ -> raise (Failure "We should not have a non-Int or String JSON selector. Check semantic.")
+              | _ -> raise (Failure "Should not have a non-Int or String JSON selector. Check semantic.")
             )
           )
           else (
             (match (List.nth expr_types (index + 1))
               with Int -> "((JSONArray) " ^ prog_str ^ ".get(" ^ handle_expression (expr) ^ "))"
               | String -> "((JSONObject) " ^ prog_str ^ ".get(" ^ handle_expression(expr) ^ "))"
-              | _ -> raise (Failure "We should not have a non-Int or String JSON selector. Check semantic.")
+              | _ -> raise (Failure "Should not have a non-Int or String JSON selector. Check semantic.")
             )
           )
         )
