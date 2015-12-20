@@ -17,3 +17,5 @@ tests/bikedata.json
 bikedata.json
 tests/coursedata.json
 coursedata.json
+tests/fitbitdata.json
+fitbitdata.json
