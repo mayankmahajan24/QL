@@ -13,3 +13,7 @@ qlc
 scanner.ml
 compiler/parser.conflicts
 .DS_Store
+tests/bikedata.json
+bikedata.json
+tests/coursedata.json
+coursedata.json
