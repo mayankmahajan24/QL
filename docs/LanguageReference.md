@@ -91,10 +91,17 @@ links = {
 
 ## 4.0 Expressions
 
+Expressions in QL can be one of the following types. A statment in our language can be composed of just an expression but it's much more useful to use them in other statements like if-else constructs, loops and assign statements.
+
 ### 4.1 Data Type Literal
-ANSHUL
+Expressions can be just a literal, as defined for our language in Section 2.4 above. This allows us to directly input a value where needed.
+
+e.g in `int a = 5` the 5 on the right hand side of the assignment operator is a Data Type Literal of integer type, used to assign a value to the variable `a`.
+
 ### 4.2 Identifier
-ANSHUL
+Expressions can be just an identifier, as defined for our language in Section 2.1 above. This allows us to use variables as values where needed.
+
+e.g in `int b = a` the `a` on the right hand side of the assignment operator is an Identifier of integer type, used to assign a value to the variable `b`.
 
 ### 4.3 Bracket Selector
 
@@ -119,7 +126,7 @@ This can be used in two different ways:
     `json a = json("sample.json")
     int b = a["value"]`
 
-    It is unclear what a["value"] is so our compiler infers that it will be an integer, since the left hand side of the assignment is an `int`.
+    It is unclear what a["value"] is so our compiler infers that it will be an integer, since the left hand side of the assignment is an `int`. This happens in our static semantic check.
 
 This operator can be nested, e.g.: ["data"]["views"]["total"]. It associates from left to right.  This means that each additional bracket selector will go one level deeper into the json by getting the value of corresponding key.
 
@@ -245,13 +252,27 @@ The program above will print a as 9 and b as 8.1.
 
 ### 4.5 Boolean Expressions
 
-#### 4.5.1 `not` : negation
+Boolean expressions are fundamentally important to the decision constructs used in our language, like the `if-else` block and inside the conditional statements for loops like `while`, `for` and `where`. Each boolean expression must evaluate to `True` or `False`. 
 
-- not `expr` = evaluates `expr` as a boolean (throws error if this is not possible); returns the opposite of `expr` (if `expr` was true, return false; if `expr` was false, return true)
+#### 4.5.1 Boolean Literal
 
-If this operator is used on anything other than a bool, we throw an error.
+Boolean expressions can be just a boolean literal, which could be the keyword `True` or `False`.
 
-#### 4.5.2 Equivalency operators
+e.g in `if(True)` the `True` inside the `if` conditional is a Boolean Literal.
+
+#### 4.5.2 Identifier of boolean variable
+
+Expressions can be just an identifier, as defined for our language in Section 2.1 above. This allows us to use variables as values where needed. QL performs static semantic checking to ensure that the identifier used as a Boolean expression has been defined earlier with `bool` type. 
+
+e.g in `if(a)` the `a` inside the `if` conditional is a Identifier that must be of bool type.
+
+#### 4.5.3 `not` : negation
+
+- `not bool_expr` evaluates `bool_expr` as a boolean first and then returns the opposite of the `bool_expr` (if `bool_expr` was true, return false; if `bool_expr` was false, return true)
+
+If the `not` operator is used on anything other than a bool, we throw an error.
+
+#### 4.5.4 Equivalency operators
 - == : equivalence,
 - != : non-equivalence,
 - \> : greater than,
@@ -259,34 +280,23 @@ If this operator is used on anything other than a bool, we throw an error.
 - \>= : greater than or equal to,
 - <= : less than or equal to
 
-`anytype` OP `anytype`: returns a bool (true if $1 OP $3 e.g. `3 == 3` returns true)
+Each of these operators act on two operands, each of an `expr` as defined in Section 4.4 above. It is important to note that neither of the operands of the equivalency operator can acutally be of boolean types themselves. The operator returns a bool.
 
-- if $1 and $3 are strings, we do a lexical comparison
+Our static semantic checker checks at compile time if the operands on either side of the equivalency operators are of the same data type or not. Since QL does not support type casting, in case the data types fail to match, the compiler reports an error.
 
-- if $1 and $3 are both ints, or both floats, we see if they are equal
+Examples of this operator:
 
-If the types are anything other than these specified combinations, we throw an error.
+- `3 == 3`, checks for equality between the two integer literals
+- `5.0 != 3`, fails to work because the two operands are of different data types
+- `"anshul" >= "ninja"`, we do a lexical comparison since both the operands are strings
+- `a == 5 + 4`, evaluates both operands, each an `expr` before applying the equivalency boolan operator. As such, the data type of `a` is obtained from the symbol table and then 5 + 4 is evaluated before checking for equality. In case, `a` is not of type `int` as inferred from the operand that evaluates to 9, the compiler reports an error.
+- `a > 5 == 3` fails to work because although the precedence rules evalaute this boolean expression from left to right, `a > 5` returns a type of `bool` which cannot be used in the `==` operators.
 
-#### 4.5.3 Logical operators
+#### 4.5.5 Logical operators
 
 - `expr1` & `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if they both evaluate to true; otherwise, returns false.
 
 - `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
-
-#### --> needs to be Boolean Expression
-ANSHUL
-Our conditional statements behave as conditional statements in other languages do. They check the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required. We can provide an arbitrary number of `elseif` statements following the `if`, though there can also be none. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
-
-```
-if (__boolean condition__) {
-    #~~ List of statements ~~#
-}
-elseif (__boolean condition__) {
-    #~~ List of statements ~~#
-} else {
-    #~~ List of statements ~~#
-}
-```
 
 ### 4.6 Function Calls
 A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
