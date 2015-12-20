@@ -54,7 +54,7 @@ A sequence of ASCII characters surrounded by double quotation marks on both side
 
 ## 3.0 Data Types
 ### 3.1 Primitive Types
-All primitive data types are passed by value. They can each be declared and then initialized later (their value is null in the interim) or declared and initialized in-line.
+The primitive types in QL are statically typed; in other words, the type of a variable is known at compile time. The primitive types can be declared and then initialized later (their value is null in the interim) or declared and initialized in-line. 
 
 #### 3.1.1 Integers (`int`)
 Integers are signed, 8-byte literals denoting a number as a sequence of digits e.g. `5`,`6`,`-1`,`0`.
@@ -73,7 +73,7 @@ All non-primitive data types are passed by a reference in memory. They can each 
 
 
 #### 3.2.1 Arrays (`array`)
-Arrays represent multiple instances of one of the primitive data types represente as contiguous memory. The square bracket notation is used to create an array and then get direct access to elements. Each array must contain only a single type of primitives; for example, we can have either an array of `int`, an array of `float`, an array of `bool`, and an array of `string`, but no combinations of these types. The size of the array is fixed at the time of its creation e.g. `array(10)`.
+Arrays represent multiple instances of one of the primitive data types represented as contiguous memory. The square bracket notation is used to create an array and then get direct access to elements. Each array must contain only a single type of primitives; for example, we can have either an array of `int`, an array of `float`, an array of `bool`, and an array of `string`, but no combinations of these types. The size of the array is fixed at the time of its creation e.g. `array(10)`.
 
 #### 3.2.2 JSON (`json`)
 Since the language must search and return results from JSON files, it supports Jsons as a non-primitive type. A `json` object can be created through multiple mechanisms. The first is directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. This will check `file1.json` to ensure it is a valid JSON, and if so, will store the JSON in the variable `a`. The second way to obtain a JSON object is by using a subset of a current JSON. For example, say the following variable is already set:
