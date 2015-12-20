@@ -1,3 +1,10 @@
+#~~
+Prints percentage of CitiBikers who identify as male.
+
+Requires bikedata.json with at least the following fields:
+{"gender":1},
+~~#
+
 json bikeData = json("bikedata.json")
 float countMale = 0.0
 float totalRiders = 0.0

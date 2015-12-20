@@ -1,3 +1,10 @@
+#~~
+Prints percentage of CitiBikers who identify as male.
+
+Requires bikedata.json with at least the following fields:
+{"birth year":1981},
+~~#
+
 json bikeData = json("bikedata.json")
 int count = 0
 int total = 0

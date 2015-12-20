@@ -1,4 +1,13 @@
+#~~
+Prints average speed of CitiBikers in MPH.
+
+Requires bikedata.json with at least the following fields:
+{"tripduration":1110,"start station latitude":40.74025878,"start station longitude":-73.98409214,"end station latitude":40.71893904,"end station longitude":-73.99266288},
+~~#
+
 json bikeData = json("bikedata.json")
+float totalHours = 0.0
+float totalMiles = 0.0
 
 function sqrt(float f) : float {
   float epsilon = 0.0000001
@@ -14,9 +23,7 @@ function sqrt(float f) : float {
   return t
 }
 
-#~~ Given coordinates, returns approximate distance in miles ~~#
 function computeDistance(float startLat, float startLong, float endLat, float endLong) : float {
-
   #~~ Each degree of latitude is approximately 69 miles apart ~~#
   float latDiff = endLat - startLat
   latDiff = 69.0 * latDiff
@@ -25,10 +32,7 @@ function computeDistance(float startLat, float startLong, float endLat, float en
   float longDiff = endLong - startLong
   longDiff = 53.0 * longDiff
 
-  float tmp1 = latDiff * latDiff
-  float tmp2 = longDiff * longDiff
-  float totalDist = tmp1 + tmp2
-  return sqrt(totalDist)
+  return sqrt(latDiff * latDiff + longDiff * longDiff)
 }
 
 function convertSecondsToHours(float seconds) : float {
@@ -36,27 +40,14 @@ function convertSecondsToHours(float seconds) : float {
   return hours
 }
 
-float totalHours = 0.0
-float totalMiles = 0.0
-
 where (True) as ride {
-  float startLat = ride["start station latitude"]
-  float startLong = ride["start station longitude"]
-  float endLat = ride["end station latitude"]
-  float endLong = ride["end station longitude"]
-  float rideMiles = computeDistance(startLat, startLong, endLat, endLong)
-
-  float rideDurationInSeconds = ride["tripduration"]
-  float rideDuration = convertSecondsToHours(rideDurationInSeconds)
+  float rideMiles = computeDistance(ride["start station latitude"], ride["start station longitude"], ride["end station latitude"], ride["end station longitude"])
 
   if (rideMiles > 0.0) {
-    totalHours = totalHours + rideDuration
     totalMiles = totalMiles + rideMiles
+    totalHours = totalHours + convertSecondsToHours(ride["tripduration"])
   }
 } in bikeData["rides"]
 
-float averageMilesPerHour = totalMiles / totalHours
-
 print("The average speed of CitiBikers (in MPH):")
-print(averageMilesPerHour)
-
+print(totalMiles / totalHours)

@@ -1,20 +1,19 @@
 #~~
 Prints out an ordered list of the average length of Evan's steps on each day of the week.
 
-Requires fitbitdata.json with following format:
-{"Activities":"2015-11-15","Day":"Sunday","Calories Burned":"2,139","Steps":5682.0,"Distance":2.68,"Floors":"15","Minutes Sedentary":"791","Minutes Lightly Active":"162","Minutes Fairly Active":"0","Minutes Very Active":"0","Activity Calories":"630"}
+Requires fitbitdata.json with at least the following fields:
+{"Day":"Sunday","Steps":5682.0,"Distance":2.68}
 ~~#
 
 json fitbitData = json("fitbitdata.json")
 
 array float stepsPerDay = array(7)
 array float distPerDay = array(7)
-array string days = ["Sunday";"Monday";"Tuesday";"Wednesday";"Thursday";"Friday";"Saturday"]
 array float feetPerStepPerDay = array(7)
+array string days = ["Sunday";"Monday";"Tuesday";"Wednesday";"Thursday";"Friday";"Saturday"]
 
 function convertMilesToFeet(float miles) : float {
-  float feet = miles * 5280.0
-  return feet
+  return miles * 5280.0
 }
 
 function dayOfWeekAsIndex(string day) : int {
@@ -64,17 +63,12 @@ function sortDaysByFeetPerStep() : int {
       }
     }
   }
-
   return 0
 }
 
 where (True) as day {
-  string dayOfWeek = day["Day"]
-  int index = dayOfWeekAsIndex(dayOfWeek)
-
-  float dist = day["Distance"]
-  float distInFeet = convertMilesToFeet(dist)
-
+  int index = dayOfWeekAsIndex(day["Day"])
+  float distInFeet = convertMilesToFeet(day["Distance"])
   float steps = day["Steps"]
 
   distPerDay[index] = distPerDay[index] + distInFeet
@@ -82,8 +76,7 @@ where (True) as day {
 } in fitbitData["days"]
 
 for (int i = 0, i < length(days), i = i + 1) {
-  float feetPerStep = distPerDay[i] / stepsPerDay[i]
-  feetPerStepPerDay[i] = feetPerStep
+  feetPerStepPerDay[i] = distPerDay[i] / stepsPerDay[i]
 }
 
 sortDaysByFeetPerStep()
