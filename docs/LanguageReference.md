@@ -360,10 +360,19 @@ b = True
 s = "goats"
 ```
 
-### 5.3 Function Declaration
+### 5.3 Return statements
+A return statement ends the body of a function. A functions return statement must match up with its return type that was declared after the colon in the function declaration.
+
+EVAN FORMATTING
+This is how our grammar handles return statements.
+```
+<RETURN> <expr> 
+```
+
+### 5.4 Function Declaration
 Function declarations in QL all start with the function keyword, followed by the function identifier, parentheses with parameter declarations inside, colon keyword, a return type, and brackets with the function body inside.
 
-#### 5.3.1 Parameter declarations
+#### 5.4.1 Parameter declarations
 The parameter declarations inside the parentheses are the same as the left hand side of a variable declaration. The variable data type followed by the identifier.  These variable declarations are separated by commas.
 
 EVAN FORMATTING
@@ -375,7 +384,7 @@ This is the grammar for parameter declarations.
 <arg_decl>: 
     |<data_type> <id>
 ```
-#### 5.3.2 Colon and Return Type
+#### 5.4.2 Colon and Return Type
 The colon functions in our language as the specifier of a function return type. Before this colon is an argument list and immediately after this colon comes our function return type, which can be any of the data types previously discussed.
 
 EVAN FORMATTING
@@ -384,7 +393,7 @@ This is how our grammar handles a colon.
 <LPAREN> <parameter_declaration> <RPAREN> <COLON> <return_type>
 ```
 
-#### 5.3.3 Grammar for Function Declarations
+#### 5.4.3 Grammar for Function Declarations
 This is QL's grammar for function declarations.
 ```
 <FUNCTION> <id> <LPAREN> <parameter_declaration> <RPAREN> <COLON> <return_type> <LCURLY> <stmt_list> <RCURLY>
@@ -393,16 +402,10 @@ This is QL's grammar for function declarations.
 Here is an example of QL code.
 ```
 function add (int x, int y, int z) : int {
-  #~~ body of statements ~~#
+  int d = x + y + z
+  int w = 5
+  return d
 }
-```
-### 5.4 Return statements
-A return statement ends the body of a function. A functions return statement must match up with its return type that was declared after the colon in the function declaration.
-
-EVAN FORMATTING
-This is how our grammar handles return statements.
-```
-<RETURN> <expr> 
 ```
 
 ### 5.5 Loop statements
