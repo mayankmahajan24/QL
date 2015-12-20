@@ -155,7 +155,6 @@ json file1 = json("file1.json")
 
 #~~ file1["data"]["views"]["total"] statically inferred as an int ~~#
 int total = file1["data"]["views"]["total"]
-print (total)
 ```
 
 ### 4.4 Binary Operator
@@ -173,12 +172,10 @@ Below is an example of the `*` operator:
 
 ```
 int a = 5 * 6
-print(a)
 
 float b = 1.0 * 10.0
-print(b)
 ```
-The program above will print a as 30 and be as 10.0.
+The program above will have a equal to 30 and b equal to 10.0.
 
 </FORMATTING>
 
@@ -196,12 +193,10 @@ Below is an example of the `/` operator:
 
 ```
 int a = 10 / 2
-print(a)
 
 float b = 100.0 / 20.0
-print(b)
 ```
-The program above will print a as 5 and be as 5.0.
+The program above will have a equal to 5 and b equal to 5.0.
 
 </FORMATTING>
 
@@ -220,15 +215,12 @@ Below is an example of the `+` operator:
 
 ```
 int a = 1 + 2
-print(a)
 
 float b = 10.1 + 4.1
-print(b)
 
 string c = "hello " + "goat"
-print(c)
 ```
-The program above will print a as 3, b as 14.2, and c as "hello goat".
+The program above will have a equal to 3, b equal to 14.2, and c equal to "hello goat".
 
 </FORMATTING>
 
@@ -246,12 +238,10 @@ Below is an example of the `-` operator:
 
 ```
 int a = 10 - 1
-print(a)
 
 float b = 10.0 - 1.9
-print(b)
 ```
-The program above will print a as 9 and b as 8.1.
+The program above will have a equal to 9 and b equal to 8.1.
 
 ### 4.5 Boolean Expressions
 
@@ -396,8 +386,16 @@ This is how our grammar handles a colon.
 
 #### 5.3.3 Grammar for Function Declarations
 This is QL's grammar for function declarations.
+```
 <FUNCTION> <id> <LPAREN> <parameter_declaration> <RPAREN> <COLON> <return_type> <LCURLY> <stmt_list> <RCURLY>
+```
 
+Here is an example of QL code.
+```
+function add (int x, int y, int z) : int {
+  #~~ body of statements ~~#
+}
+```
 ### 5.4 Return statements
 A return statement ends the body of a function. A functions return statement must match up with its return type that was declared after the colon in the function declaration.
 
