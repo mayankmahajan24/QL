@@ -64,8 +64,9 @@ Arrays represent multiple instances of one of the primitive data types represent
 #### 3.2.2 JSON (`json`)
 Since the language must search and return results from JSON files, it supports Jsons as a non-primitive type. A `json` object can be created directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. During runtime, the generated java code will check if the contents of the file make up a valid json. This means that Jsons are dynamically typed in QL. 
 
-Jsons are statically inferred but checked dynamically typed in QL.  At compile time, 
+Jsons are statically inferred but checked dynamically in QL.
 
+EVAN - so we can do this but i dont know how to introduce this without first introducing the bracket selector
 <!-- The second way to obtain a JSON object is by using a subset of a current JSON. For example, say the following variable is already set:
 
 ```
