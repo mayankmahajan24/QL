@@ -408,19 +408,68 @@ This is how our grammar handles return statements.
 ```
 
 ### 5.5 Loop statements
-#### 5.5.1 `where` clauses
-The where clause allows the user to search through a JSON and find all of the elements within that JSON that match a certain boolean condition. This condition can be related to the structure of the element; for example, the condition can impose a condition of the certain property or key of the element itself.
 
-A where condition must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the `as __identifier__`, which allows the user to identify the element within the JSON that is currently being processed. This must be included. Following this is an `{`, which marks the beginning of the body code which is applied to each element. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON through which the clause will iterate to extract elements.
+The loop statements in QL allow us to iteratively call a block of statements in our code.
+
+#### 5.5.1 `where` loops
+The where loop is a key feature of QL that allows the user to search through a JSON array and execute a set of statemetns for all the JSON array elements (key, value pairs by structure) that match a certain boolean condition. For example, consider the following JSON file opened in QL using the `json temp = json("sample.json")` command:
+:
+
+```
+{
+  "count" : 5,
+  "int_index" : 0,
+  "owner" : "Matt",
+  "number" : 5.4,
+  "friends" : [
+    {
+      "name" : "Anshul",
+      "age" : 12
+    },
+    {
+      "name" : "Evan",
+      "age" : 54
+    },
+    {
+      "name" : "Gary",
+      "age" : 21
+    },
+    {
+      "name" : "Mayank",
+      "age" : 32
+    }
+  ]
+}
+``` 
+
+Now we can run the where loop on the `temp["friends"]` array, with each element of the array resembling the following structure:
+
+```
+    {
+      "name" : "Anshul",
+      "age" : 12
+    }
+```
+A where loop must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the `as __identifier__`, which allows the user to associate the current element of the array being processed using the `__identifier__`. Following this is an `{`, which marks the beginning of the body code which is applied to each element for which the condition evaluates to true. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON array through which the clause will iterate to extract elements.
 
 ```
 where (__boolean condition__) as __identifier__ {
     #~~ List of statements ~~#
-} in __json__
+} in __json_array__
+```
+The scoping rules make the `__identifier__` available to the `__boolean condition__` and the block statements enclosed in the braces. The `__json_array__` is referenced using the Bracket Selector notation in Section 4.3 above.
+
+For the `sample.json` file opened using the `temp` json variable shown above, a where loop to print the names of all friends over the age of 21 would look like this in QL:
+
+```
+where (friend["age"] >= 21) as friend {
+    string name = friend["name"]
+    print(name)
+} in temp["friends"]
 ```
 
 #### 5.5.2 `for` loops
-The for loop starts with the `for` keyword, followed by a set of three expressions separated by commas and enclosed by parentheses. The first expression is the initialization, where temporary variables can be initialized. The second expression is the boolean condition; at each iteration through the loop, the boolean condition will be checked. The loop will execute as long as the boolean condition is satisfied, and will exit as soon as the condition is evaluated to false. The third expression is the afterthought, where variables can be updated at each stage of the loop. Following these three expressions is an open `{` , followed by a list of statements, and then a close `}`.
+The for loop starts with the `for` keyword, followed by a set of three expressions separated by commas and enclosed by parentheses. The first expression is the initialization, where temporary variables can be initialized. The second expression is the boolean condition; at each iteration through the loop, the boolean condition will be checked. The loop will execute as long as the boolean condition is satisfied, and will exit as soon as the condition evaluates to false. The third expression is the update expression, where variables can be updated at each stage of the loop. Following these three expressions is an open `{` , followed by a list of statements, and then a close `}`.
 
 ```
 for (__initialization__, __boolean condition__, __update__) {
@@ -428,50 +477,45 @@ for (__initialization__, __boolean condition__, __update__) {
 }
 ```
 
+The `__initialization__` and the `__update__` are each assignment statements, as defined in section 5.1 and 5.2 above. The `__bolean condition__` is a boolean expression, as defined in section 4.5 above.
+
 #### 5.5.3 `while` loops
-The while loop is initiated by the `while` keyword, followed by an open paren `(`, followed by a boolean expression, which is then followed by a close paren `)`. After this, there is a block of statements, enclosed by `{` and `}`, which are executed in succession until the condition inside the `while` parentheses is no longer satisfied. This behaves as `while` loops do in other languages.
+The while loop is initiated by the `while` keyword, followed by a boolean expression enclosed within a set of matching paranthesis. After this, there is a block of statements, enclosed by `{` and `}`, which are executed in succession as long as the the condition represented by the boolean expression is no longer satisfied.
 
 ```
 while (__boolean condition__) {
     #~~ List of statements ~~#
 }
 ```
-#### 5.5.4 `if/else` clauses
+### 5.6 Conditional Statement
+
+Conditional statements are crucial to the program flow and execute a segment of the code based on a boolean expression.
+
+#### 5.6.1 `if/else` clauses
+The if-else clause checks the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required and the `else` statement is optional. We can provide an arbitrary number (zero or more) of `elseif` statements following the if and these are evaluated in sequential order. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
+
+```
+if (__boolean condition__) {
+    #~~ List of statements ~~#
+}
+elseif (__boolean condition__) {
+    #~~ List of statements ~~#
+} else {
+    #~~ List of statements ~~#
+}
+```
+The first `__boolean_condition` to evaluate to true in this sequence of `if`, `elseif` constructs determines which block of statements is evaluated. In case no such clause matches, then the list of statements in the `else` block get executed.
 
 ## 6.0 Standard Library Functions
 
-Standard library functions are included with the language for convenience for the user. The first few of these functions will give users the ability to perform basic modifying operations with arrays.
+Two standard library functions are included with the language for convenience for the user.
 
-### 6.1 `append`
+### 6.1 `length`
 ```
-function append(array arr, int x) : array {
-
-}
+length(i)
 ```
-
-The above function takes in an array and an integer as arguments and returns an array with size increased by 1 that contains that integer at the last index.
-
-### 6.2 `unique`
-
-```
-function unique(array arr) : array {
-
-}
-```
-
-The above function receives an array as argument and returns a copy of the array with duplicate values removed. Only the first appearance of each element will be conserved, and a resulting array is returned.
-
-### 6.3 `sort`
-
-```
-function sort(array arr) : array {
-
-}
-```
-
-The above function receives an array as argument and returns a copy of the array with all of the elements sorted in ascending order. To compare the elements of the array, the `>` operator is used. For example, the array `[1,4,3,5,2]` passed into the sort() method would return `[1,2,3,4,5]`. The array `["c","e","a","c","f"]` would return `["a","c","d","e","f"]`.
-
-### 6.4 `print`
+// EVAN DECIDE IF THIS IS EVEN A LIBRARY FUNCTION
+### 6.2 `print`
 
 We also include a built-in print function to print strings and primitive types.
 
