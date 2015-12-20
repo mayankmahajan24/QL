@@ -114,7 +114,7 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let expr_list = List.map (fun expr -> (convert_expr (expr) (symbol_table))) e1 in
     Jast.Array_assign((ql_to_java_type (expected_data_type)), id, expr_list)
   | Ast.Fixed_length_array_assign(expected_data_type, id, length) ->
-    Jast.Fixed_length_array_assign(expected_data_type, id, length)
+    Jast.Fixed_length_array_assign((ql_to_java_type (expected_data_type)), id, length)
   | Ast.Update_variable (id, e1) ->
     let update_expr = convert_expr e1 symbol_table in
     Jast.Update_variable(id, update_expr)

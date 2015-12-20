@@ -400,7 +400,7 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let func_env = declare_func func_name return_type arg_list env in
 		let func_env_vars = define_func_vars arg_list func_env in
 		(* TODO: Implement void functions *)
-		if (return_type != "void" && (List.length arg_list) == 0) then raise ReturnStatementMissing;
+		if (return_type != "void" && (List.length stmt_list) == 0) then raise ReturnStatementMissing;
 		let post_func_env = check_function_statements (List.rev stmt_list) func_env_vars return_type in
 		overwrite_js_map func_env post_func_env
 	| Noop -> env
