@@ -3,21 +3,7 @@
 ### Anshul Gupta (akg2155), Evan Tarrh (ert2123), Gary Lin (gml2153), Matt Piccolella (mjp2220), Mayank Mahajan (mm4399)
 
 ##Table of Contents
-### 1.0 Introduction
-### 2.0 Lexical Conventions
-#### 2.1 Identifiers
-#### 2.2 Keywords
-#### 2.3 Comments
-#### 2.4 Literals
-### 3.0 Data Types
-#### 3.1 Primitive Types
-#### 3.2 Non-Primitive Types
-### 4.0 Syntax
-#### 4.1 Punctuation
-#### 4.2 Operators
-#### 4.3 Expressions
-#### 4.4 Statements
-### 5.0 Standard Library Functions
+
 
 
 ## 1.0 Introduction
