@@ -333,8 +333,11 @@ To declare a variable, a data type must be specified followed by the variable na
 EVAN - grammar rules have a diff formatting from code
 This is the specific grammar for declaring a variable.
 ```
-<assignment_data_type> <id> = <expr>
-<expr> = <literal> | <id>
+<var_decl>: 
+    |<assignment_data_type> <id> <EQUALS> <expr>
+<expr>: 
+    |<literal> 
+    | <id>
 ```
 Some examples of the declaration of variables would be:
 
@@ -352,8 +355,10 @@ To update a variable, the variable on the left side of the equals sign must alre
 EVAN - grammar rules have a diff formatting from code
 This is the specific grammar for reassigning a variable.
 ```
-<id> = <expr>
-<expr> = <literal> | <id>
+<var_reassign>:
+    |<id> <EQUALS> <expr>
+<expr>:
+    <literal> | <id>
 ```
 Some examples of the declaration of variables would be (note we are assuming these variables were previously declared as the correct corresponding type):
 
@@ -366,12 +371,41 @@ s = "goats"
 ```
 
 ### 5.3 Function Declaration
-Function declarations in QL all start with the keyword function, followed by the function identifier, parentheses with parameter declarations inside, a return type 
+Function declarations in QL all start with the function keyword, followed by the function identifier, parentheses with parameter declarations inside, colon keyword, a return type, and brackets with the function body inside.
 
-GARY
+#### 5.3.1 Parameter declarations
+The parameter declarations inside the parentheses are the same as the left hand side of a variable declaration. The variable data type followed by the identifier.  These variable declarations are separated by commas.
+
+EVAN FORMATTING
+This is the grammar for parameter declarations.
+```
+<parameter_declaration> :
+    | <arg_decl>
+    | <parameter_declaration> <COMMA> <arg_decl>
+<arg_decl>: 
+    |<data_type> <id>
+```
+#### 5.3.2 Colon and Return Type
+The colon functions in our language as the specifier of a function return type. Before this colon is an argument list and immediately after this colon comes our function return type, which can be any of the data types previously discussed.
+
+EVAN FORMATTING
+This is how our grammar handles a colon.
+```
+<LPAREN> <parameter_declaration> <RPAREN> <COLON> <return_type>
+```
+
+#### 5.3.3 Grammar for Function Declarations
+This is QL's grammar for function declarations.
+<FUNCTION> <id> <LPAREN> <parameter_declaration> <RPAREN> <COLON> <return_type> <LCURLY> <stmt_list> <RCURLY>
 
 ### 5.4 Return statements
-A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
+A return statement ends the body of a function. A functions return statement must match up with its return type that was declared after the colon in the function declaration.
+
+EVAN FORMATTING
+This is how our grammar handles return statements.
+```
+<RETURN> <expr> 
+```
 
 ### 5.5 Loop statements
 #### 5.5.1 `where` clauses
