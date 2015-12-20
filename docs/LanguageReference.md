@@ -103,48 +103,6 @@ links = {
 }
 ``` -->
 
-## 4.0 Syntax
-The following sections define the specifics of the syntax of our language.
-
-### 4.1 Punctuation
-
-QL employs several different types of punctuation to signal certain directions of workflow or special blocks of code within programs.
-
-####4.1.1 `()`: hierarchical evaluation, function arguments, `where` clauses
-
-Parentheses can be used in three main cases:
-
-- Numerical or Boolean statements: Forces the expression inside the parentheses to be evaluated before interacting with tokens outside of the parentheses. For example, in `1*(2-3)`, the expression `2-3` will be evaluated, and its result will then be multiplied with 1. These can also be nested, e.g. : (1 + (4-(5/3)*2)).
-
-- Function arguments: When providing arguments during a function call, the arguments must be listed within parentheses directly after the name of the function. For examples, foo(array a, int b) involves a function foo() that takes in an array and an integer enclosed in parentheses. The parentheses are also used for marking the argument list in the function definition, i.e.
-
-```
-function foo(array a, int b) : array {
-	#~~ code goes here ~~#
-}
-
-foo(arr1, myInt)
-```
-
-- `Where` clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
-
-```
-where(["size"] > 10 & ["weight"] < 4) as item {
-	#~~ code goes here ~~#
-}
-```
-
-####4.1.2 `{}`: function definitions, `where` clauses
-
-Curly braces have two uses:
-
-- Function definitions: When a function is defined, the procedural code to be run must be enclosed in curly braces.
-
-- `where` clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
-
-####4.1.3 `:`: function return types
-The colon has use in our language as the specifier of a function return type. Separated between our language identifier and its argument list, we specify a `:` to mark that we will not be specifying a return type. Immediately after this colon, then, comes our function return type, which can be any of the data types we described above.
-
 ## 4.0 Expressions
 
 ### 4.1 Data Type Literal
@@ -470,3 +428,50 @@ print(toPrint1 + toPrint2)
 ```
 
 Attempting to print something that is not a primitive wi llresult in an error.
+
+
+-------
+OLD STUFF DON'T KNOW IF WE STILL NEED
+
+## 4.0 Syntax
+The following sections define the specifics of the syntax of our language.
+
+### 4.1 Punctuation
+
+QL employs several different types of punctuation to signal certain directions of workflow or special blocks of code within programs.
+
+####4.1.1 `()`: hierarchical evaluation, function arguments, `where` clauses
+
+Parentheses can be used in three main cases:
+
+- Numerical or Boolean statements: Forces the expression inside the parentheses to be evaluated before interacting with tokens outside of the parentheses. For example, in `1*(2-3)`, the expression `2-3` will be evaluated, and its result will then be multiplied with 1. These can also be nested, e.g. : (1 + (4-(5/3)*2)).
+
+- Function arguments: When providing arguments during a function call, the arguments must be listed within parentheses directly after the name of the function. For examples, foo(array a, int b) involves a function foo() that takes in an array and an integer enclosed in parentheses. The parentheses are also used for marking the argument list in the function definition, i.e.
+
+```
+function foo(array a, int b) : array {
+    #~~ code goes here ~~#
+}
+
+foo(arr1, myInt)
+```
+
+- `Where` clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
+
+```
+where(["size"] > 10 & ["weight"] < 4) as item {
+    #~~ code goes here ~~#
+}
+```
+
+####4.1.2 `{}`: function definitions, `where` clauses
+
+Curly braces have two uses:
+
+- Function definitions: When a function is defined, the procedural code to be run must be enclosed in curly braces.
+
+- `where` clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
+
+####4.1.3 `:`: function return types
+The colon has use in our language as the specifier of a function return type. Separated between our language identifier and its argument list, we specify a `:` to mark that we will not be specifying a return type. Immediately after this colon, then, comes our function return type, which can be any of the data types we described above.
+
