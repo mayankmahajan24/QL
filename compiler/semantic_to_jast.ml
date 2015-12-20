@@ -74,7 +74,7 @@ let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table)
         let serialized = serialize (expr) (symbol_table) in
         let json_type = json_selector_type (serialized) (symbol_table) in
         let java_type = ql_to_java_type (ast_data_to_string (json_type)) in
-        let selector_types = List.map (fun expr -> 
+        let selector_types = List.map (fun expr ->
           let (expr_type,_) = check_expr_type (expr) (symbol_table) in
           convert_data_type (expr_type)
         ) selectors in
@@ -99,7 +99,7 @@ let convert_arg_decl (arg_decl : Ast.arg_decl) =
     var_name = arg_decl.var_name;
   }
 
-let rec build_expr_list (jast_exprs: Jast.expr list) (exprs: Ast.expr list) (symbol_table: Environment.symbol_table) = 
+let rec build_expr_list (jast_exprs: Jast.expr list) (exprs: Ast.expr list) (symbol_table: Environment.symbol_table) =
   match exprs
     with [head] -> List.rev (jast_exprs@[(convert_expr head symbol_table)])
     | head :: tl -> (build_expr_list (jast_exprs@[(convert_expr head symbol_table)]) tl symbol_table)
