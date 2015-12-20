@@ -27,7 +27,7 @@ While domain-specific languages like SQL and PostgreSQL work with relational dat
 
 ## 2.0 Lexical Conventions
 ### 2.1 Identifiers
-Identifiers are combinations of letters and numbers. They must start with a lowercase letter, and can be any combination of lowercase letters, uppercase letters, and numbers. Lowercase letters and uppercase letters are seen as being distinct. We also reject dashes in identifiers. Identifiers can refer to three things in our language: variables, functions, and function arguments.
+Identifiers are combinations of letters and numbers. They must start with a lowercase letter, and can be any combination of lowercase letters, uppercase letters, and numbers. Lowercase letters and uppercase letters are seen as being distinct. Identifiers can refer to three things in our language: variables, functions, and function arguments.
 ### 2.2 Keywords
 The following words are defined as keywords and are reserved for the use of the language; thus, they cannot be used as identifiers to name either a variable, a function, or a function argument:
 
@@ -44,17 +44,17 @@ We reserve the symbol `#~~` to introduce a comment and the symbol `~~#` to close
 ### 2.4 Literals
 Our language supports several different types of literals.
 #### 2.4.1 `int` literals
-A string of numeric digits of arbitrary size that does not contain a decimal point with an optional ‘-’ to indicate a negative number.
+A string of numeric digits of arbitrary size that does not contain a decimal point.  Integers can have an optional ‘-’ at the beginning of the string of numbers to indicate a negative number.
 #### 2.4.2 `float` literals
-A string of numeric digits of arbitrary size, followed by a single ‘.’ digit character, followed by another string of numeric digits of arbitrary size. It can also contain an optional ‘-’ to indicate a negative number.  In addition, we are following Brian Kernighan and Dennis Ritchie's explanation in *The C Programming Language*: "A floating constant consists of an integer part, a decimal part, a fraction part, an e, and an optionally signed integer exponent. The integer and fraction parts both consist of a sequence of digits. Either the integer part, or the fraction part (not both) may be missing; either the decimal point or the e and the exponent (not both) may be missing."
+QL is following Brian Kernighan and Dennis Ritchie's explanation in *The C Programming Language*: "A floating constant consists of an integer part, a decimal part, a fraction part, an e, and an optionally signed integer exponent. The integer and fraction parts both consist of a sequence of digits. Either the integer part, or the fraction part (not both) may be missing; either the decimal point or the e and the exponent (not both) may be missing." Floats can also contain an optional ‘-’ at the beginning of the float to indicate a negative value.  
 #### 2.4.3 `boolean` literals
-Booleans can take on one of two values: `true` or `false`. `true` evaluates to an integer value of 1 and `false` evaluates to an integer value of  0. Thus, something like `true == 1` would evaluate to `true`, and something like `if(1)` would be valid.
+Booleans can take on one of two values: `True` or `False`. Booleans in QL are capitalized.
 #### 2.4.4 `string` literals
 A sequence of ASCII characters surrounded by double quotation marks on both sides.
 
 ## 3.0 Data Types
 ### 3.1 Primitive Types
-The primitive types in QL are statically typed; in other words, the type of a variable is known at compile time. The primitive types can be declared and then initialized later (their value is null in the interim) or declared and initialized in-line. 
+The primitive types in QL can be statically typed; in other words, the type of a variable is known at compile time. This occurs when the right side of the assignment is a literal of a data type. The primitive types can be declared and then initialized later (their value is null in the interim) or declared and initialized in-line. 
 
 #### 3.1.1 Integers (`int`)
 Integers are signed, 8-byte literals denoting a number as a sequence of digits e.g. `5`,`6`,`-1`,`0`.
@@ -63,7 +63,7 @@ Integers are signed, 8-byte literals denoting a number as a sequence of digits e
 Floats are signed, 8-byte single-precision floating point numbers e.g. `-3.14`, `4e10`, `.1`, `2.`.
 
 #### 3.1.3 Boolean (`bool`)
-Booleans are defined by the `true` and `false` keywords. Only boolean types can be used in logical expressions e.g. `true`, `false`.
+Booleans are defined by the `True` and `False` keywords. Only boolean types can be used in logical expressions e.g. `True`, `False`.
 
 #### 3.1.4 String (`string`)
 Since our language doesn't contain characters, strings are the only way of expressing zero or more characters in the language. Each string is enclosed by two quotation marks e.g. `"e"`, `"Hello, world!"`.
@@ -73,10 +73,14 @@ All non-primitive data types are passed by a reference in memory. They can each 
 
 
 #### 3.2.1 Arrays (`array`)
-Arrays represent multiple instances of one of the primitive data types represented as contiguous memory. The square bracket notation is used to create an array and then get direct access to elements. Each array must contain only a single type of primitives; for example, we can have either an array of `int`, an array of `float`, an array of `bool`, and an array of `string`, but no combinations of these types. The size of the array is fixed at the time of its creation e.g. `array(10)`.
+Arrays represent multiple instances of one of the primitive data types represented as contiguous memory. Each array must contain only a single type of primitives; for example, we can have either an array of `int`, an array of `float`, an array of `bool`, and an array of `string`, but no combinations of these types. Note that nested arrays are not allowed in QL. The size of the array is fixed at the time of its creation e.g. `array(10)`. Arrays in QL are statically typed since the type of a variable is known at compile time.
 
 #### 3.2.2 JSON (`json`)
-Since the language must search and return results from JSON files, it supports Jsons as a non-primitive type. A `json` object can be created through multiple mechanisms. The first is directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. This will check `file1.json` to ensure it is a valid JSON, and if so, will store the JSON in the variable `a`. The second way to obtain a JSON object is by using a subset of a current JSON. For example, say the following variable is already set:
+Since the language must search and return results from JSON files, it supports Jsons as a non-primitive type. A `json` object can be created directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. During runtime, the generated java code will check if the contents of the file make up a valid json. This means that Jsons are dynamically typed in QL. 
+
+Jsons are statically inferred but checked dynamically typed in QL.  At compile time, 
+
+<!-- The second way to obtain a JSON object is by using a subset of a current JSON. For example, say the following variable is already set:
 
 ```
 b = {
@@ -97,7 +101,7 @@ links = {
     "2" : 2,
     "3" : 3
 }
-```
+``` -->
 
 ## 4.0 Syntax
 The following sections define the specifics of the syntax of our language.
@@ -146,11 +150,20 @@ The colon has use in our language as the specifier of a function return type. Se
 
 This can be used in two different ways:
 
-- [int `index`]: accesses value at `index` of array
+- [int `index`]: accesses value at `index` of an array variable
     * Return type is the same as the array’s type.
+    * This square bracket notation can be used to assign a value into a variable.
+    FORMATTING
+    Example of QL Code:
+    array int a = [1;2;3;4]
+    int b = a[2]
 
-- [string `key`]: accesses value at `key` of JSON
-    * Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, or a JSON.
+    At the end of this program, b is equal to 3.
+
+- [string `key`]: accesses value at `key` of a JSON variable
+    * Return type is inferred from the value in JSON. The type can be one of two things: a value (int, float, bool, string) and an array.
+    * QL performs static inferring when a declared variable is assigned to a json variable with bracket selectors. The program will check what the type of the left hand side of the assignment is and infer that the json with with bracket selectors will resolve to that type.
+    FORMATTING
 
 
 This operator can nest, e.g.: ["data"]["views"]["total"]. It associates from left to right.
@@ -276,16 +289,17 @@ If the types are anything other than these specified combinations, we throw an e
 - `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
 
 ### 4.3 Expressions
-
+ANSHUL
 #### 4.3.1 Data Type Literal
-
+ANSHUL
 #### 4.3.2 Identifier
-
+ANSHUL
 #### 4.3.3 Bracket Selector
-
+ANSHUL
 #### 4.3.4 Binary Operations
-
+ANSHUL
 #### 4.3.5 Conditional Statements --> needs to be Boolean Expression
+ANSHUL
 Our conditional statements behave as conditional statements in other languages do. They check the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required. We can provide an arbitrary number of `elseif` statements following the `if`, though there can also be none. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
 
 An example conditional statement is as follows:
