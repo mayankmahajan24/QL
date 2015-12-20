@@ -160,7 +160,7 @@ print (total)
 
 ### 4.4 Binary Operator
 #### 4.4.1 Multiplication: `*`
-`*` : multiplication
+`*` : multiplication (left associative)
 - e1 * e2: 
 <FORMATTING>
 This operation is only valid when both e1 and e2 are integers or floats.
@@ -183,6 +183,7 @@ The program above will print a as 30 and be as 10.0.
 </FORMATTING>
 
 #### 4.4.2 Division: `/`
+`/` : division (left associative)
 - e1 / e2: 
 <FORMATTING>
 This operation is only valid when both e1 and e2 are integers or floats.
@@ -205,6 +206,7 @@ The program above will print a as 5 and be as 5.0.
 </FORMATTING>
 
 #### 4.4.3 Addition: `+`
+`+` : addition (left associative)
 - e1 + e2: 
 <FORMATTING>
 This operation is only valid when both e1 and e2 are integers, floats, or strings.
@@ -231,6 +233,7 @@ The program above will print a as 3, b as 14.2, and c as "hello goat".
 </FORMATTING>
 
 #### 4.4.4 Subtraction: `-`
+`-` : subtraction (left associative)
 - e1 - e2: 
 <FORMATTING>
 This operation is only valid when both e1 and e2 are integers or floats.
@@ -308,40 +311,64 @@ A function-call invokes a previously declared function by matching the unique fu
 This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation. Some examples of possible function calls are:
 
 ```
-sort(a)
-array a = append(a, int(2))
+array int a = [4;2;1;3]
+array int b = sort(a)
 ```
 
+The int array in b is now equal to [1;2;3;4]
+
 ## 5.0 Statements
-There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, mathematical operations, and function calls. Statements are separated by the newline character `\n`, as follows:
+EVAN -- I dont think we need this, what do you think?
+<!-- There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, mathematical operations, and function calls. Statements are separated by the newline character `\n`. The newline character, which you will see code samples below as `\n` is produced by the return key.  The code below is the most primitive example of an expression.
 
 ```
 expression \n
 ```
 
 The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
-
+ -->
 ### 5.1 Declaring Variables
-To declare a variable, a data type must be specified followed by the variable name and an equals sign.  After the equal sign, the user has to specify the datatype with the corresponding parameters to be passed into the constructor in parentheses.
+To declare a variable, a data type must be specified followed by the variable name and an equals sign.  The right side of the equals sign depends on what type of data type has been declared. If it is a primitive data type, then the user has to specify the corresponding literal of that data type.  If the data type is non-primitive, then the user has to enumerate either the array it is assigning into the variable or the json constructor with the corresponding JSON file name passed in. In addition, variables can be declared and assigned as another previously declared variable of the same data type.
 
+EVAN - grammar rules have a diff formatting from code
+This is the specific grammar for declaring a variable.
 ```
-<data_type> <variable_name> = <data_type>(<parameter>)
-<parameter> = <identifier> | <literal>
+<assignment_data_type> <id> = <expr>
+<expr> = <literal> | <id>
 ```
-
 Some examples of the declaration of variables would be:
 
 ```
 array testArr = array(10)
-int i = int(0)
-float f = float(1.4e10)
-bool b = bool(true)
-string s = string("foo")
+int i = 0
+float f = 1.4
+bool b = True
+string s = "goats"
 ```
 
 ### 5.2 Updating Variables
+To update a variable, the variable on the left side of the equals sign must already by declared.  The right side of the equals sign follows the same rules as section 5.1's explanation of declaring variables.  The only distinction is this time, there does not need to be a data type prior to the variable name on the left hand side of the equals sign.
+
+EVAN - grammar rules have a diff formatting from code
+This is the specific grammar for reassigning a variable.
+```
+<id> = <expr>
+<expr> = <literal> | <id>
+```
+Some examples of the declaration of variables would be (note we are assuming these variables were previously declared as the correct corresponding type):
+
+```
+testArr = array(10)
+i = 0
+f = 1.4
+b = True
+s = "goats"
+```
 
 ### 5.3 Function Declaration
+Function declarations in QL all start with the keyword function, followed by the function identifier, parentheses with parameter declarations inside, a return type 
+
+GARY
 
 ### 5.4 Return statements
 A return statement ends the definition of a function which has a non-void return type. If there is no return statement at the bottom of the function block, it is evidence that there is a `void` return type for the function; if it's not a `void` return type, then we return a compiler error.
@@ -375,6 +402,7 @@ while (__boolean condition__) {
     #~~ List of statements ~~#
 }
 ```
+#### 5.5.4 `if/else` clauses
 
 ## 6.0 Standard Library Functions
 
