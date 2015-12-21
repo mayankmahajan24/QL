@@ -11,9 +11,9 @@ else
 fi
 
 # Try to compile our file
-javac -classpath ../build/json-simple-1.1.1.jar $1.java >& /dev/null
+javac -classpath build/json-simple-1.1.1.jar $1.java >& /dev/null
 if [ $? -eq 0 ]; then
-  java -classpath ../build/json-simple-1.1.1.jar:. $1
+  java -classpath build/json-simple-1.1.1.jar:. $1
 else
   echo "Compiler error"
 fi
