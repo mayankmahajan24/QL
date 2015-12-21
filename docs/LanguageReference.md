@@ -6,56 +6,56 @@
 
 1. Introduction
 2. Lexical conventions
-  1. Identifiers
-  2. Keywords
-  3. Comments
-  4. Literals
-    1. `int` literals
-    2. `float` literals
-    3. `bool` literals
-    4. `string` literals
+    1. Identifiers
+    2. Keywords
+    3. Comments
+    4. Literals
+        1. `int` literals
+        2. `float` literals
+        3. `bool` literals
+        4. `string` literals
 3. Data Types
-  1. Primitive Types
-    1. Integers
-    2. Floating Point Numbers
-    3. Booleans
-    4. Strings
-  2. Non-Primitive Types
-    1. Arrays
-    2. JSONs
+    1. Primitive Types
+        1. Integers
+        2. Floating Point Numbers
+        3. Booleans
+        4. Strings
+    2. Non-Primitive Types
+        1. Arrays
+        2. JSONs
 4. Expressions
-  1. Literals
-  2. Identifiers
-  3. Bracket Selectors
-  4. Binary Operators
-    1. Multiplication
-    2. Division
-    3. Addition
-    4. Subtraction
-  5. Boolean Expressions
-    1. Literal
-    2. Identifier
-    3. Negation
-    4. Equivalency Operators
-    5. Logical Operators
-  6. Function Calls
+    1. Literals
+    2. Identifiers
+    3. Bracket Selectors
+    4. Binary Operators
+        1. Multiplication
+        2. Division
+        3. Addition
+        4. Subtraction
+    5. Boolean Expressions
+        1. Literal
+        2. Identifier
+        3. Negation
+        4. Equivalency Operators
+        5. Logical Operators
+    6. Function Calls
 5. Statements
-  1. Declaring Variables
-  2. Updating Variables
-  3. Return Statements
-  4. Function Declarations
-    1. Parameter Declarations
-    2. Colon and Return Type
-    3. Grammar for Function Declarations
-  5. Loop Statements
-    1. `where`
-    2. `for`
-    3. `while`
-  6. Conditional Statements
-    1. `if/else`
+    1. Declaring Variables
+    2. Updating Variables
+    3. Return Statements
+    4. Function Declarations
+        1. Parameter Declarations
+        2. Colon and Return Type
+        3. Grammar for Function Declarations
+    5. Loop Statements
+        1. `where`
+        2. `for`
+        3. `while`
+    6. Conditional Statements
+        1. `if/else`
 6. Standard Library Functions
-  1. Length
-  2. Print
+    1. Length
+    2. Print
 
 
 ## 1.0 Introduction
@@ -139,26 +139,26 @@ This can be used in two different ways:
 - [int `index`]: accesses value at `index` of an array variable
   * Return type is the same as the array’s type.
   * This square bracket notation can be used to assign a value into a variable.
+    Example of QL Code:
+    ```
+    array int a = [1;2;3;4]
+    int b = a[2]
+    ```
 
-   Example of QL Code:
-   ```
-   array int a = [1;2;3;4]
-   int b = a[2]
-   ```
-
-   At the end of this program, b is equal to 3.
+    At the end of this program, b is equal to 3.
 
 - [string `key`]: accesses value at `key` of a JSON variable
   * Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, and a json.
   * QL performs static inferring when a declared variable is assigned to a json variable with bracket selectors. The program will check what the type of the left hand side of the assignment is and infer that the json with bracket selectors will resolve to that type.
 
-   Example of QL Code:
-   ```
-   json a = json("sample.json")
-   int b = a["value"]
-   ```
+    Example of QL Code:
+    ```
+    json a = json("sample.json")
+    int b = a["value"]
+    ```
 
-   It is unclear what a["value"] is so our compiler infers that it will be an integer, since the left hand side of the assignment is an `int`. This happens in our static semantic check.
+    It is unclear what a["value"] is so our compiler infers that it will be an integer, since the left hand side of the assignment is an `int`. This happens in our static semantic check.
+
 
 This operator can be nested, e.g.: ["data"]["views"]["total"]. It associates from left to right.  This means that each additional bracket selector will go one level deeper into the JSON by getting the value of corresponding key.
 
@@ -219,7 +219,6 @@ links = {
 ### 4.4 Binary Operator
 #### 4.4.1 Multiplication: `*`
 ##### _left associative_
-
 `e1 * e2`
 
 This operation is only valid when both e1 and e2 are integers or floats.
@@ -239,7 +238,6 @@ The program above will have a equal to 30 and b equal to 10.0.
 
 #### 4.4.2 Division: `/`
 ##### _left associative_
-
 `e1 / e2`
 
 This operation is only valid when both e1 and e2 are integers or floats.
@@ -259,7 +257,6 @@ The program above will have a equal to 5 and b equal to 5.0.
 
 #### 4.4.3 Addition: `+`
 ##### _left associative_
-
 `e1 + e2`
 
 This operation is only valid when both e1 and e2 are integers, floats, or strings.
@@ -283,7 +280,6 @@ The program above will have a equal to 3, b equal to 14.2, and c equal to "hello
 
 #### 4.4.4 Subtraction: `-`
 ##### _left associative_
-
 `e1 - e2`
 
 This operation is only valid when both e1 and e2 are integers or floats.
@@ -328,25 +324,30 @@ If the `not` operator is used on anything other than a bool, we throw an error.
 
 Operators and the types they can be used on
 - == : equivalence
-  - `string` == `string`
-  - `int` == `int`
-  - `float` == `float`
+    - `string` == `string`
+    - `int` == `int`
+    - `float` == `float`
+
 - != : non-equivalence
-  - `string` == `string`
-  - `int` == `int`
-  - `float` == `float`
+    - `string` == `string`
+    - `int` == `int`
+    - `float` == `float`
+
 - \> : greater than
-  - `int` == `int`
-  - `float` == `float`
+    - `int` == `int`
+    - `float` == `float`
+
 - < : less than,
-  - `int` == `int`
-  - `float` == `float`
+    - `int` == `int`
+    - `float` == `float`
+
 - \>= : greater than or equal to,
-  - `int` == `int`
-  - `float` == `float`
+    - `int` == `int`
+    - `float` == `float`
+
 - <= : less than or equal to
-  - `int` == `int`
-  - `float` == `float`
+    - `int` == `int`
+    - `float` == `float`
 
 Each of these operators act on two operands, each of an `expr` as defined in Section 4.4 above. It is important to note that neither of the operands of the equivalency operator can acutally be of boolean types themselves. The operator returns a bool.
 
@@ -362,7 +363,6 @@ Examples of this operator:
 #### 4.5.5 Logical operators
 
 - `expr1` & `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if they both evaluate to true; otherwise, returns false.
-
 - `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
 
 ### 4.6 Function Calls
@@ -521,10 +521,10 @@ The where loop is a key feature of QL that allows the user to search through a J
 We can run the where loop on the `temp["friends"]` array, with each element of the array resembling the following structure:
 
 ```
-    {
-      "name" : "Anshul",
-      "age" : 12
-    }
+{
+  "name" : "Anshul",
+  "age" : 12
+}
 ```
 
 A where loop must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the `as <identifier>`, which allows the user to associate the current element of the array being processed using the `<identifier>`. Following this is a `{`, which marks the beginning of the body code which is applied to each element for which the condition evaluates to true. A closing `}` signifies the end of the body. After the closing brace, there is a mandatory "in" keyword, which is followed by the JSON array through which the clause will iterate to extract elements.
@@ -564,6 +564,7 @@ while (<boolean_condition>) {
     #~~ List of statements ~~#
 }
 ```
+
 ### 5.6 Conditional Statement
 
 Conditional statements are crucial to the program flow and execute a segment of the code based on a boolean expression.
