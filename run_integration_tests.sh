@@ -57,7 +57,7 @@ Check() {
   touch ${basename}-gen.out &&
   javac -classpath build/json-simple-1.1.1.jar:. Test.java &&
   java -classpath build/json-simple-1.1.1.jar:. Test > ${basename}-gen.out &&
-  generatedfiles="$generatedfiles ${basename}-gen.out"
+  generatedfiles="$generatedfiles ${basename}-gen.out" 
   Compare ${basename}-gen.out ${basename}-exp.out ${basename}.i.diff
 
   if [ $error -eq 0 ] ; then
@@ -92,5 +92,9 @@ do
 done
 
 echo "Tests passed: $PASS. Tests failed: $FAIL."
+if [ ! $FAIL -eq 0 ]
+then
+  echo "Looks like some tests failed. Make sure you have the necessary JSON files added."
+fi 
 
 exit $globalerror
