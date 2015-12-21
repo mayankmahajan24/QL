@@ -1,3 +1,12 @@
+#
+# QL
+#
+# Manager: Matthew Piccolella
+# Systems Architect: Anshul Gupta
+# Tester: Evan Tarrh
+# Language Guru: Gary Lin
+# Systems Integrator: Mayank Mahajan
+
 #!/bin/sh
 
 # Adapted from Prof. Edwards' test script for MicroC.
