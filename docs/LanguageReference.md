@@ -66,30 +66,6 @@ Since the language must search and return results from JSON files, it supports J
 
 Jsons are statically inferred but checked dynamically in QL.
 
-EVAN - so we can do this but i dont know how to introduce this without first introducing the bracket selector
-<!-- The second way to obtain a JSON object is by using a subset of a current JSON. For example, say the following variable is already set:
-
-```
-b = {
-    "size":10,
-    "links": {
-        "1": 1,
-        "2": 2,
-        "3": 3
-    }
-}
-```
-
-QL then allows for commands like `json links = b["links"]`. The links variable would then look as follows:
-
-```
-links = {
-    "1" : 1,
-    "2" : 2,
-    "3" : 3
-}
-``` -->
-
 ## 4.0 Expressions
 
 Expressions in QL can be one of the following types. A statment in our language can be composed of just an expression but it's much more useful to use them in other statements like if-else constructs, loops and assign statements.
@@ -120,7 +96,7 @@ This can be used in two different ways:
     </FORMATTING>
 
 - [string `key`]: accesses value at `key` of a JSON variable
-    * Return type is inferred from the value in JSON. The type can be one of two things: a value (int, float, bool, string) and an array.
+    * Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, and a json.
     * QL performs static inferring when a declared variable is assigned to a json variable with bracket selectors. The program will check what the type of the left hand side of the assignment is and infer that the json with bracket selectors will resolve to that type.
     <FORMATTING>
     Example of QL Code:
@@ -157,6 +133,33 @@ json file1 = json("file1.json")
 #~~ file1["data"]["views"]["total"] statically inferred as an int ~~#
 int total = file1["data"]["views"]["total"]
 ```
+
+Here is an example of obtaining a JSON object by using a bracket selector on another JSON object.
+Say that the json variable b equals this json below.
+
+```
+b = {
+    "size":10,
+    "links": {
+        "1": 1,
+        "2": 2,
+        "3": 3
+    }
+}
+
+This is the result of using a bracket selector on b.
+```
+
+QL then allows for commands like `json links = b["links"]`. The links variable would then look as follows:
+
+```
+links = {
+    "1" : 1,
+    "2" : 2,
+    "3" : 3
+}
+```
+
 
 ### 4.4 Binary Operator
 #### 4.4.1 Multiplication: `*`
