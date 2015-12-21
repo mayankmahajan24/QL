@@ -53,7 +53,7 @@
         3. `while`
     6. Conditional Statements
         1. `if/else`
-6. Standard Library Functions
+6. Built-In Functions
     1. Length
     2. Print
 
@@ -369,7 +369,7 @@ Examples of this operator:
 A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
 
 ```
-<function_identifier>(<arg1>,<arg2>,...)
+<function_identifier> <LPAREN> <arg1> <COMMA> <arg2> <COMMA> ... <RPAREN>
 ```
 
 This transfers the control of the program execution to the invoked function and waits for it to return before proceeding with computation. Some examples of possible function calls are:
@@ -580,9 +580,9 @@ if (<boolean_condition>) {
 }
 ```
 
-## 6.0 Standard Library Functions
+## 6.0 Built-In Functions
 
-Two standard library functions are included with the language for convenience for the user.
+Two built-in functions are included with the language for convenience for the user.
 
 ### 6.1 `length`
 
