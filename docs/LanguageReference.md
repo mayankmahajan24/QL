@@ -137,25 +137,28 @@ e.g in `int b = a` the `a` on the right hand side of the assignment operator is 
 This can be used in two different ways:
 
 - [int `index`]: accesses value at `index` of an array variable
-    * Return type is the same as the array’s type.
-    * This square bracket notation can be used to assign a value into a variable.
-    <FORMATTING>
-    Example of QL Code:
-    `array int a = [1;2;3;4]
-    int b = a[2]`
+  * Return type is the same as the array’s type.
+  * This square bracket notation can be used to assign a value into a variable.
 
-    At the end of this program, b is equal to 3.
-    </FORMATTING>
+   Example of QL Code:
+   ```
+   array int a = [1;2;3;4]
+   int b = a[2]
+   ```
+
+   At the end of this program, b is equal to 3.
 
 - [string `key`]: accesses value at `key` of a JSON variable
-    * Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, and a json.
-    * QL performs static inferring when a declared variable is assigned to a json variable with bracket selectors. The program will check what the type of the left hand side of the assignment is and infer that the json with bracket selectors will resolve to that type.
-    <FORMATTING>
-    Example of QL Code:
-    `json a = json("sample.json")
-    int b = a["value"]`
+  * Return type is inferred from the value in JSON. The type can be one of three things: a value (int, float, bool, string), an array, and a json.
+  * QL performs static inferring when a declared variable is assigned to a json variable with bracket selectors. The program will check what the type of the left hand side of the assignment is and infer that the json with bracket selectors will resolve to that type.
 
-    It is unclear what a["value"] is so our compiler infers that it will be an integer, since the left hand side of the assignment is an `int`. This happens in our static semantic check.
+   Example of QL Code:
+   ```
+   json a = json("sample.json")
+   int b = a["value"]
+   ```
+
+   It is unclear what a["value"] is so our compiler infers that it will be an integer, since the left hand side of the assignment is an `int`. This happens in our static semantic check.
 
 This operator can be nested, e.g.: ["data"]["views"]["total"]. It associates from left to right.  This means that each additional bracket selector will go one level deeper into the JSON by getting the value of corresponding key.
 
@@ -215,9 +218,10 @@ links = {
 
 ### 4.4 Binary Operator
 #### 4.4.1 Multiplication: `*`
-`*` : multiplication (left associative)
-- e1 * e2:
-<FORMATTING>
+##### _left associative_
+
+`e1 * e2`
+
 This operation is only valid when both e1 and e2 are integers or floats.
 When e1 and e2 are ints, this operator will return an int.
 When e1 and e2 are floats, this operator will return a float.
@@ -233,12 +237,11 @@ float b = 1.0 * 10.0
 ```
 The program above will have a equal to 30 and b equal to 10.0.
 
-</FORMATTING>
-
 #### 4.4.2 Division: `/`
-`/` : division (left associative)
-- e1 / e2:
-<FORMATTING>
+##### _left associative_
+
+`e1 / e2`
+
 This operation is only valid when both e1 and e2 are integers or floats.
 When e1 and e2 are ints, this operator will return an int.
 When e1 and e2 are floats, this operator will return a float.
@@ -254,12 +257,11 @@ float b = 100.0 / 20.0
 ```
 The program above will have a equal to 5 and b equal to 5.0.
 
-</FORMATTING>
-
 #### 4.4.3 Addition: `+`
-`+` : addition (left associative)
-- e1 + e2:
-<FORMATTING>
+##### _left associative_
+
+`e1 + e2`
+
 This operation is only valid when both e1 and e2 are integers, floats, or strings.
 When e1 and e2 are ints, this operator will return an int.
 When e1 and e2 are floats, this operator will return a float.
@@ -276,14 +278,14 @@ float b = 10.1 + 4.1
 
 string c = "hello " + "goat"
 ```
+
 The program above will have a equal to 3, b equal to 14.2, and c equal to "hello goat".
 
-</FORMATTING>
-
 #### 4.4.4 Subtraction: `-`
-`-` : subtraction (left associative)
-- e1 - e2:
-<FORMATTING>
+##### _left associative_
+
+`e1 - e2`
+
 This operation is only valid when both e1 and e2 are integers or floats.
 When e1 and e2 are ints, this operator will return an int.
 When e1 and e2 are floats, this operator will return a float.
@@ -297,6 +299,7 @@ int a = 10 - 1
 
 float b = 10.0 - 1.9
 ```
+
 The program above will have a equal to 9 and b equal to 8.1.
 
 ### 4.5 Boolean Expressions
@@ -322,12 +325,28 @@ e.g in `if(a)` the `a` inside the `if` conditional is a Identifier that must be 
 If the `not` operator is used on anything other than a bool, we throw an error.
 
 #### 4.5.4 Equivalency operators
-- == : equivalence,
-- != : non-equivalence,
-- \> : greater than,
+
+Operators and the types they can be used on
+- == : equivalence
+  - `string` == `string`
+  - `int` == `int`
+  - `float` == `float`
+- != : non-equivalence
+  - `string` == `string`
+  - `int` == `int`
+  - `float` == `float`
+- \> : greater than
+  - `int` == `int`
+  - `float` == `float`
 - < : less than,
+  - `int` == `int`
+  - `float` == `float`
 - \>= : greater than or equal to,
+  - `int` == `int`
+  - `float` == `float`
 - <= : less than or equal to
+  - `int` == `int`
+  - `float` == `float`
 
 Each of these operators act on two operands, each of an `expr` as defined in Section 4.4 above. It is important to note that neither of the operands of the equivalency operator can acutally be of boolean types themselves. The operator returns a bool.
 
@@ -336,8 +355,7 @@ Our static semantic checker checks at compile time if the operands on either sid
 Examples of this operator:
 
 - `3 == 3`, checks for equality between the two integer literals
-- `5.0 != 3`, fails to work because the two operands are of different data types
-- `"anshul" >= "ninja"`, we do a lexical comparison since both the operands are strings
+- `5.0 != 3`, fails to compile because the two operands are of different data types
 - `a == 5 + 4`, evaluates both operands, each an `expr` before applying the equivalency boolan operator. As such, the data type of `a` is obtained from the symbol table and then 5 + 4 is evaluated before checking for equality. In case, `a` is not of type `int` as inferred from the operand that evaluates to 9, the compiler reports an error.
 - `a > 5 == 3` fails to work because although the precedence rules evalaute this boolean expression from left to right, `a > 5` returns a type of `bool` which cannot be used in the `==` operators.
 
@@ -358,109 +376,111 @@ This transfers the control of the program execution to the invoked function and 
 
 ```
 array int a = [4;2;1;3]
-array int b = sort(a)
+int b = length(a)
 ```
 
-The int array in b is now equal to [1;2;3;4]
+The variable b is now equal to 4.
 
 ## 5.0 Statements
-EVAN -- I dont think we need this, what do you think?
-<!-- There are several different kinds of statements in QL, including both basic and compound statements. Basic statements can consist of three different types of expressions, including assignments, mathematical operations, and function calls. Statements are separated by the newline character `\n`. The newline character, which you will see code samples below as `\n` is produced by the return key.  The code below is the most primitive example of an expression.
-
-```
-expression \n
-```
-
-The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
- -->
 ### 5.1 Declaring Variables
 To declare a variable, a data type must be specified followed by the variable name and an equals sign.  The right side of the equals sign depends on what type of data type has been declared. If it is a primitive data type, then the user has to specify the corresponding literal of that data type.  If the data type is non-primitive, then the user has to enumerate either the array it is assigning into the variable or the JSON constructor with the corresponding JSON file name passed in. In addition, variables can be declared and assigned as another previously declared variable of the same data type.
 
-EVAN - grammar rules have a diff formatting from code
 This is the specific grammar for declaring a variable.
-```
-<var_decl>:
-    |<assignment_data_type> <id> <EQUALS> <expr>
-<expr>:
-    |<literal>
-    | <id>
-```
-Some examples of the declaration of variables would be:
 
 ```
-array testArr = array(10)
+<var_decl>:
+    | <ARRAY> <array_data_type> <id> <EQUALS> <list_of_literals>
+    | <ARRAY> <array_data_type> <id> <EQUALS> <ARRAY> <LPAREN> <int_literal> <RPAREN>
+    | <assignment_data_type> <id> <EQUALS> <expr>
+<expr>:
+    | <literal>
+    | <id>
+    | ... (other expressions)
+```
+
+Examples of the declaration of variables:
+
+```
 int i = 0
-float f = 1.4
+float f = 1.4 * 5e5
 bool b = True
 string s = "goats"
+array int nums = array(10)
+array string strs = ["So","many","features","it's","remarkable"]
 ```
 
 ### 5.2 Updating Variables
 To update a variable, the variable on the left side of the equals sign must already by declared.  The right side of the equals sign follows the same rules as section 5.1's explanation of declaring variables.  The only distinction is this time, there does not need to be a data type prior to the variable name on the left hand side of the equals sign.
 
-EVAN - grammar rules have a diff formatting from code
 This is the specific grammar for reassigning a variable.
-```
-<var_reassign>:
-    |<id> <EQUALS> <expr>
-<expr>:
-    <literal> | <id>
-```
-Some examples of the declaration of variables would be (note we are assuming these variables were previously declared as the correct corresponding type):
 
 ```
-testArr = array(10)
-i = 0
-f = 1.4
-b = True
-s = "goats"
+<var_update>:
+    | <id> <EQUALS> <expr>
+    | <id> <LSQUARE> <int_literal> <RSQUARE> <EQUALS> <expr>
+<expr>:
+    | <literal>
+    | <id>
+    | ... (other expressions)
+```
+
+Examples of updating variables (assuming these variables were previously declared as the same type):
+
+```
+nums[3] = 42
+i = 5 * 9
+f = -0.01
+s = "GOATS"
 ```
 
 ### 5.3 Return statements
-A return statement ends the body of a function. A functions return statement must match up with its return type that was declared after the colon in the function declaration.
+The final statement of the body of a function must be a return statement. A function's return statement must correspond to the return type that was specified after the colon in the function declaration.
 
-EVAN FORMATTING
-This is how our grammar handles return statements.
+This is how our grammar handles return statements:
+
 ```
 <RETURN> <expr>
 ```
 
 ### 5.4 Function Declaration
-Function declarations in QL all start with the function keyword, followed by the function identifier, parentheses with parameter declarations inside, colon keyword, a return type, and brackets with the function body inside.
+Function declarations in QL all start with the function keyword, followed by the function identifier, parentheses with parameter declarations inside, a colon, a return type, and brackets with the function body inside.
 
 #### 5.4.1 Parameter declarations
-The parameter declarations inside the parentheses are the same as the left hand side of a variable declaration. The variable data type followed by the identifier.  These variable declarations are separated by commas.
+The parameter declarations inside the parentheses are the same as the left hand side of a variable declaration. The variable data type followed by the identifier. These variable declarations are separated by commas.
 
-EVAN FORMATTING
-This is the grammar for parameter declarations.
+This is QL's grammar for parameter declarations.
+
 ```
 <parameter_declaration> :
     | <arg_decl>
     | <parameter_declaration> <COMMA> <arg_decl>
 <arg_decl>:
-    |<data_type> <id>
+    | <data_type> <id>
 ```
+
 #### 5.4.2 Colon and Return Type
 The colon functions in our language as the specifier of a function return type. Before this colon is an argument list and immediately after this colon comes our function return type, which can be any of the data types previously discussed.
 
-EVAN FORMATTING
-This is how our grammar handles a colon.
+This is how our grammar uses colons:
+
 ```
 <LPAREN> <parameter_declaration> <RPAREN> <COLON> <return_type>
 ```
 
 #### 5.4.3 Grammar for Function Declarations
+
 This is QL's grammar for function declarations.
+
 ```
 <FUNCTION> <id> <LPAREN> <parameter_declaration> <RPAREN> <COLON> <return_type> <LCURLY> <stmt_list> <RCURLY>
 ```
 
 Here is an example of QL code.
+
 ```
-function add (int x, int y, int z) : int {
-  int d = x + y + z
-  int w = 5
-  return d
+function average (float x, float y, float z) : float {
+  float a = x + y + z
+  return a / 3.0
 }
 ```
 
@@ -469,8 +489,7 @@ function add (int x, int y, int z) : int {
 The loop statements in QL allow us to iteratively call a block of statements in our code.
 
 #### 5.5.1 `where` loops
-The where loop is a key feature of QL that allows the user to search through a JSON array and execute a set of statemetns for all the JSON array elements (key, value pairs by structure) that match a certain boolean condition. For example, consider the following JSON file opened in QL using the `json temp = json("sample.json")` command:
-:
+The where loop is a key feature of QL that allows the user to search through a JSON array and execute a set of statements for all the JSON array elements (key, value pairs by structure) that match a certain boolean condition. For example, consider the following JSON file opened in QL using the `json temp = json("sample.json")` command:
 
 ```
 {
@@ -499,7 +518,7 @@ The where loop is a key feature of QL that allows the user to search through a J
 }
 ```
 
-Now we can run the where loop on the `temp["friends"]` array, with each element of the array resembling the following structure:
+We can run the where loop on the `temp["friends"]` array, with each element of the array resembling the following structure:
 
 ```
     {
@@ -507,14 +526,15 @@ Now we can run the where loop on the `temp["friends"]` array, with each element 
       "age" : 12
     }
 ```
-A where loop must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the `as __identifier__`, which allows the user to associate the current element of the array being processed using the `__identifier__`. Following this is an `{`, which marks the beginning of the body code which is applied to each element for which the condition evaluates to true. A closing `}` signifies the end of the body. The last section is the "in" keyword, which is followed by the JSON array through which the clause will iterate to extract elements.
+
+A where loop must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the `as <identifier>`, which allows the user to associate the current element of the array being processed using the `<identifier>`. Following this is a `{`, which marks the beginning of the body code which is applied to each element for which the condition evaluates to true. A closing `}` signifies the end of the body. After the closing brace, there is a mandatory "in" keyword, which is followed by the JSON array through which the clause will iterate to extract elements.
 
 ```
-where (__boolean condition__) as __identifier__ {
+where (<boolean_condition>) as <identifier> {
     #~~ List of statements ~~#
-} in __json_array__
+} in <json_array>
 ```
-The scoping rules make the `__identifier__` available to the `__boolean condition__` and the block statements enclosed in the braces. The `__json_array__` is referenced using the Bracket Selector notation in Section 4.3 above.
+The scoping rules make the `<identifier>` available to the `<boolean_condition>` and the block statements enclosed in the braces. The `<json_array>` is referenced using the Bracket Selector notation in Section 4.3 above.
 
 For the `sample.json` file opened using the `temp` JSON variable shown above, a where loop to print the names of all friends over the age of 21 would look like this in QL:
 
@@ -529,18 +549,18 @@ where (friend["age"] >= 21) as friend {
 The for loop starts with the `for` keyword, followed by a set of three expressions separated by commas and enclosed by parentheses. The first expression is the initialization, where temporary variables can be initialized. The second expression is the boolean condition; at each iteration through the loop, the boolean condition will be checked. The loop will execute as long as the boolean condition is satisfied, and will exit as soon as the condition evaluates to false. The third expression is the update expression, where variables can be updated at each stage of the loop. Following these three expressions is an open `{` , followed by a list of statements, and then a close `}`.
 
 ```
-for (__initialization__, __boolean condition__, __update__) {
+for (<initialization>, <boolean_condition>, <update>) {
     #~~ List of statements ~~#
 }
 ```
 
-The `__initialization__` and the `__update__` are each assignment statements, as defined in section 5.1 and 5.2 above. The `__bolean condition__` is a boolean expression, as defined in section 4.5 above.
+The `<initialization>` and the `<update>` are each assignment statements, as defined in section 5.1 and 5.2 above. The `<boolean_condition>` is a boolean expression, as defined in section 4.5 above.
 
 #### 5.5.3 `while` loops
 The while loop is initiated by the `while` keyword, followed by a boolean expression enclosed within a set of matching paranthesis. After this, there is a block of statements, enclosed by `{` and `}`, which are executed in succession as long as the the condition represented by the boolean expression is no longer satisfied.
 
 ```
-while (__boolean condition__) {
+while (<boolean_condition>) {
     #~~ List of statements ~~#
 }
 ```
@@ -549,88 +569,30 @@ while (__boolean condition__) {
 Conditional statements are crucial to the program flow and execute a segment of the code based on a boolean expression.
 
 #### 5.6.1 `if/else` clauses
-The if-else clause checks the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required and the `else` statement is optional. We can provide an arbitrary number (zero or more) of `elseif` statements following the if and these are evaluated in sequential order. Finally, we can follow an `if`/combination of `elseif`'s with a single `else`, though there can be only one.
+The if-else clause checks the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required and the `else` statement is optional.
 
 ```
-if (__boolean condition__) {
-    #~~ List of statements ~~#
-}
-elseif (__boolean condition__) {
+if (<boolean_condition>) {
     #~~ List of statements ~~#
 } else {
     #~~ List of statements ~~#
 }
 ```
-The first `__boolean_condition` to evaluate to true in this sequence of `if`, `elseif` constructs determines which block of statements is evaluated. In case no such clause matches, then the list of statements in the `else` block get executed.
 
 ## 6.0 Standard Library Functions
 
 Two standard library functions are included with the language for convenience for the user.
 
 ### 6.1 `length`
-```
-length(i)
-```
-// EVAN DECIDE IF THIS IS EVEN A LIBRARY FUNCTION
+
+`length(arr)` accepts as its parameter an array, and returns an integer equal to the number of elements in the array.
+
 ### 6.2 `print`
 
 We also include a built-in print function to print strings and primitive types.
 
 ```
-print(toPrint)
+print(<expr>)
 ```
 
-Multiple primitives  may be printed to console in one statement, concatenated by a `+`:
-
-```
-print(toPrint1 + toPrint2)
-```
-
-Attempting to print something that is not a primitive wi llresult in an error.
-
-
--------
-OLD STUFF DON'T KNOW IF WE STILL NEED
-
-## 4.0 Syntax
-The following sections define the specifics of the syntax of our language.
-
-### 4.1 Punctuation
-
-QL employs several different types of punctuation to signal certain directions of workflow or special blocks of code within programs.
-
-####4.1.1 `()`: hierarchical evaluation, function arguments, `where` clauses
-
-Parentheses can be used in three main cases:
-
-- Numerical or Boolean statements: Forces the expression inside the parentheses to be evaluated before interacting with tokens outside of the parentheses. For example, in `1*(2-3)`, the expression `2-3` will be evaluated, and its result will then be multiplied with 1. These can also be nested, e.g. : (1 + (4-(5/3)*2)).
-
-- Function arguments: When providing arguments during a function call, the arguments must be listed within parentheses directly after the name of the function. For examples, foo(array a, int b) involves a function foo() that takes in an array and an integer enclosed in parentheses. The parentheses are also used for marking the argument list in the function definition, i.e.
-
-```
-function foo(array a, int b) : array {
-    #~~ code goes here ~~#
-}
-
-foo(arr1, myInt)
-```
-
-- `Where` clauses: In a `where` clause, the search criteria must be enclosed within parentheses, and the expression within the parentheses should evaluate to a boolean value. For example,
-
-```
-where(["size"] > 10 & ["weight"] < 4) as item {
-    #~~ code goes here ~~#
-}
-```
-
-####4.1.2 `{}`: function definitions, `where` clauses
-
-Curly braces have two uses:
-
-- Function definitions: When a function is defined, the procedural code to be run must be enclosed in curly braces.
-
-- `where` clauses: In a `where` clause, immediately following the search criteria, curly braces enclose the code to be implemented. Using the `where` clause outlined above. The open and closed curly braces should contain all of the code to be run for each entry within the JSON that passes the filter.
-
-####4.1.3 `:`: function return types
-The colon has use in our language as the specifier of a function return type. Separated between our language identifier and its argument list, we specify a `:` to mark that we will not be specifying a return type. Immediately after this colon, then, comes our function return type, which can be any of the data types we described above.
-
+Here, `<expr>` must evaluate to a primitive type. Attempting to print something that is not a primitive will result in an error.
