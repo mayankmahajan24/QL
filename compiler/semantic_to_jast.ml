@@ -74,7 +74,7 @@ let rec convert_expr (expr : Ast.expr) (symbol_table : Environment.symbol_table)
         let serialized = serialize (expr) (symbol_table) in
         let json_type = json_selector_type (serialized) (symbol_table) in
         let java_type = ql_to_java_type (ast_data_to_string (json_type)) in
-        let selector_types = List.map (fun expr -> 
+        let selector_types = List.map (fun expr ->
           let (expr_type,_) = check_expr_type (expr) (symbol_table) in
           convert_data_type (expr_type)
         ) selectors in
@@ -99,7 +99,7 @@ let convert_arg_decl (arg_decl : Ast.arg_decl) =
     var_name = arg_decl.var_name;
   }
 
-let rec build_expr_list (jast_exprs: Jast.expr list) (exprs: Ast.expr list) (symbol_table: Environment.symbol_table) = 
+let rec build_expr_list (jast_exprs: Jast.expr list) (exprs: Ast.expr list) (symbol_table: Environment.symbol_table) =
   match exprs
     with [head] -> List.rev (jast_exprs@[(convert_expr head symbol_table)])
     | head :: tl -> (build_expr_list (jast_exprs@[(convert_expr head symbol_table)]) tl symbol_table)
@@ -114,7 +114,7 @@ let rec convert_statement (stmt : Ast.stmt) (symbol_table : Environment.symbol_t
     let expr_list = List.map (fun expr -> (convert_expr (expr) (symbol_table))) e1 in
     Jast.Array_assign((ql_to_java_type (expected_data_type)), id, expr_list)
   | Ast.Fixed_length_array_assign(expected_data_type, id, length) ->
-    Jast.Fixed_length_array_assign(expected_data_type, id, length)
+    Jast.Fixed_length_array_assign((ql_to_java_type (expected_data_type)), id, length)
   | Ast.Update_variable (id, e1) ->
     let update_expr = convert_expr e1 symbol_table in
     Jast.Update_variable(id, update_expr)

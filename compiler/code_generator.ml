@@ -38,7 +38,7 @@ let cast_json_access (prog_str : string) (data_type : string) = match data_type
   | "boolean" -> ""
   | "String" ->  "(String)" ^ prog_str
   | "JSONArray" -> "(JSONArray)" ^ prog_str
-  | _ -> raise (Failure "Failure in Java casting a JSON access.")
+  | _ -> raise (Failure (data_type^"Failure in Java casting a JSON access."))
 
 let rec comma_separate_list (expr_list : Jast.expr list) = match expr_list
   with [] -> ""
@@ -111,8 +111,10 @@ let rec handle_bool_expr (expr : Jast.bool_expr) = match expr
       with "True" -> "true"
       | "False" -> "false"
       | _ -> "bad")
-  | Binop(left_expr, op, right_expr) ->
-    (handle_expression left_expr) ^ " " ^ (convert_bool_operator op) ^ " " ^ (handle_expression right_expr)
+  | Binop(left_expr, op, right_expr) -> (match op, right_expr
+    with (Equal, Literal_string(s)) -> "(" ^ (handle_expression left_expr) ^ ").equals(\"" ^ s ^ "\")"
+    | _ -> (handle_expression left_expr) ^ " " ^ (convert_bool_operator op) ^ " " ^ (handle_expression right_expr)
+  )
   | Bool_binop(left_expr, cond, right_expr) ->
     (handle_bool_expr left_expr) ^ " " ^ (convert_cond_op cond) ^ " " ^ (handle_bool_expr right_expr)
   | Not(expr) ->
@@ -197,7 +199,7 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (var_string: 
       "for (" ^ init_stmt ^ condition_stmt ^ ";" ^ remove_semicolon(update_stmt) ^ ") {\n"
          ^ body_stmt ^ "}\n" in
     (new_prog_string, var_string, func_string)
-  | Where(condition, id, body, json_array) -> 
+  | Where(condition, id, body, json_array) ->
     let json_var_string = handle_expression json_array in
     let json_array_declaration = "\nstaticArrr = (JSONArray)" ^ json_var_string ^ ";\n" in
     let it_declaration = "staticItt = staticArrr.iterator();\n" in
@@ -209,12 +211,12 @@ let rec handle_statement (stmt : Jast.stmt) (prog_string : string) (var_string: 
 
     let new_prog_string = (prog_string ^ json_array_declaration ^ it_declaration ^ while_declaration ^ elem_declaration ^ if_declaration ^ body_declaration ^ closing_braces_declaration) in
     (new_prog_string, var_string, func_string)
-  | _ -> 
+  | _ ->
     (prog_string, var_string, func_string)
 
 and handle_statements (stmt_list : Jast.program) (prog_string : string) (var_string: string) (func_string : string) (in_block : bool)  = match stmt_list
     with [] -> (prog_string, var_string, func_string)
-  | [stmt] -> 
+  | [stmt] ->
     let (prog, var, func) = (handle_statement stmt prog_string var_string func_string in_block) in
     (prog ^ "\n", var, func)
   | stmt :: other_stmts ->
@@ -229,22 +231,20 @@ let program_header (class_name : string) =
   let header_string = "
   import java.io.FileReader;\n
   import java.util.Iterator;\n
- 
   import org.json.simple.JSONArray;\n
   import org.json.simple.JSONObject;\n
   import org.json.simple.parser.JSONParser;\n" in
   let prog_string  = header_string ^ "public class " ^ class_name ^ " { \n
     public static JSONArray staticArrr;\n
     public static Iterator staticItt;\n
-
     " in
   prog_string
 
-let main_method = "public static void main(String[] args) { 
+let main_method = "public static void main(String[] args) {
       try {
     "
 
-let program_footer = " } catch (Exception e) {\nSystem.out.println(\"No\");\n}\n}"
+let program_footer = " } catch (Exception e) {\ne.printStackTrace();\n}\n}"
 
 let generate_code (program : Jast.program) (file_name : string) =
   let (prog, var, funcs) = handle_statements program "" "" "" false in

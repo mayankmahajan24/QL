@@ -137,7 +137,19 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 	| Binop(left_expr, op, right_expr) ->
 		let (left_type, left_env) = (check_expr_type left_expr env) in
 		let (right_type, right_env) = (check_expr_type right_expr left_env) in
-		((check_binop_type left_type op right_type), right_env)
+		let resulting_type = check_binop_type left_type op right_type in
+		(match (left_type, right_type) with
+			(AnyType, AnyType) -> (AnyType, env)
+      | (AnyType, _) ->
+      	let serialized = serialize left_expr right_env in
+      	let new_env = json_selector_update serialized (ast_data_to_string (data_to_ast_data (right_type))) (right_env)
+     		in
+      	(right_type, new_env)
+      | (_, AnyType) ->
+      	let serialized = serialize right_expr right_env in
+      	let new_env = json_selector_update serialized (ast_data_to_string(data_to_ast_data(left_type))) right_env in
+      	(left_type, new_env)
+      | (_,_) -> (resulting_type, right_env))
 	| Id(i) -> (ast_data_to_data((var_type i env)), env)
 	| Call(func_name, arg_list) ->
 		let arg_types = List.map (fun expr ->
@@ -156,9 +168,10 @@ and check_expr_type (expr : Ast.expr) (env: Environment.symbol_table) = match ex
 				(ast_data_to_data(func_return_type), new_json_mapping)
 		)
 	| Bracket_select(id, selectors) ->
-		let selector_ast_data_type = var_type id env in 
+		let selector_ast_data_type = var_type id env in
 		let selector_data_type = ast_data_to_data selector_ast_data_type in
-		(check_bracket_select_type (selector_data_type) (selectors) (env) (id) (serialize (expr) (env)))
+		let serialized = serialize (expr) (env) in
+		(check_bracket_select_type (selector_data_type) (selectors) (env) (id) serialized)
 
 and serialize (expr : Ast.expr) (env : symbol_table) = match expr
 	with Bracket_select(id, selectors) ->
@@ -182,7 +195,7 @@ and serialize_literal (literal : expr) = match literal
 	| Id(i) -> i
 	| Bracket_select(id, selectors) -> (List.fold_left (
 		fun str expr -> str ^ (serialize_literal (expr)))) id selectors
-	| _ -> raise (Failure "Printing this is undefined.") 
+	| _ -> raise (Failure "Printing this is undefined.")
 
 let rec map_json_types (expr : Ast.expr) (env : symbol_table) (data_type : string) = match expr
 	with Binop(left_expr, op, right_expr) ->
@@ -309,8 +322,10 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
  	| If(bool_expr, then_stmt, else_stmt) ->
 		let (_,new_env) = handle_bool_expr bool_expr env in
 		let post_if_env = check_statements (List.rev then_stmt) (new_env) in
-		let post_else_env = check_statements (List.rev else_stmt) (new_env) in
-			overwrite_js_map (overwrite_js_map new_env post_if_env) post_else_env 
+		let override_if = overwrite_js_map new_env post_if_env in
+		let post_else_env = check_statements (List.rev else_stmt) (override_if) in
+		let post_loop_env = overwrite_js_map override_if post_else_env in
+		post_loop_env
   	| Update_array_element (id, e1, e2) ->
   		let ast_array_data_type = array_type id env in
 		let data_type = ast_data_to_data ast_array_data_type in
@@ -337,14 +352,15 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 			Ast.Array(_) -> where_env
 			| Ast.AnyType -> let array_set_env = (json_selector_update serialized (ast_data_to_string (Ast.Array(Ast.AnyType))) where_env) in
 				array_set_env
-			| _ -> raise UniterableType;) in 
+			| _ -> raise UniterableType;) in
 		let post_loop_env = (check_statements (List.rev stmt_list) (serial_env)) in
 		(* Also here. *)
 		overwrite_js_map serial_env post_loop_env
 	| Assign(data_type, id, e1) ->
-	if (json_selector_found e1 env) == true then
+	if (json_selector_found e1 env) = true then
 		let updated_env = declare_var id data_type env in
-		json_selector_update (serialize e1 env) data_type updated_env;
+		let final_env = json_selector_update (serialize e1 env) data_type updated_env in
+		final_env
 	else
 		let left = string_to_data_type(data_type) and (right,new_env) = check_expr_type (e1) (env) in
 		equate left right;
@@ -361,21 +377,21 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 	| Fixed_length_array_assign(expected_data_type, id, length) ->
 		let left = data_to_ast_data(string_to_data_type(expected_data_type)) in
 			let declare_var_env = declare_var id "array" env in
-				define_array_type left [] declare_var_env id 
-	| Array_select_assign(expected_data_type, new_var_id, array_id, selectors ) -> 
-		let left = data_to_ast_data (string_to_data_type expected_data_type) in (match var_type array_id env with Json -> 
-				let json_type = json_selector_type 
+				define_array_type left [] declare_var_env id
+	| Array_select_assign(expected_data_type, new_var_id, array_id, selectors ) ->
+		let left = data_to_ast_data (string_to_data_type expected_data_type) in (match var_type array_id env with Json ->
+				let json_type = json_selector_type
 				(*THIS PART DOESNT WORK BC WE ONLY PASS THE ID NOT THE SERIALIZED THING WITH THE SELECTORS*)
 				array_id env in  (match json_type with
-				Ast.AnyType -> 
-				let declare_var_env = declare_var new_var_id "array" env in 
+				Ast.AnyType ->
+				let declare_var_env = declare_var new_var_id "array" env in
 					let _ = define_array_type left [] declare_var_env new_var_id in
 					json_selector_update (serialize (Ast.Bracket_select(array_id, selectors)) env) expected_data_type env
 				| other_type -> equate (string_to_data_type expected_data_type) (ast_data_to_data other_type);
 					let declare_var_env = declare_var new_var_id "array" env in define_array_type left [] declare_var_env new_var_id
 				)
 			| _ -> raise IncorrectSelectorId; )
-	
+
 	| Bool_assign(data_type, id, e1) ->
 		let left = string_to_data_type(data_type) and (right,new_env) = handle_bool_expr (e1) (env) in
 			equate left right;
@@ -384,9 +400,9 @@ let rec check_statement (stmt : Ast.stmt) (env : Environment.symbol_table) = mat
 		let func_env = declare_func func_name return_type arg_list env in
 		let func_env_vars = define_func_vars arg_list func_env in
 		(* TODO: Implement void functions *)
-		if (return_type != "void" && (List.length arg_list) == 0) then raise ReturnStatementMissing;
+		if (return_type != "void" && (List.length stmt_list) == 0) then raise ReturnStatementMissing;
 		let post_func_env = check_function_statements (List.rev stmt_list) func_env_vars return_type in
-		overwrite_js_map func_env post_func_env 
+		overwrite_js_map func_env post_func_env
 	| Noop -> env
 	| _ -> raise (Failure "Unimplemented functionality.")
 
