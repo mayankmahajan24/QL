@@ -4,6 +4,58 @@
 
 ##Table of Contents
 
+1. Introduction
+2. Lexical conventions
+  1. Identifiers
+  2. Keywords
+  3. Comments
+  4. Literals
+    1. `int` literals
+    2. `float` literals
+    3. `bool` literals
+    4. `string` literals
+3. Data Types
+  1. Primitive Types
+    1. Integers
+    2. Floating Point Numbers
+    3. Booleans
+    4. Strings
+  2. Non-Primitive Types
+    1. Arrays
+    2. JSONs
+4. Expressions
+  1. Literals
+  2. Identifiers
+  3. Bracket Selectors
+  4. Binary Operators
+    1. Multiplication
+    2. Division
+    3. Addition
+    4. Subtraction
+  5. Boolean Expressions
+    1. Literal
+    2. Identifier
+    3. Negation
+    4. Equivalency Operators
+    5. Logical Operators
+  6. Function Calls
+5. Statements
+  1. Declaring Variables
+  2. Updating Variables
+  3. Return Statements
+  4. Function Declarations
+    1. Parameter Declarations
+    2. Colon and Return Type
+    3. Grammar for Function Declarations
+  5. Loop Statements
+    1. `where`
+    2. `for`
+    3. `while`
+  6. Conditional Statements
+    1. `if/else`
+6. Standard Library Functions
+  1. Length
+  2. Print
 
 
 ## 1.0 Introduction
@@ -32,15 +84,15 @@ Our language supports several different types of literals.
 #### 2.4.1 `int` literals
 A string of numeric digits of arbitrary size that does not contain a decimal point.  Integers can have an optional ‘-’ at the beginning of the string of numbers to indicate a negative number.
 #### 2.4.2 `float` literals
-QL is following Brian Kernighan and Dennis Ritchie's explanation in *The C Programming Language*: "A floating constant consists of an integer part, a decimal part, a fraction part, an e, and an optionally signed integer exponent. The integer and fraction parts both consist of a sequence of digits. Either the integer part, or the fraction part (not both) may be missing; either the decimal point or the e and the exponent (not both) may be missing." Floats can also contain an optional ‘-’ at the beginning of the float to indicate a negative value.  
-#### 2.4.3 `boolean` literals
+QL is following Brian Kernighan and Dennis Ritchie's explanation in *The C Programming Language*: "A floating constant consists of an integer part, a decimal part, a fraction part, an e, and an optionally signed integer exponent. The integer and fraction parts both consist of a sequence of digits. Either the integer part, or the fraction part (not both) may be missing; either the decimal point or the e and the exponent (not both) may be missing." Floats can also contain an optional ‘-’ at the beginning of the float to indicate a negative value.
+#### 2.4.3 `bool` literals
 Booleans can take on one of two values: `True` or `False`. Booleans in QL are capitalized.
 #### 2.4.4 `string` literals
 A sequence of ASCII characters surrounded by double quotation marks on both sides.
 
 ## 3.0 Data Types
 ### 3.1 Primitive Types
-The primitive types in QL can be statically typed; in other words, the type of a variable is known at compile time. This occurs when the right side of the assignment is a literal of a data type. The primitive types can be declared and then initialized later (their value is null in the interim) or declared and initialized in-line. 
+The primitive types in QL can be statically typed; in other words, the type of a variable is known at compile time. This occurs when the right side of the assignment is a literal of a data type. The primitive types can be declared and then initialized later (their value is null in the interim) or declared and initialized in-line.
 
 #### 3.1.1 Integers (`int`)
 Integers are signed, 8-byte literals denoting a number as a sequence of digits e.g. `5`,`6`,`-1`,`0`.
@@ -62,9 +114,9 @@ All non-primitive data types are passed by a reference in memory. They can each 
 Arrays represent multiple instances of one of the primitive data types represented as contiguous memory. Each array must contain only a single type of primitives; for example, we can have either an array of `int`, an array of `float`, an array of `bool`, and an array of `string`, but no combinations of these types. Note that nested arrays are not allowed in QL. The size of the array is fixed at the time of its creation e.g. `array(10)`. Arrays in QL are statically typed since the type of a variable is known at compile time.
 
 #### 3.2.2 JSON (`json`)
-Since the language must search and return results from JSON files, it supports Jsons as a non-primitive type. A `json` object can be created directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. During runtime, the generated java code will check if the contents of the file make up a valid json. This means that Jsons are dynamically typed in QL. 
+Since the language must search and return results from JSON files, it supports JSONs as a non-primitive type. A `json` object can be created directly from a filename of a valid JSON. For example, one could write: `json a = json("file1.json")`. During runtime, the generated java code will check if the contents of the file make up a valid JSON. This means that JSONs are dynamically typed in QL.
 
-Jsons are statically inferred but checked dynamically in QL.
+JSONs are statically inferred but checked dynamically in QL.
 
 ## 4.0 Expressions
 
@@ -105,7 +157,7 @@ This can be used in two different ways:
 
     It is unclear what a["value"] is so our compiler infers that it will be an integer, since the left hand side of the assignment is an `int`. This happens in our static semantic check.
 
-This operator can be nested, e.g.: ["data"]["views"]["total"]. It associates from left to right.  This means that each additional bracket selector will go one level deeper into the json by getting the value of corresponding key.
+This operator can be nested, e.g.: ["data"]["views"]["total"]. It associates from left to right.  This means that each additional bracket selector will go one level deeper into the JSON by getting the value of corresponding key.
 
 Below is a program containing different examples of the `[]` operator. `file1.json` is the JSON file we will be using in this example.
 
@@ -164,7 +216,7 @@ links = {
 ### 4.4 Binary Operator
 #### 4.4.1 Multiplication: `*`
 `*` : multiplication (left associative)
-- e1 * e2: 
+- e1 * e2:
 <FORMATTING>
 This operation is only valid when both e1 and e2 are integers or floats.
 When e1 and e2 are ints, this operator will return an int.
@@ -185,7 +237,7 @@ The program above will have a equal to 30 and b equal to 10.0.
 
 #### 4.4.2 Division: `/`
 `/` : division (left associative)
-- e1 / e2: 
+- e1 / e2:
 <FORMATTING>
 This operation is only valid when both e1 and e2 are integers or floats.
 When e1 and e2 are ints, this operator will return an int.
@@ -206,7 +258,7 @@ The program above will have a equal to 5 and b equal to 5.0.
 
 #### 4.4.3 Addition: `+`
 `+` : addition (left associative)
-- e1 + e2: 
+- e1 + e2:
 <FORMATTING>
 This operation is only valid when both e1 and e2 are integers, floats, or strings.
 When e1 and e2 are ints, this operator will return an int.
@@ -230,7 +282,7 @@ The program above will have a equal to 3, b equal to 14.2, and c equal to "hello
 
 #### 4.4.4 Subtraction: `-`
 `-` : subtraction (left associative)
-- e1 - e2: 
+- e1 - e2:
 <FORMATTING>
 This operation is only valid when both e1 and e2 are integers or floats.
 When e1 and e2 are ints, this operator will return an int.
@@ -249,7 +301,7 @@ The program above will have a equal to 9 and b equal to 8.1.
 
 ### 4.5 Boolean Expressions
 
-Boolean expressions are fundamentally important to the decision constructs used in our language, like the `if-else` block and inside the conditional statements for loops like `while`, `for` and `where`. Each boolean expression must evaluate to `True` or `False`. 
+Boolean expressions are fundamentally important to the decision constructs used in our language, like the `if-else` block and inside the conditional statements for loops like `while`, `for` and `where`. Each boolean expression must evaluate to `True` or `False`.
 
 #### 4.5.1 Boolean Literal
 
@@ -259,7 +311,7 @@ e.g in `if(True)` the `True` inside the `if` conditional is a Boolean Literal.
 
 #### 4.5.2 Identifier of boolean variable
 
-Expressions can be just an identifier, as defined for our language in Section 2.1 above. This allows us to use variables as values where needed. QL performs static semantic checking to ensure that the identifier used as a Boolean expression has been defined earlier with `bool` type. 
+Expressions can be just an identifier, as defined for our language in Section 2.1 above. This allows us to use variables as values where needed. QL performs static semantic checking to ensure that the identifier used as a Boolean expression has been defined earlier with `bool` type.
 
 e.g in `if(a)` the `a` inside the `if` conditional is a Identifier that must be of bool type.
 
@@ -322,15 +374,15 @@ expression \n
 The effects of the expression are evaluated prior to the next expression being evaluated. The precedence of operators within the expression goes from highest to lowest. To determine which operator binds tighter than another, check the operator precedence above.
  -->
 ### 5.1 Declaring Variables
-To declare a variable, a data type must be specified followed by the variable name and an equals sign.  The right side of the equals sign depends on what type of data type has been declared. If it is a primitive data type, then the user has to specify the corresponding literal of that data type.  If the data type is non-primitive, then the user has to enumerate either the array it is assigning into the variable or the json constructor with the corresponding JSON file name passed in. In addition, variables can be declared and assigned as another previously declared variable of the same data type.
+To declare a variable, a data type must be specified followed by the variable name and an equals sign.  The right side of the equals sign depends on what type of data type has been declared. If it is a primitive data type, then the user has to specify the corresponding literal of that data type.  If the data type is non-primitive, then the user has to enumerate either the array it is assigning into the variable or the JSON constructor with the corresponding JSON file name passed in. In addition, variables can be declared and assigned as another previously declared variable of the same data type.
 
 EVAN - grammar rules have a diff formatting from code
 This is the specific grammar for declaring a variable.
 ```
-<var_decl>: 
+<var_decl>:
     |<assignment_data_type> <id> <EQUALS> <expr>
-<expr>: 
-    |<literal> 
+<expr>:
+    |<literal>
     | <id>
 ```
 Some examples of the declaration of variables would be:
@@ -370,7 +422,7 @@ A return statement ends the body of a function. A functions return statement mus
 EVAN FORMATTING
 This is how our grammar handles return statements.
 ```
-<RETURN> <expr> 
+<RETURN> <expr>
 ```
 
 ### 5.4 Function Declaration
@@ -385,7 +437,7 @@ This is the grammar for parameter declarations.
 <parameter_declaration> :
     | <arg_decl>
     | <parameter_declaration> <COMMA> <arg_decl>
-<arg_decl>: 
+<arg_decl>:
     |<data_type> <id>
 ```
 #### 5.4.2 Colon and Return Type
@@ -445,7 +497,7 @@ The where loop is a key feature of QL that allows the user to search through a J
     }
   ]
 }
-``` 
+```
 
 Now we can run the where loop on the `temp["friends"]` array, with each element of the array resembling the following structure:
 
@@ -464,7 +516,7 @@ where (__boolean condition__) as __identifier__ {
 ```
 The scoping rules make the `__identifier__` available to the `__boolean condition__` and the block statements enclosed in the braces. The `__json_array__` is referenced using the Bracket Selector notation in Section 4.3 above.
 
-For the `sample.json` file opened using the `temp` json variable shown above, a where loop to print the names of all friends over the age of 21 would look like this in QL:
+For the `sample.json` file opened using the `temp` JSON variable shown above, a where loop to print the names of all friends over the age of 21 would look like this in QL:
 
 ```
 where (friend["age"] >= 21) as friend {
