@@ -20,7 +20,7 @@
 %token WHERE IN AS FOR WHILE
 
 /* Conditionals */
-%token IF ELSEIF ELSE
+%token IF ELSE
 
 /* Math Operators */
 %token PLUS MINUS TIMES DIVIDE

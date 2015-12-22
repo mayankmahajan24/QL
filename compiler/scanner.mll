@@ -47,7 +47,6 @@ rule token = parse
 
 (* Conditional Keywords *)
 | "if"        { IF }        | "else"      { ELSE }
-| "elseif"    { ELSEIF }
 
 (* Loop Keywords *)
 | "where"     { WHERE }     | "in"        { IN }

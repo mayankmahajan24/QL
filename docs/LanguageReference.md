@@ -70,7 +70,7 @@ Identifiers are combinations of letters and numbers. They must start with a lowe
 The following words are defined as keywords and are reserved for the use of the language; thus, they cannot be used as identifiers to name either a variable, a function, or a function argument:
 
 ```
-int, float, bool, string, json, array, where, in, as, for, while, return, function, True, False, if, elseif, else, void, not
+int, float, bool, string, json, array, where, in, as, for, while, return, function, True, False, if, else, void, not
 ```
 ### 2.3 Comments
 We reserve the symbol `#~~` to introduce a comment and the symbol `~~#` to close a comment. Comments cannot be nested, and they do not occur within string literals. A comment looks as follows:
