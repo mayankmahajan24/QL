@@ -70,7 +70,7 @@ Identifiers are combinations of letters and numbers. They must start with a lowe
 The following words are defined as keywords and are reserved for the use of the language; thus, they cannot be used as identifiers to name either a variable, a function, or a function argument:
 
 ```
-int, float, bool, string, json, array, where, in, as, for, while, return, function, true, false, if, elseif, else, void, not
+int, float, bool, string, json, array, where, in, as, for, while, return, function, True, False, if, elseif, else, void, not
 ```
 ### 2.3 Comments
 We reserve the symbol `#~~` to introduce a comment and the symbol `~~#` to close a comment. Comments cannot be nested, and they do not occur within string literals. A comment looks as follows:
@@ -92,7 +92,7 @@ A sequence of ASCII characters surrounded by double quotation marks on both side
 
 ## 3.0 Data Types
 ### 3.1 Primitive Types
-The primitive types in QL can be statically typed; in other words, the type of a variable is known at compile time. This occurs when the right side of the assignment is a literal of a data type. The primitive types can be declared and then initialized later (their value is null in the interim) or declared and initialized in-line.
+The primitive types in QL are statically typed; in other words, the type of a variable is known at compile time. This occurs when the right side of the assignment is a literal of a data type. The primitive types can be declared and then initialized later (their value is null in the interim) or declared and initialized in-line.
 
 #### 3.1.1 Integers (`int`)
 Integers are signed, 8-byte literals denoting a number as a sequence of digits e.g. `5`,`6`,`-1`,`0`.
@@ -120,7 +120,7 @@ JSONs are statically inferred but checked dynamically in QL.
 
 ## 4.0 Expressions
 
-Expressions in QL can be one of the following types. A statment in our language can be composed of just an expression but it's much more useful to use them in other statements like if-else constructs, loops and assign statements.
+Expressions in QL can be one of the following types. A statement in our language can be composed of just an expression but it's much more useful to use them in other statements like if-else constructs, loops, and assign statements.
 
 ### 4.1 Data Type Literal
 Expressions can be just a literal, as defined for our language in Section 2.4 above. This allows us to directly input a value where needed.
@@ -188,12 +188,14 @@ json file1 = json("file1.json")
 #~~ file1["data"]["views"]["total"] statically inferred as an int ~~#
 int total = file1["data"]["views"]["total"]
 ```
+`total` equals 80 here.
 
 Here is an example of obtaining a JSON object by using a bracket selector on another JSON object.
 Say that the json variable b equals this json below.
 
+b = 
 ```
-b = {
+{
     "size":10,
     "links": {
         "1": 1,
@@ -202,13 +204,12 @@ b = {
     }
 }
 
-This is the result of using a bracket selector on b.
 ```
+Let's use the bracket selector on b.  QL allows for commands like `json links = b["links"]`. The links variable would then look as follows:
 
-QL then allows for commands like `json links = b["links"]`. The links variable would then look as follows:
-
+links = 
 ```
-links = {
+{
     "1" : 1,
     "2" : 2,
     "3" : 3
@@ -316,7 +317,7 @@ e.g in `if(a)` the `a` inside the `if` conditional is a Identifier that must be 
 
 #### 4.5.3 `not` : negation
 
-- `not bool_expr` evaluates `bool_expr` as a boolean first and then returns the opposite of the `bool_expr` (if `bool_expr` was true, return false; if `bool_expr` was false, return true)
+- `not bool_expr` evaluates `bool_expr` as a boolean first and then returns the opposite of the `bool_expr` (if `bool_expr` was True, return False; if `bool_expr` was False, return True)
 
 If the `not` operator is used on anything other than a bool, we throw an error.
 
@@ -329,27 +330,27 @@ Operators and the types they can be used on
     - `float` == `float`
 
 - != : non-equivalence
-    - `string` == `string`
-    - `int` == `int`
-    - `float` == `float`
+    - `string` != `string`
+    - `int` != `int`
+    - `float` != `float`
 
 - \> : greater than
-    - `int` == `int`
-    - `float` == `float`
+    - `int` \> `int`
+    - `float` \> `float`
 
 - < : less than,
-    - `int` == `int`
-    - `float` == `float`
+    - `int` < `int`
+    - `float` < `float`
 
 - \>= : greater than or equal to,
-    - `int` == `int`
-    - `float` == `float`
+    - `int` \> `int`
+    - `float` \> `float`
 
 - <= : less than or equal to
-    - `int` == `int`
-    - `float` == `float`
+    - `int` <= `int`
+    - `float` <= `float`
 
-Each of these operators act on two operands, each of an `expr` as defined in Section 4.4 above. It is important to note that neither of the operands of the equivalency operator can acutally be of boolean types themselves. The operator returns a bool.
+Each of these operators act on two operands, each of an `expr` as defined in Section 4.4 above. It is important to note that neither of the operands of the equivalency operator can actually be of boolean types themselves. The operator returns a bool.
 
 Our static semantic checker checks at compile time if the operands on either side of the equivalency operators are of the same data type or not. Since QL does not support type casting, in case the data types fail to match, the compiler reports an error.
 
@@ -357,13 +358,13 @@ Examples of this operator:
 
 - `3 == 3`, checks for equality between the two integer literals
 - `5.0 != 3`, fails to compile because the two operands are of different data types
-- `a == 5 + 4`, evaluates both operands, each an `expr` before applying the equivalency boolan operator. As such, the data type of `a` is obtained from the symbol table and then 5 + 4 is evaluated before checking for equality. In case, `a` is not of type `int` as inferred from the operand that evaluates to 9, the compiler reports an error.
-- `a > 5 == 3` fails to work because although the precedence rules evalaute this boolean expression from left to right, `a > 5` returns a type of `bool` which cannot be used in the `==` operators.
+- `a == 5 + 4`, evaluates both operands, each an `expr`, before applying the equivalency boolan operator. As such, the data type of `a` is obtained from the symbol table and then 5 + 4 is evaluated before checking for equality. In the case that `a` is not of type `int`, as inferred from the operand that evaluates to 9, the compiler reports an error.
+- `a > 5 == 3` fails to work because although the precedence rules evaluate this boolean expression from left to right, `a > 5` returns a type of `bool` which cannot be used in the `==` operators.
 
 #### 4.5.5 Logical operators
 
-- `expr1` & `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if they both evaluate to true; otherwise, returns false.
-- `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns true if either evaluate to true; otherwise, returns false.
+- `expr1` & `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns True if they both evaluate to True; otherwise, returns False.
+- `expr1` | `expr2`: evaluates `expr1` and `expr2` as booleans (throws error if this is not possible), and returns True if either evaluate to True; otherwise, returns False.
 
 ### 4.6 Function Calls
 A function-call invokes a previously declared function by matching the unique function name and the list of arguments, as follows:
@@ -526,8 +527,26 @@ We can run the where loop on the `temp["friends"]` array, with each element of t
   "age" : 12
 }
 ```
+```
+{
+  "name" : "Evan",
+  "age" : 54
+}
+```
+```
+{
+  "name" : "Gary",
+  "age" : 21
+}
+```
+```
+{
+  "name" : "Mayank",
+  "age" : 32
+}
+```
 
-A where loop must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the `as <identifier>`, which allows the user to associate the current element of the array being processed using the `<identifier>`. Following this is a `{`, which marks the beginning of the body code which is applied to each element for which the condition evaluates to true. A closing `}` signifies the end of the body. After the closing brace, there is a mandatory "in" keyword, which is followed by the JSON array through which the clause will iterate to extract elements.
+A where loop must start with the `where` keyword, followed by a boolean condition enclosed in parentheses. This condition will be checked against every element in the JSON. The next element is the `as <identifier>`, which allows the user to associate the current element of the array being processed using the `<identifier>`. Following this is a `{`, which marks the beginning of the body code which is applied to each element for which the condition evaluates to true. A closing `}` signifies the end of the body. After the closing brace, there is a mandatory `in` keyword, which is followed by the JSON array through which the clause will iterate to extract elements.
 
 ```
 where (<boolean_condition>) as <identifier> {
@@ -570,7 +589,7 @@ while (<boolean_condition>) {
 Conditional statements are crucial to the program flow and execute a segment of the code based on a boolean expression.
 
 #### 5.6.1 `if/else` clauses
-The if-else clause checks the truth of a condition, executing a list of statements if the boolean condition provided is true. Only the `if` statement is required and the `else` statement is optional.
+The if-else clause checks the truth of the boolean condition, and executes the corresponding list of statements depending if the boolean condition provided is True or False. Only the `if` statement is required and the `else` statement is optional.
 
 ```
 if (<boolean_condition>) {
